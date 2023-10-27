@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CentralHub.Api", "CentralHub.Api\CentralHub.Api.csproj", "{CCC2B487-4988-4EB1-9C3C-BD60D0D85013}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CentralHub.WebUI", "CentralHub.WebUI\CentralHub.WebUI.csproj", "{AAA88325-905E-40BF-81A6-057E532D6B34}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CCC2B487-4988-4EB1-9C3C-BD60D0D85013}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCC2B487-4988-4EB1-9C3C-BD60D0D85013}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCC2B487-4988-4EB1-9C3C-BD60D0D85013}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCC2B487-4988-4EB1-9C3C-BD60D0D85013}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAA88325-905E-40BF-81A6-057E532D6B34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAA88325-905E-40BF-81A6-057E532D6B34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAA88325-905E-40BF-81A6-057E532D6B34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAA88325-905E-40BF-81A6-057E532D6B34}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
