@@ -1,0 +1,49 @@
+@page "/devices"
+@using CentralHub.WebUI.Data
+@using CentralHub.Api.Model
+@inject DevicesService DevicesService
+
+<PageTitle>Devices</PageTitle>
+
+<h1>Devices</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (_devices == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Mac Address</th>
+            <th>Device Type</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var device in _devices)
+        {
+            <tr>
+                <td>@device.Name</td>
+                <td>@device.MacAddress</td>
+                <td>@device.DeviceType.ToString()</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Device[]? _devices;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _devices = await DevicesService.GetDevicesAsync();
+    }
+
+}

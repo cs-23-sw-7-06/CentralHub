@@ -1,39 +1,33 @@
-using System.Text.Json;
 using CentralHub.Api.Model;
 
 namespace CentralHub.WebUI.Data;
 
-public class WeatherForecastService
+public class DevicesService
 {
     private readonly IHttpClientFactory _clientFactory;
 
-    public WeatherForecastService(IHttpClientFactory clientFactory)
+    public DevicesService(IHttpClientFactory clientFactory)
     {
         _clientFactory = clientFactory;
     }
 
-    private static readonly string[] Summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
-    public async Task<WeatherForecast[]> GetForecastAsync()
+    public async Task<Device[]> GetDevicesAsync()
     {
         var request = new HttpRequestMessage(HttpMethod.Get,
-            "http://localhost:5003/WeatherForecast");
+            "http://localhost:5003/Devices");
         request.Headers.Add("Accept", "application/json");
         request.Headers.Add("User-Agent", "CentralHub.WebUI");
 
         var client = _clientFactory.CreateClient();
 
         var response = await client.SendAsync(request);
-        var forecast = await response.Content.ReadFromJsonAsync<WeatherForecast[]>();
+        var devices = await response.Content.ReadFromJsonAsync<Device[]>();
 
-        if (forecast == null)
+        if (devices == null)
         {
             throw new InvalidOperationException("Shit brokey");
         }
 
-        return forecast;
+        return devices;
     }
 }
