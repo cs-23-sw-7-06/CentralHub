@@ -10,7 +10,7 @@ public class WeatherForecastService
     {
         _clientFactory = clientFactory;
     }
-    
+
     private static readonly string[] Summaries = new[]
     {
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
