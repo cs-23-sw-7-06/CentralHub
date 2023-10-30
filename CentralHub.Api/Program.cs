@@ -33,8 +33,8 @@ var connectionString = sqliteStringBuilder.ToString();
 var connectionString = Path.Combine(stateDirectory, "data.db");
 #endif
 
-builder.Services.AddDbContext<DevicesContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Singleton);
-builder.Services.AddSingleton<IDevicesRepository, DevicesRepository>();
+builder.Services.AddDbContext<TrackersContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Singleton);
+builder.Services.AddSingleton<ITrackersRepository, TrackersRepository>();
 
 var app = builder.Build();
 
@@ -44,11 +44,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    // Insert dummy devices
-    var devicesRepository = app.Services.GetRequiredService<IDevicesRepository>();
-    devicesRepository.AddDevice(new Device("Test Device 1", "AA:BB:CC:DD:EE:FF", DeviceType.WiFi));
-    devicesRepository.AddDevice(new Device("Test Device 2", "FF:EE:DD:CC:BB:AA", DeviceType.WiFi));
-    devicesRepository.AddDevice(new Device("Test Device 3", "00:11:22:33:44:55", DeviceType.Bluetooth));
+    // Insert dummy trackers
+    var trackersRepository = app.Services.GetRequiredService<ITrackersRepository>();
+    trackersRepository.AddTracker(new Tracker("Test Tracker 1", "AA:BB:CC:DD:EE:FF", TrackerType.WiFi));
+    trackersRepository.AddTracker(new Tracker("Test Tracker 2", "FF:EE:DD:CC:BB:AA", TrackerType.WiFi));
+    trackersRepository.AddTracker(new Tracker("Test Tracker 3", "00:11:22:33:44:55", TrackerType.Bluetooth));
 }
 
 
