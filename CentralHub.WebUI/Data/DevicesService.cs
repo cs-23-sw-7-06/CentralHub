@@ -14,7 +14,7 @@ public class DevicesService
     public async Task<Device[]> GetDevicesAsync()
     {
         var request = new HttpRequestMessage(HttpMethod.Get,
-            "http://localhost:5003/Devices");
+            "http://localhost:8081/Devices");
         request.Headers.Add("Accept", "application/json");
         request.Headers.Add("User-Agent", "CentralHub.WebUI");
 

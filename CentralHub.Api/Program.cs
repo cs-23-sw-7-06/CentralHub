@@ -4,6 +4,10 @@ using CentralHub.Api.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
+// Use state directory given by systemd
+var stateDirectory = Environment.GetEnvironmentVariable("STATE_DIRECTORY") ?? Environment.CurrentDirectory;
+Console.WriteLine($"State directory: {stateDirectory}");
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -14,6 +18,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddEntityFrameworkSqlite();
 
+#if DEBUG
 var id = $"{Guid.NewGuid().ToString()}.db";
 
 var sqliteStringBuilder = new SqliteConnectionStringBuilder()
@@ -23,7 +28,12 @@ var sqliteStringBuilder = new SqliteConnectionStringBuilder()
     Cache = SqliteCacheMode.Shared
 };
 
-builder.Services.AddDbContext<DevicesContext>(options => options.UseSqlite(sqliteStringBuilder.ToString()), ServiceLifetime.Singleton);
+var connectionString = sqliteStringBuilder.ToString();
+#else
+var connectionString = Path.Combine(stateDirectory, "data.db");
+#endif
+
+builder.Services.AddDbContext<DevicesContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Singleton);
 builder.Services.AddSingleton<IDevicesRepository, DevicesRepository>();
 
 var app = builder.Build();
@@ -40,6 +50,7 @@ if (app.Environment.IsDevelopment())
     devicesRepository.AddDevice(new Device("Test Device 2", "FF:EE:DD:CC:BB:AA", DeviceType.WiFi));
     devicesRepository.AddDevice(new Device("Test Device 3", "00:11:22:33:44:55", DeviceType.Bluetooth));
 }
+
 
 //app.UseHttpsRedirection();
 

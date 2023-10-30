@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using CentralHub.WebUI.Data;
 
+// Use state directory given by systemd
+var stateDirectory = Environment.GetEnvironmentVariable("STATE_DIRECTORY") ?? Environment.CurrentDirectory;
+Console.WriteLine($"State directory: {stateDirectory}");
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
