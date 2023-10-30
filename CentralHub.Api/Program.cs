@@ -30,7 +30,7 @@ var sqliteStringBuilder = new SqliteConnectionStringBuilder()
 
 var connectionString = sqliteStringBuilder.ToString();
 #else
-var connectionString = Path.Combine(stateDirectory, "data.db");
+var connectionString = $"Data Source={Path.Combine(stateDirectory, "data.db")}";
 #endif
 
 builder.Services.AddDbContext<TrackersContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Singleton);
