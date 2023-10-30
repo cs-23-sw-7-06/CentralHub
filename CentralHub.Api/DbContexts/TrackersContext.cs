@@ -3,17 +3,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CentralHub.Api.DbContexts;
 
-public class DevicesContext : DbContext
+public class TrackersContext : DbContext
 {
-    public DbSet<Device> Devices { get; set; }
+    public DbSet<Tracker> Trackers { get; set; }
 
-    public DevicesContext(DbContextOptions<DevicesContext> options)
+    public TrackersContext(DbContextOptions<TrackersContext> options)
         : base(options)
     {
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Device>().ToTable("Devices");
+        modelBuilder.Entity<Tracker>().ToTable("Trackers");
     }
 }

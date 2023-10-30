@@ -1,15 +1,15 @@
-@page "/devices"
+@page "/trackers"
 @using CentralHub.WebUI.Data
 @using CentralHub.Api.Model
-@inject DevicesService DevicesService
+@inject TrackersService TrackersService
 
-<PageTitle>Devices</PageTitle>
+<PageTitle>Trackers</PageTitle>
 
-<h1>Devices</h1>
+<h1>Trackers</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
 
-@if (_devices == null)
+@if (_trackers == null)
 {
     <p>
         <em>Loading...</em>
@@ -22,16 +22,16 @@ else
         <tr>
             <th>Name</th>
             <th>Mac Address</th>
-            <th>Device Type</th>
+            <th>Tracker Type</th>
         </tr>
         </thead>
         <tbody>
-        @foreach (var device in _devices)
+        @foreach (var tracker in _trackers)
         {
             <tr>
-                <td>@device.Name</td>
-                <td>@device.MacAddress</td>
-                <td>@device.DeviceType.ToString()</td>
+                <td>@tracker.Name</td>
+                <td>@tracker.MacAddress</td>
+                <td>@tracker.TrackerType.ToString()</td>
             </tr>
         }
         </tbody>
@@ -39,11 +39,11 @@ else
 }
 
 @code {
-    private Device[]? _devices;
+    private Tracker[]? _trackers;
 
     protected override async Task OnInitializedAsync()
     {
-        _devices = await DevicesService.GetDevicesAsync();
+        _trackers = await TrackersService.GetTrackersAsync();
     }
 
 }

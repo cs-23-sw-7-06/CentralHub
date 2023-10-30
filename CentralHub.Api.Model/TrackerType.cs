@@ -1,6 +1,6 @@
 namespace CentralHub.Api.Model;
 
-public enum DeviceType
+public enum TrackerType
 {
     WiFi,
     Bluetooth,
