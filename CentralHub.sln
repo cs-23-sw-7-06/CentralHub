@@ -4,6 +4,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CentralHub.Api", "CentralHu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CentralHub.WebUI", "CentralHub.WebUI\CentralHub.WebUI.csproj", "{AAA88325-905E-40BF-81A6-057E532D6B34}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CentralHub.Api.Tests", "CentralHub.Api.Tests\CentralHub.Api.Tests.csproj", "{D982D304-1303-47D3-9681-9273E0EA073D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CentralHub.Api.Model", "CentralHub.Api.Model\CentralHub.Api.Model.csproj", "{DF6739A6-1F46-497E-8FA6-2303224CA16F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{AAA88325-905E-40BF-81A6-057E532D6B34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AAA88325-905E-40BF-81A6-057E532D6B34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AAA88325-905E-40BF-81A6-057E532D6B34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D982D304-1303-47D3-9681-9273E0EA073D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D982D304-1303-47D3-9681-9273E0EA073D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D982D304-1303-47D3-9681-9273E0EA073D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D982D304-1303-47D3-9681-9273E0EA073D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF6739A6-1F46-497E-8FA6-2303224CA16F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF6739A6-1F46-497E-8FA6-2303224CA16F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF6739A6-1F46-497E-8FA6-2303224CA16F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF6739A6-1F46-497E-8FA6-2303224CA16F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

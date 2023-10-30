@@ -1,4 +1,4 @@
-namespace CentralHub.WebUI.Data;
+namespace CentralHub.Api.Model;
 
 public class WeatherForecast
 {

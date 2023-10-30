@@ -1,3 +1,4 @@
+using CentralHub.Api.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentralHub.Api.Controllers;
