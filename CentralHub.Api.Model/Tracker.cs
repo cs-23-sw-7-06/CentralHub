@@ -2,10 +2,10 @@ namespace CentralHub.Api.Model;
 
 public class Tracker
 {
-    public Tracker(string name, string location,  string macAddress, TrackerType trackerType)
+    public Tracker(string name, string location, string macAddress, TrackerType trackerType)
     {
         Name = name;
-	Location = location;
+        Location = location;
         MacAddress = macAddress;
         TrackerType = trackerType;
     }
