@@ -25,7 +25,7 @@ public class TrackersControllerTests
     [Test]
     public async Task TestAddTracker()
     {
-        var tracker = new Tracker("Test Tracker", "AA:BB:CC:DD:EE:FF", TrackerType.WiFi);
+        var tracker = new Tracker("Test Tracker", "0.1.95", "AA:BB:CC:DD:EE:FF", TrackerType.WiFi);
         await _trackersController.Post(tracker);
 
         var trackers = await _trackersController.Get();
