@@ -46,9 +46,9 @@ if (app.Environment.IsDevelopment())
 
     // Insert dummy trackers
     var trackersRepository = app.Services.GetRequiredService<ITrackersRepository>();
-    trackersRepository.AddTracker(new Tracker("Test Tracker 1", "AA:BB:CC:DD:EE:FF", TrackerType.WiFi));
-    trackersRepository.AddTracker(new Tracker("Test Tracker 2", "FF:EE:DD:CC:BB:AA", TrackerType.WiFi));
-    trackersRepository.AddTracker(new Tracker("Test Tracker 3", "00:11:22:33:44:55", TrackerType.Bluetooth));
+    trackersRepository.AddTracker(new Tracker("Test Tracker 1", "0.1.95", "AA:BB:CC:DD:EE:FF", TrackerType.WiFi));
+    trackersRepository.AddTracker(new Tracker("Test Tracker 2", "0.2.32", "FF:EE:DD:CC:BB:AA", TrackerType.WiFi));
+    trackersRepository.AddTracker(new Tracker("Test Tracker 3", "0.2.90", "00:11:22:33:44:55", TrackerType.Bluetooth));
 }
 
 
