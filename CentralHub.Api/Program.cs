@@ -10,6 +10,9 @@ Console.WriteLine($"State directory: {stateDirectory}");
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Better SystemD integration
+builder.Host.UseSystemd();
+
 // Add services to the container.
 
 builder.Services.AddControllers();
