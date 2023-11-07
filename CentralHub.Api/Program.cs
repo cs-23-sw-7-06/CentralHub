@@ -36,8 +36,8 @@ var connectionString = sqliteStringBuilder.ToString();
 var connectionString = $"Data Source={Path.Combine(stateDirectory, "data.db")}";
 #endif
 
-builder.Services.AddDbContext<TrackersContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Singleton);
-builder.Services.AddSingleton<ITrackersRepository, TrackersRepository>();
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Singleton);
+builder.Services.AddSingleton<IRoomRepository, RoomRepository>();
 
 var app = builder.Build();
 
@@ -48,10 +48,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 
     // Insert dummy trackers
-    var trackersRepository = app.Services.GetRequiredService<ITrackersRepository>();
-    trackersRepository.AddTracker(new Tracker("Test Tracker 1", "0.1.95", "AA:BB:CC:DD:EE:FF", TrackerType.WiFi));
-    trackersRepository.AddTracker(new Tracker("Test Tracker 2", "0.2.32", "FF:EE:DD:CC:BB:AA", TrackerType.WiFi));
-    trackersRepository.AddTracker(new Tracker("Test Tracker 3", "0.2.90", "00:11:22:33:44:55", TrackerType.Bluetooth));
+    var roomRepository = app.Services.GetRequiredService<IRoomRepository>();
+    var room = new Room("Test Room 1", "Test Room");
+    roomRepository.AddRoomAsync(room, default).GetAwaiter().GetResult();
+    roomRepository.AddTrackerAsync(new Tracker("Test Tracker 1", "Test Tracker", "AA:BB:CC:DD:EE:FF", room), default).GetAwaiter().GetResult();
+    roomRepository.AddTrackerAsync(new Tracker("Test Tracker 2", "Test Tracker", "FF:EE:DD:CC:BB:AA", room), default).GetAwaiter().GetResult();
+    roomRepository.AddTrackerAsync(new Tracker("Test Tracker 3", "Test Tracker", "00:11:22:33:44:55", room), default).GetAwaiter().GetResult();
 }
 
 
