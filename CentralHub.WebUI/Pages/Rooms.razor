@@ -1,0 +1,94 @@
+@page "/rooms"
+@using CentralHub.WebUI.Data
+@using CentralHub.Api.Model
+@implements IDisposable
+@inject RoomService RoomService
+
+<PageTitle>Rooms</PageTitle>
+
+<h1>Rooms</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (_rooms == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Location</th>
+            <th scope="col"># Trackers</th>
+            <th scope="col">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var room in _rooms)
+        {
+            <tr>
+                <td>@room.Name</td>
+                <td>@room.Description</td>
+                <td>@_trackerCountDictionary![room]</td>
+                <td>
+                    <!-- TODO: Implement editing -->
+                    <button type="button" class="btn btn-light"><span class="oi oi-pencil"></span></button>
+                    <button type="button" class="btn btn-light" @onclick="async () => await DeleteRoom(room)"><span class="oi oi-trash"></span></button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private List<Room>? _rooms;
+    private Dictionary<Room, int>? _trackerCountDictionary;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _rooms = (await RoomService.GetRoomsAsync(_cancellationTokenSource.Token)).ToList();
+
+        var dictionary = new Dictionary<Room, int>();
+        
+        // FIXME: This is inefficient.
+        foreach (var room in _rooms)
+        {
+            var trackerCount = await GetTrackerCountAsync(room);
+            dictionary.Add(room, trackerCount);
+        }
+
+        _trackerCountDictionary = dictionary;
+    }
+
+
+    private async Task<int> GetTrackerCountAsync(Room room)
+    {
+        var trackers = await RoomService.GetTrackersAsync(room, _cancellationTokenSource.Token);
+
+        return trackers.Length;
+    }
+
+    private async Task DeleteRoom(Room room)
+    {
+        // Remove the room on the server
+        await RoomService.RemoveRoomAsync(room, _cancellationTokenSource.Token);
+        
+        // Remove the room in memory
+        _trackerCountDictionary!.Remove(room);
+        _rooms!.Remove(room);
+        
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+    }
+}

@@ -14,7 +14,7 @@ builder.Host.UseSystemd();
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<TrackersService>();
+builder.Services.AddSingleton<RoomService>();
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
