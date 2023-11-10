@@ -18,11 +18,13 @@ public sealed class Room
     }
 
     [Obsolete("Only for use with EF Core")]
-    public Room(string name, string description, ICollection<Tracker> trackers)
+    public Room(string name, string description, ICollection<Tracker> trackers, Building building)
     {
         Name = name;
         Description = description;
         Trackers = trackers;
+        Building = building;
+        BuildingId = building.buildingId;
     }
 
     public int RoomId { get; set; }
@@ -36,4 +38,5 @@ public sealed class Room
     /// </summary>
     [JsonIgnore]
     public ICollection<Tracker> Trackers { get; }
+    public Building Building { get; set; }
 }

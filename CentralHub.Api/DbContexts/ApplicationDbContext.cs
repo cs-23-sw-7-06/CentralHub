@@ -6,6 +6,7 @@ namespace CentralHub.Api.DbContexts;
 public class ApplicationDbContext : DbContext
 {
     public DbSet<Room> Rooms { get; set; }
+    public DbSet<Building> Buildings { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -15,8 +16,16 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Setup table names
+        modelBuilder.Entity<Building>().ToTable("Buildings");
         modelBuilder.Entity<Room>().ToTable("Rooms");
         modelBuilder.Entity<Tracker>().ToTable("Trackers");
+
+        // Setup relationships
+        modelBuilder.Entity<Building>()
+            .HasMany(e => e.Rooms)
+            .WithOne(e => e.Building)
+            .HasForeignKey(e => e.BuildingId)
+            .HasPrincipalKey(e => e.BuildingId);
 
         // Setup relationships
         modelBuilder.Entity<Room>()
