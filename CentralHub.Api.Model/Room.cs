@@ -9,6 +9,7 @@ public sealed class Room
     public Room()
     {
         Trackers = new List<Tracker>();
+        Building = null;
     }
 
     public Room(string name, string description)
@@ -39,5 +40,5 @@ public sealed class Room
     /// </summary>
     [JsonIgnore]
     public ICollection<Tracker> Trackers { get; }
-    public Building Building { get; set; }
+    public Building? Building { get; set; }
 }

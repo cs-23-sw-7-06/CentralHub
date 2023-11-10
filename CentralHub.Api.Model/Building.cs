@@ -8,6 +8,7 @@ public sealed class Building
     [Obsolete("Only for Deserialization")]
     public Building()
     {
+        Rooms = new List<Room>();
     }
 
     public Building(string name, string description)
