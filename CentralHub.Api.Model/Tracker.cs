@@ -7,6 +7,7 @@ public sealed class Tracker
     [Obsolete("Deserialization only")]
     public Tracker()
     {
+        Room = null;
     }
 
     public Tracker(string name, string description, string macAddress, Room room)
@@ -37,5 +38,5 @@ public sealed class Tracker
     // We should not serialize / deserialize the room,
     // as the room should be a reference to an already existing room.
     [JsonIgnore]
-    public Room Room { get; set; }
+    public Room? Room { get; set; }
 }

@@ -8,6 +8,7 @@ public sealed class Room
     [Obsolete("Only for Deserialization")]
     public Room()
     {
+        Trackers = new List<Tracker>();
     }
 
     public Room(string name, string description)
