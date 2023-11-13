@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using System.Text.Json.Serialization;
 
 namespace CentralHub.Api.Model;

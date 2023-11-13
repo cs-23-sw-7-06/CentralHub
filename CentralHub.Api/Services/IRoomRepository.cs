@@ -19,4 +19,6 @@ public interface IRoomRepository
     Task<IEnumerable<Room>> GetRoomsAsync(CancellationToken cancellationToken);
 
     Task<Room?> GetRoomByIdAsync(int id, CancellationToken cancellationToken);
+    Task AddMeasurementsAsync(MeasurementCollection measurements, CancellationToken token);
+    Task<ICollection<Measurement>> GetMeasurementsAsync(int id, CancellationToken token);
 }

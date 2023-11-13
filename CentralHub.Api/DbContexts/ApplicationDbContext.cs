@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using CentralHub.Api.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CentralHub.Api.DbContexts;
 
@@ -24,5 +26,7 @@ public class ApplicationDbContext : DbContext
             .WithOne(e => e.Room)
             .HasForeignKey(e => e.RoomId)
             .HasPrincipalKey(e => e.RoomId);
+
+
     }
 }

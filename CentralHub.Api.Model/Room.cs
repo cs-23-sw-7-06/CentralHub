@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CentralHub.Api.Model;
 
@@ -37,4 +38,5 @@ public sealed class Room
     /// </summary>
     [JsonIgnore]
     public ICollection<Tracker> Trackers { get; }
+
 }
