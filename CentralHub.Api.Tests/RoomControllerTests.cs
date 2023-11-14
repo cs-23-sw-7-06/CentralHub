@@ -93,5 +93,15 @@ public class RoomControllerTests
         {
             return new ValueTask<Room>(_rooms.Single(r => r.RoomId == id)).AsTask();
         }
+
+        public Task AddMeasurementsAsync(MeasurementCollection measurements, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ICollection<Measurement>> GetMeasurementsAsync(int id, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
