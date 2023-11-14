@@ -1,6 +1,7 @@
 using CentralHub.Api.Controllers;
 using CentralHub.Api.Model;
 using CentralHub.Api.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CentralHub.Api.Tests;
 
@@ -13,7 +14,7 @@ public class RoomControllerTests
     public void Setup()
     {
         _roomRepository = new RoomRepository();
-        _roomController = new RoomController(_roomRepository);
+        _roomController = new RoomController(NullLogger<RoomController>.Instance, _roomRepository);
     }
 
     [Test]

@@ -8,10 +8,12 @@ namespace CentralHub.Api.Controllers;
 [Route("/room")]
 public class RoomController : ControllerBase
 {
+    private readonly ILogger<RoomController> _logger;
     private readonly IRoomRepository _roomRepository;
 
-    public RoomController(IRoomRepository roomRepository)
+    public RoomController(ILogger<RoomController> logger, IRoomRepository roomRepository)
     {
+        _logger = logger;
         _roomRepository = roomRepository;
     }
 
@@ -34,7 +36,8 @@ public class RoomController : ControllerBase
         var room = await _roomRepository.GetRoomByIdAsync(id, cancellationToken);
         if (room == null)
         {
-            throw new InvalidOperationException("Room not found");
+            _logger.LogError("Room did not exist!");
+            return;
         }
         await _roomRepository.RemoveRoomAsync(room, cancellationToken);
     }
