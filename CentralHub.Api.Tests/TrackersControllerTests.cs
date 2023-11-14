@@ -111,11 +111,11 @@ public class TrackersControllerTests
             return new ValueTask<Room>(Room).AsTask();
         }
 
-        
+
 
         public Task AddMeasurementsAsync(MeasurementCollection measurements, CancellationToken token)
         {
-            if(Measurements == null) throw new NullReferenceException();
+            if (Measurements == null) throw new NullReferenceException();
             foreach (var measurement in measurements.Measurements)
             {
                 Measurements.Add(new KeyValuePair<int, Measurement>(measurements.TrackerId, measurement));
@@ -125,7 +125,7 @@ public class TrackersControllerTests
 
         public Task<ICollection<Measurement>> GetMeasurementsAsync(int id, CancellationToken token)
         {
-            if(Measurements[0].Value != new Measurement("wifi", "12:34:56:78:90", 1)) throw new InvalidDataException("Measurement list does not contain the expected values");
+            if (Measurements[0].Value != new Measurement("wifi", "12:34:56:78:90", 1)) throw new InvalidDataException("Measurement list does not contain the expected values");
 
             return new ValueTask<ICollection<Measurement>>((ICollection<Measurement>)Measurements).AsTask();
 
