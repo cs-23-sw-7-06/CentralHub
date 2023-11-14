@@ -6,6 +6,7 @@ namespace CentralHub.Api.Services;
 
 internal sealed class RoomRepository : IRoomRepository
 {
+    private static volatile bool _hasAddedTrackers = false;
     private readonly ApplicationDbContext _applicationDbContext;
 
     public RoomRepository(ApplicationDbContext applicationDbContext)
@@ -13,6 +14,20 @@ internal sealed class RoomRepository : IRoomRepository
         _applicationDbContext = applicationDbContext;
         _applicationDbContext.Database.OpenConnection();
         _applicationDbContext.Database.EnsureCreated();
+
+#if DEBUG
+        if (_hasAddedTrackers)
+        {
+            return;
+        }
+        // Insert dummy trackers
+        var room = new Room("Test Room 1", "Test Room");
+        AddRoomAsync(room, default).GetAwaiter().GetResult();
+        AddTrackerAsync(new Tracker("Test Tracker 1", "Test Tracker", "AA:BB:CC:DD:EE:FF", room), default).GetAwaiter().GetResult();
+        AddTrackerAsync(new Tracker("Test Tracker 2", "Test Tracker", "FF:EE:DD:CC:BB:AA", room), default).GetAwaiter().GetResult();
+        AddTrackerAsync(new Tracker("Test Tracker 3", "Test Tracker", "00:11:22:33:44:55", room), default).GetAwaiter().GetResult();
+        _hasAddedTrackers = true;
+#endif
     }
 
     public async Task AddRoomAsync(Room room, CancellationToken cancellationToken)
