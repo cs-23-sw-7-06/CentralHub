@@ -53,10 +53,13 @@ public class TrackersControllerTests
 
         private readonly List<Tracker> _trackers = new List<Tracker>();
 
+        private List<KeyValuePair<int, Measurement>> Measurements = new List<KeyValuePair<int, Measurement>>();
+
         public RoomRepository()
         {
             Room = new Room("Test Room", "Test Room", _trackers);
             Room.RoomId = 1;
+            Measurements.Add(new KeyValuePair<int, Measurement>(1, new Measurement("wifi", "12:34:56:78:90", 1)));
         }
 
         public Task AddRoomAsync(Room room, CancellationToken cancellationToken)
@@ -106,6 +109,27 @@ public class TrackersControllerTests
             }
 
             return new ValueTask<Room>(Room).AsTask();
+        }
+
+
+
+        public Task AddMeasurementsAsync(MeasurementCollection measurements, CancellationToken token)
+        {
+            if (Measurements == null) throw new NullReferenceException();
+            foreach (var measurement in measurements.Measurements)
+            {
+                Measurements.Add(new KeyValuePair<int, Measurement>(measurements.TrackerId, measurement));
+            }
+            return Task.CompletedTask;
+        }
+
+        public Task<ICollection<Measurement>> GetMeasurementsAsync(int id, CancellationToken token)
+        {
+            if (Measurements[0].Value != new Measurement("wifi", "12:34:56:78:90", 1)) throw new InvalidDataException("Measurement list does not contain the expected values");
+
+            return new ValueTask<ICollection<Measurement>>((ICollection<Measurement>)Measurements).AsTask();
+
+
         }
     }
 }

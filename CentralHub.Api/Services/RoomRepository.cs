@@ -1,6 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 using CentralHub.Api.DbContexts;
 using CentralHub.Api.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CentralHub.Api.Services;
 
@@ -122,5 +124,33 @@ internal sealed class RoomRepository : IRoomRepository
     public async Task<Room?> GetRoomByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _applicationDbContext.Rooms.SingleOrDefaultAsync(r => r.RoomId == id, cancellationToken);
+    }
+
+
+    public List<KeyValuePair<int, Measurement>> Measurements { get; set; }
+
+    async Task IRoomRepository.AddMeasurementsAsync(MeasurementCollection measurements, CancellationToken token)
+    {
+        foreach (var measurement in measurements.Measurements)
+        {
+            Measurements.Add(new KeyValuePair<int, Measurement>(measurements.TrackerId, measurement));
+        }
+
+
+    }
+
+    async Task<ICollection<Measurement>> IRoomRepository.GetMeasurementsAsync(int id, CancellationToken token)
+    {
+
+        if (Measurements.Where(measurement => measurement.Key == id).Count() > 0)
+        {
+            var measurementsForTracker = Measurements.Where(measurement => measurement.Key == id).Select(pair => pair.Value).ToList();
+            return await Task.FromResult((ICollection<Measurement>)measurementsForTracker);
+        }
+        else
+        {
+            var measurementsForTracker = new List<Measurement>();
+            return measurementsForTracker;
+        }
     }
 }

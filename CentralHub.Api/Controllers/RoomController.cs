@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using CentralHub.Api.Model;
 using CentralHub.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -52,5 +53,11 @@ public class RoomController : ControllerBase
     public async Task<Room?> GetRoom(int id, CancellationToken cancellationToken)
     {
         return await _roomRepository.GetRoomByIdAsync(id, cancellationToken);
+    }
+
+    [HttpGet("measurements")]
+    public async Task<ICollection<Measurement>> GetMeasurements(int id, CancellationToken token)
+    {
+        return await _roomRepository.GetMeasurementsAsync(id, token);
     }
 }

@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CentralHub.Api.Controllers;
 
+
+
 [ApiController]
 [Route("/tracker")]
 public class TrackerController : ControllerBase
@@ -49,5 +51,11 @@ public class TrackerController : ControllerBase
     public async Task RemoveTracker(Tracker tracker, CancellationToken cancellationToken)
     {
         await _roomRepository.RemoveTrackerAsync(tracker, cancellationToken);
+    }
+
+    [HttpPost("measurement")]
+    public async Task PostMeasurement(MeasurementCollection measurements, CancellationToken token)
+    {
+        await _roomRepository.AddMeasurementsAsync(measurements, token);
     }
 }
