@@ -41,7 +41,8 @@ internal static class Program
 
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
-        builder.Services.AddSingleton<ILocalizationTargetService, LocalizationTargetService>();
+        builder.Services.AddScoped<ITrackerRepository, TrackerRepository>();
+        builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
 
         var app = builder.Build();
 
