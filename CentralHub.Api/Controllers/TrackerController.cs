@@ -29,7 +29,7 @@ public class TrackerController : ControllerBase
         var room = await _roomRepository.GetRoomByIdAsync(tracker.RoomId, cancellationToken);
         if (room == null)
         {
-            throw new Exception($"Room with id {tracker.RoomId} was not found");
+            throw new InvalidOperationException($"Room with id {tracker.RoomId} was not found");
         }
 
         // Room is not included in the json so we need to insert it here.

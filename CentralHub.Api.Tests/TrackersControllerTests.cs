@@ -51,11 +51,9 @@ public class TrackersControllerTests
     {
         public Room Room { get; }
 
-        private readonly List<Tracker> _trackers = new List<Tracker>();
-
         public RoomRepository()
         {
-            Room = new Room("Test Room", "Test Room", _trackers);
+            Room = new Room("Test Room", "Test Room");
             Room.RoomId = 1;
         }
 
@@ -76,7 +74,12 @@ public class TrackersControllerTests
 
         public Task AddTrackerAsync(Tracker tracker, CancellationToken cancellationToken)
         {
-            _trackers.Add(tracker);
+            if (tracker.RoomId != Room.RoomId)
+            {
+                throw new KeyNotFoundException("Room not found");
+            }
+
+            Room.Trackers.Add(tracker);
 
             return Task.CompletedTask;
         }
@@ -88,7 +91,12 @@ public class TrackersControllerTests
 
         public Task RemoveTrackerAsync(Tracker tracker, CancellationToken cancellationToken)
         {
-            _trackers.Remove(tracker);
+            if (tracker.RoomId != Room.RoomId)
+            {
+                throw new KeyNotFoundException("Room not found");
+            }
+
+            Room.Trackers.Remove(tracker);
 
             return Task.CompletedTask;
         }

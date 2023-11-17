@@ -4,9 +4,15 @@ namespace CentralHub.Api.Model;
 
 public sealed class Tracker
 {
-    [Obsolete("Deserialization only")]
-    public Tracker()
+    [Obsolete("For deserialization only")]
+    [JsonConstructor]
+    public Tracker(int trackerId, string name, string description, string macAddress, int roomId)
     {
+        TrackerId = trackerId;
+        Name = name;
+        Description = description;
+        MacAddress = macAddress;
+        RoomId = roomId;
         Room = null;
     }
 
@@ -21,7 +27,7 @@ public sealed class Tracker
 
     [Obsolete("EF Core only!")]
     public Tracker(string name, string description, string macAddress)
-        : this(name, description, macAddress, null)
+        : this(name, description, macAddress, null!)
     {
     }
 
