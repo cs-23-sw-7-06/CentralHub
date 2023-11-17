@@ -1,21 +1,25 @@
-using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 
 namespace CentralHub.Api.Model;
 
 public sealed class Room
 {
-    [Obsolete("Only for Deserialization")]
-    public Room()
+    [Obsolete("For deserialization only")]
+    [JsonConstructor]
+    public Room(int roomId, string name, string description)
     {
+        RoomId = roomId;
+        Name = name;
+        Description = description;
         Trackers = new List<Tracker>();
     }
 
     public Room(string name, string description)
-#pragma warning disable CS0618 // Type or member is obsolete
-        : this(name, description, new List<Tracker>())
-#pragma warning restore CS0618 // Type or member is obsolete
     {
+        RoomId = -1;
+        Name = name;
+        Description = description;
+        Trackers = new List<Tracker>();
     }
 
     [Obsolete("Only for use with EF Core")]

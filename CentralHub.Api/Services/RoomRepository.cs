@@ -6,7 +6,7 @@ namespace CentralHub.Api.Services;
 
 internal sealed class RoomRepository : IRoomRepository
 {
-    private static volatile bool _hasAddedTrackers = false;
+    private static volatile bool _hasAddedTrackers;
     private readonly ApplicationDbContext _applicationDbContext;
 
     public RoomRepository(ApplicationDbContext applicationDbContext)
@@ -70,6 +70,11 @@ internal sealed class RoomRepository : IRoomRepository
     public async Task AddTrackerAsync(Tracker tracker, CancellationToken cancellationToken)
     {
         var room = tracker.Room;
+        if (room == null)
+        {
+            throw new InvalidOperationException("tracker.Room was null");
+        }
+
         room.Trackers.Add(tracker);
         _applicationDbContext.Rooms.Update(room);
         try
@@ -87,13 +92,23 @@ internal sealed class RoomRepository : IRoomRepository
 
     public async Task UpdateTrackerAsync(Tracker tracker, CancellationToken cancellationToken)
     {
+        if (tracker.Room == null)
+        {
+            throw new InvalidOperationException("tracker.Room was null");
+        }
+
         await UpdateRoomAsync(tracker.Room, cancellationToken);
     }
 
     public async Task RemoveTrackerAsync(Tracker tracker, CancellationToken cancellationToken)
     {
         var room = tracker.Room;
-        room.Trackers.Add(tracker);
+        if (room == null)
+        {
+            throw new InvalidOperationException("tracker.Room was null");
+        }
+
+        room.Trackers.Remove(tracker);
         _applicationDbContext.Rooms.Update(room);
         try
         {
@@ -103,7 +118,7 @@ internal sealed class RoomRepository : IRoomRepository
         {
             // Set the room to unchanged
             _applicationDbContext.Rooms.Attach(room).State = EntityState.Unchanged;
-            room.Trackers.Remove(tracker);
+            room.Trackers.Add(tracker);
             throw;
         }
     }
