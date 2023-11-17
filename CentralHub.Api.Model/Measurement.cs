@@ -1,39 +1,26 @@
-using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace CentralHub.Api.Model;
 
 public sealed class Measurement
 {
-    private Protocol _protocol;
-
-    [Obsolete("Deserialization only")]
-    public Measurement()
+    [JsonConstructor]
+    public Measurement(string macAddress, Protocol type, int rssi)
     {
-    }
-
-    public Measurement(Protocol type, string macAddress, int rssi)
-    {
-        Type = type;
         MacAddress = macAddress;
+        Type = type;
         Rssi = rssi;
     }
 
-    public string MacAddress { get; set; }
+    public string MacAddress { get; }
+
+    public Protocol Type { get; }
+
+    public int Rssi { get; }
 
     public enum Protocol
     {
         Wifi,
         Bluetooth
     }
-    public Protocol Type
-    {
-        get => _protocol;
-        set
-        {
-            if (value == Protocol.Wifi || value == Protocol.Bluetooth) _protocol = value;
-            else throw new InvalidEnumArgumentException("Invalid Protocol Type");
-        }
-    }
-
-    public int Rssi { get; set; }
 }

@@ -1,11 +1,12 @@
-using CentralHub.Api.Model;
+using System.Diagnostics.Contracts;
+using CentralHub.Api.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace CentralHub.Api.DbContexts;
 
 public class ApplicationDbContext : DbContext
 {
-    public DbSet<Room> Rooms { get; set; }
+    public DbSet<RoomDto> Rooms { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -15,14 +16,15 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Setup table names
-        modelBuilder.Entity<Room>().ToTable("Rooms");
-        modelBuilder.Entity<Tracker>().ToTable("Trackers");
+        modelBuilder.Entity<RoomDto>().ToTable("Rooms");
+        modelBuilder.Entity<TrackerDto>().ToTable("Trackers");
 
         // Setup relationships
-        modelBuilder.Entity<Room>()
+        modelBuilder.Entity<RoomDto>()
             .HasMany(e => e.Trackers)
-            .WithOne(e => e.Room)
-            .HasForeignKey(e => e.RoomId)
-            .HasPrincipalKey(e => e.RoomId);
+            .WithOne(e => e.RoomDto)
+            .HasForeignKey(e => e.RoomDtoId)
+            .IsRequired()
+            .HasPrincipalKey(e => e.RoomDtoId);
     }
 }

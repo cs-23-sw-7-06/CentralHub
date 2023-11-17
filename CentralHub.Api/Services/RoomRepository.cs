@@ -1,12 +1,11 @@
 using CentralHub.Api.DbContexts;
-using CentralHub.Api.Model;
+using CentralHub.Api.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace CentralHub.Api.Services;
 
 internal sealed class RoomRepository : IRoomRepository
 {
-    private static volatile bool _hasAddedTrackers;
     private readonly ApplicationDbContext _applicationDbContext;
 
     public RoomRepository(ApplicationDbContext applicationDbContext)
@@ -14,47 +13,34 @@ internal sealed class RoomRepository : IRoomRepository
         _applicationDbContext = applicationDbContext;
         _applicationDbContext.Database.OpenConnection();
         _applicationDbContext.Database.EnsureCreated();
-
-#if DEBUG
-        if (_hasAddedTrackers)
-        {
-            return;
-        }
-        // Insert dummy trackers
-        var room = new Room("Test Room 1", "Test Room");
-        AddRoomAsync(room, default).GetAwaiter().GetResult();
-        AddTrackerAsync(new Tracker("Test Tracker 1", "Test Tracker", "AA:BB:CC:DD:EE:FF", room), default).GetAwaiter().GetResult();
-        AddTrackerAsync(new Tracker("Test Tracker 2", "Test Tracker", "FF:EE:DD:CC:BB:AA", room), default).GetAwaiter().GetResult();
-        AddTrackerAsync(new Tracker("Test Tracker 3", "Test Tracker", "00:11:22:33:44:55", room), default).GetAwaiter().GetResult();
-        _hasAddedTrackers = true;
-#endif
     }
 
-    public async Task AddRoomAsync(Room room, CancellationToken cancellationToken)
+    public async Task<int> AddRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
     {
-        _applicationDbContext.Rooms.Add(room);
+        _applicationDbContext.Rooms.Add(roomDto);
         try
         {
             await _applicationDbContext.SaveChangesAsync(cancellationToken);
+            return roomDto.RoomDtoId;
         }
         catch (OperationCanceledException)
         {
-            // Remove the room from the collection as the operation was cancelled.
-            _applicationDbContext.Rooms.Remove(room);
+            // Remove the roomDto from the collection as the operation was cancelled.
+            _applicationDbContext.Rooms.Remove(roomDto);
             throw;
         }
     }
 
-    public async Task UpdateRoomAsync(Room room, CancellationToken cancellationToken)
+    public async Task UpdateRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
     {
         // TODO: Undo update if cancellation was requested
-        _applicationDbContext.Rooms.Update(room);
+        _applicationDbContext.Rooms.Update(roomDto);
         await _applicationDbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task RemoveRoomAsync(Room room, CancellationToken cancellationToken)
+    public async Task RemoveRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
     {
-        _applicationDbContext.Rooms.Remove(room);
+        _applicationDbContext.Rooms.Remove(roomDto);
         try
         {
             await _applicationDbContext.SaveChangesAsync(cancellationToken);
@@ -62,80 +48,25 @@ internal sealed class RoomRepository : IRoomRepository
         catch (OperationCanceledException)
         {
             // Undo delete if cancelled.
-            _applicationDbContext.Rooms.Add(room);
+            _applicationDbContext.Rooms.Add(roomDto);
             throw;
         }
     }
 
-    public async Task AddTrackerAsync(Tracker tracker, CancellationToken cancellationToken)
+    public async Task<IEnumerable<RoomDto>> GetRoomsAsync(CancellationToken cancellationToken)
     {
-        var room = tracker.Room;
-        if (room == null)
-        {
-            throw new InvalidOperationException("tracker.Room was null");
-        }
-
-        room.Trackers.Add(tracker);
-        _applicationDbContext.Rooms.Update(room);
-        try
-        {
-            await _applicationDbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            // Set the room to unchanged
-            _applicationDbContext.Rooms.Attach(room).State = EntityState.Unchanged;
-            room.Trackers.Remove(tracker);
-            throw;
-        }
-    }
-
-    public async Task UpdateTrackerAsync(Tracker tracker, CancellationToken cancellationToken)
-    {
-        if (tracker.Room == null)
-        {
-            throw new InvalidOperationException("tracker.Room was null");
-        }
-
-        await UpdateRoomAsync(tracker.Room, cancellationToken);
-    }
-
-    public async Task RemoveTrackerAsync(Tracker tracker, CancellationToken cancellationToken)
-    {
-        var room = tracker.Room;
-        if (room == null)
-        {
-            throw new InvalidOperationException("tracker.Room was null");
-        }
-
-        room.Trackers.Remove(tracker);
-        _applicationDbContext.Rooms.Update(room);
-        try
-        {
-            await _applicationDbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            // Set the room to unchanged
-            _applicationDbContext.Rooms.Attach(room).State = EntityState.Unchanged;
-            room.Trackers.Add(tracker);
-            throw;
-        }
-    }
-
-    public async Task<IEnumerable<Room>> GetRoomsAsync(CancellationToken cancellationToken)
-    {
+        // NOTE: Does not include trackers
         return await _applicationDbContext.Rooms.ToArrayAsync(cancellationToken);
     }
 
     /// <summary>
-    /// Returns null if the room is not found.
+    /// Returns null if the roomDto is not found.
     /// </summary>
     /// <param name="id"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<Room?> GetRoomByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<RoomDto?> GetRoomByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return await _applicationDbContext.Rooms.SingleOrDefaultAsync(r => r.RoomId == id, cancellationToken);
+        return await _applicationDbContext.Rooms.SingleOrDefaultAsync(r => r.RoomDtoId == id, cancellationToken);
     }
 }

@@ -1,5 +1,7 @@
 using System.Net;
 using CentralHub.Api.Model;
+using CentralHub.Api.Model.Responses.Room;
+using CentralHub.Api.Model.Responses.Tracker;
 
 namespace CentralHub.WebUI.Data;
 
@@ -55,20 +57,20 @@ public sealed class RoomService
     {
         var request = new HttpRequestMessage(
             HttpMethod.Get,
-            $"http://localhost:8081/tracker/all?id={room.RoomId}");
+            $"http://localhost:8081/tracker/all?roomId={room.RoomId}");
         request.Headers.Add("Accept", "application/json");
         request.Headers.Add("User-Agent", "CentralHub.WebUI");
 
         var client = _clientFactory.CreateClient();
 
         var response = await client.SendAsync(request, cancellationToken);
-        var trackers = await response.Content.ReadFromJsonAsync<Tracker[]>(cancellationToken: cancellationToken);
+        var trackers = await response.Content.ReadFromJsonAsync<GetTrackersResponse>(cancellationToken: cancellationToken);
 
-        if (trackers == null)
+        if (trackers == null || !trackers.Success)
         {
             throw new InvalidOperationException("Shit brokey");
         }
 
-        return trackers;
+        return trackers.Trackers.ToArray();
     }
 }
