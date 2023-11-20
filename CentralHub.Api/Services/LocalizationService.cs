@@ -6,14 +6,8 @@ public class LocalizationService : ILocalizationService
 {
     private Thread MeasurementRemover;
     private Dictionary<int, MeasurementGroup> _measurements = new Dictionary<int, MeasurementGroup>();
-    public LocalizationService()
-    {
-        MeasurementRemover = new Thread(new ThreadStart(RemoveMeasurements));
-        MeasurementRemover.Start();
-    }
     public void AddMeasurements(int id, IReadOnlyCollection<Measurement> measurements)
     {
-
         lock (_measurements)
         {
             if (_measurements.TryGetValue(id, out MeasurementGroup value))
@@ -25,7 +19,7 @@ public class LocalizationService : ILocalizationService
                 _measurements.Add(id, new MeasurementGroup(measurements.ToList()));
             }
         }
-        if (!(MeasurementRemover.ThreadState == ThreadState.Running))
+        if (MeasurementRemover == null || !(MeasurementRemover.ThreadState == ThreadState.Running))
         {
             MeasurementRemover = new Thread(new ThreadStart(RemoveMeasurements));
             MeasurementRemover.Start();
