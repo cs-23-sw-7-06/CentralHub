@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using CentralHub.Api.Model;
 using CentralHub.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -10,11 +11,13 @@ public class RoomController : ControllerBase
 {
     private readonly ILogger<RoomController> _logger;
     private readonly IRoomRepository _roomRepository;
+    private readonly ILocalizationTargetService _localizationTargetService;
 
-    public RoomController(ILogger<RoomController> logger, IRoomRepository roomRepository)
+    public RoomController(ILogger<RoomController> logger, IRoomRepository roomRepository, ILocalizationTargetService localizationTargetService)
     {
         _logger = logger;
         _roomRepository = roomRepository;
+        _localizationTargetService = localizationTargetService;
     }
 
     [HttpPost("add")]
@@ -52,5 +55,11 @@ public class RoomController : ControllerBase
     public async Task<Room?> GetRoom(int id, CancellationToken cancellationToken)
     {
         return await _roomRepository.GetRoomByIdAsync(id, cancellationToken);
+    }
+
+    [HttpGet("measurements")]
+    public async Task<List<Measurement>> GetMeasurements(int id, CancellationToken token)
+    {
+        return await Task.FromResult(_localizationTargetService.GetMeasurementsForId(id, token));
     }
 }

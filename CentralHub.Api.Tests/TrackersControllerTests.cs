@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Diagnostics.Metrics;
 using CentralHub.Api.Controllers;
 using CentralHub.Api.Model;
 using CentralHub.Api.Services;
@@ -7,13 +9,15 @@ namespace CentralHub.Api.Tests;
 public class TrackersControllerTests
 {
     private RoomRepository _roomRepository;
+    private ILocalizationTargetService _localizationTargetService;
     private TrackerController _trackerController;
 
     [SetUp]
     public void Setup()
     {
         _roomRepository = new RoomRepository();
-        _trackerController = new TrackerController(_roomRepository);
+        _localizationTargetService = new LocalizationTargetService();
+        _trackerController = new TrackerController(_roomRepository, _localizationTargetService);
     }
 
     [Test]
@@ -46,11 +50,24 @@ public class TrackersControllerTests
         var trackers = await _trackerController.GetTrackers(room.RoomId, default);
         Assert.That(trackers, Is.Empty);
     }
+    [Test]
+    public void TestAddMeasurements()
+    {
+        var measurements = new List<Measurement>(){
+            new Measurement(Measurement.Protocol.Bluetooth, "11:22:33:44:55:66", 10),
+            new Measurement(Measurement.Protocol.Wifi, "aa:bb:cc:dd:ee:ff", 20)};
+        _localizationTargetService.AddMeasurements(0, measurements);
+
+        var gotMeasurements = _localizationTargetService.GetMeasurementsForId(0, default);
+
+        Assert.That(measurements.All(gotMeasurements.Contains));
+    }
 
     private class RoomRepository : IRoomRepository
     {
         public Room Room { get; }
 
+        private readonly List<Tracker> _trackers = new List<Tracker>();
         public RoomRepository()
         {
             Room = new Room("Test Room", "Test Room");
@@ -115,5 +132,6 @@ public class TrackersControllerTests
 
             return new ValueTask<Room>(Room).AsTask();
         }
+
     }
 }

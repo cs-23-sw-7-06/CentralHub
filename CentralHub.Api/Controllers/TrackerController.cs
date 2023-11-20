@@ -1,8 +1,6 @@
-using CentralHub.Api.DbContexts;
 using CentralHub.Api.Model;
 using CentralHub.Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CentralHub.Api.Controllers;
 
@@ -11,10 +9,12 @@ namespace CentralHub.Api.Controllers;
 public class TrackerController : ControllerBase
 {
     private readonly IRoomRepository _roomRepository;
+    private readonly ILocalizationTargetService _localizationTargetService;
 
-    public TrackerController(IRoomRepository roomRepository)
+    public TrackerController(IRoomRepository roomRepository, ILocalizationTargetService localizationTargetService)
     {
         _roomRepository = roomRepository;
+        _localizationTargetService = localizationTargetService;
     }
 
     [HttpGet("all")]
@@ -49,5 +49,11 @@ public class TrackerController : ControllerBase
     public async Task RemoveTracker(Tracker tracker, CancellationToken cancellationToken)
     {
         await _roomRepository.RemoveTrackerAsync(tracker, cancellationToken);
+    }
+
+    [HttpPost("measurement")]
+    public async Task PostMeasurement(int id, List<Measurement> measurements, CancellationToken token)
+    {
+        _localizationTargetService.AddMeasurements(id, measurements);
     }
 }

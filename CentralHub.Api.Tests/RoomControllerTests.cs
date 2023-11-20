@@ -8,13 +8,15 @@ namespace CentralHub.Api.Tests;
 public class RoomControllerTests
 {
     private RoomRepository _roomRepository;
+    private ILocalizationTargetService _localizationTargetService;
     private RoomController _roomController;
 
     [SetUp]
     public void Setup()
     {
         _roomRepository = new RoomRepository();
-        _roomController = new RoomController(NullLogger<RoomController>.Instance, _roomRepository);
+        _localizationTargetService = new LocalizationTargetService();
+        _roomController = new RoomController(NullLogger<RoomController>.Instance, _roomRepository, _localizationTargetService);
     }
 
     [Test]
