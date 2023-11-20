@@ -34,7 +34,6 @@ public class LocalizationControllerTests
         Assert.That(_localizationService.Measurements, Does.Contain(measurements[1]));
     }
 
-
     private sealed class LocalizationService : ILocalizationService
     {
         public List<Measurement> Measurements { get; } = new List<Measurement>();
@@ -48,6 +47,5 @@ public class LocalizationControllerTests
 
             Measurements.AddRange(measurements);
         }
-
     }
 }

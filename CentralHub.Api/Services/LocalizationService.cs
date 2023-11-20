@@ -6,7 +6,6 @@ public class LocalizationService : ILocalizationService
 {
     private Thread MeasurementRemover;
     private Dictionary<int, MeasurementGroup> _measurements = new Dictionary<int, MeasurementGroup>();
-
     public LocalizationService()
     {
         MeasurementRemover = new Thread(new ThreadStart(RemoveMeasurements));
@@ -33,8 +32,6 @@ public class LocalizationService : ILocalizationService
         }
         Console.WriteLine(_measurements.Values.First().Measurements.Count);
     }
-
-
     private void RemoveMeasurements()
     {
         while (true)
@@ -51,7 +48,6 @@ public class LocalizationService : ILocalizationService
                         }
                     }
                 }
-
                 if (_measurements.Keys.All(key => _measurements[key].Measurements.Count == 0))
                 {
                     break;

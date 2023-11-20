@@ -17,6 +17,5 @@ public class MeasurementGroup
             Measurements.Add(DateTime.Now, measurement);
         }
     }
-
     public Dictionary<DateTime, Measurement> Measurements { get; set; }
 }
