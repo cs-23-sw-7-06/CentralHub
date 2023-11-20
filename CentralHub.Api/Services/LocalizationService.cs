@@ -5,7 +5,7 @@ namespace CentralHub.Api.Services;
 public class LocalizationService : ILocalizationService
 {
     private Thread MeasurementRemover;
-    private Dictionary<int, List<Measurement>> _measurements = new Dictionary<int, List<Measurement>>();
+    private Dictionary<int, MeasurementGroup> _measurements = new Dictionary<int, MeasurementGroup>();
 
     public LocalizationService()
     {
@@ -14,37 +14,48 @@ public class LocalizationService : ILocalizationService
     }
     public void AddMeasurements(int id, IReadOnlyCollection<Measurement> measurements)
     {
+
         lock (_measurements)
         {
-            if (_measurements.TryGetValue(id, out List<Measurement> value))
+            if (_measurements.TryGetValue(id, out MeasurementGroup value))
             {
-                value.AddRange(measurements);
+                value.AddMeasurements(measurements.ToList());
             }
             else
             {
-                _measurements.Add(id, measurements.ToList());
+                _measurements.Add(id, new MeasurementGroup(measurements.ToList()));
             }
         }
+        if (!(MeasurementRemover.ThreadState == ThreadState.Running))
+        {
+            MeasurementRemover = new Thread(new ThreadStart(RemoveMeasurements));
+            MeasurementRemover.Start();
+        }
+        Console.WriteLine(_measurements.Values.First().Measurements.Count);
     }
+    
     
     private void RemoveMeasurements()
     {
         while (true)
         {
-            if (_measurements.Count == 0)
-            {
-                break;
-            }
-
-            foreach (var key in _measurements.Keys)
-            {
-                foreach (var measurement in _measurements[key])
+            lock(_measurements){
+                foreach (var key in _measurements.Keys)
                 {
-                    if (DateTime.Now >= DateTime.Now + TimeSpan.FromMinutes(2))
-                    { // TODO: Change second datetime.now to datetime from addMeasurements when it has been implemented
-                        _measurements[key].Remove(measurement);
+                    foreach (var measurementKey in _measurements[key].Measurements.Keys)
+                    {
+                        if (DateTime.Now >= measurementKey + TimeSpan.FromMinutes(2))
+                        {
+                            _measurements[key].Measurements.Remove(measurementKey);
+                        }
                     }
                 }
+
+                if (_measurements.Keys.All(key => _measurements[key].Measurements.Count == 0))
+                {
+                    break;
+                }
+                Task.Delay(_measurements.Keys.Select(key => _measurements[key].Measurements.Keys.Select(innerKey => ((innerKey+TimeSpan.FromMinutes(2)) - DateTime.Now).Seconds).Min()).Min());
             }
         }
     }

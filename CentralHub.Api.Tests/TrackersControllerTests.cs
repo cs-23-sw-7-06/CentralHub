@@ -67,6 +67,7 @@ public class TrackersControllerTests
         Assert.That(trackers.Trackers, Is.Empty);
     }
 
+
     private sealed class RoomRepository : IRoomRepository
     {
         public RoomDto RoomDto { get; }
