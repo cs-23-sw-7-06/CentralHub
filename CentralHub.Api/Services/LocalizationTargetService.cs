@@ -16,7 +16,7 @@ public class LocalizationTargetService : ILocalizationTargetService
             }
             else
             {
-                Measurements.Add(id, measurements);
+                Measurements.Add(id, measurements.ToList());
             }
         }
     }
