@@ -9,7 +9,7 @@ namespace CentralHub.Api.Tests;
 public class TrackersControllerTests
 {
     private RoomRepository _roomRepository;
-    private ILocalizationTargetService _localizationTargetService;
+    private LocalizationTargetService _localizationTargetService;
     private TrackerController _trackerController;
 
     [SetUp]
@@ -60,15 +60,17 @@ public class TrackersControllerTests
 
         var gotMeasurements = _localizationTargetService.GetMeasurementsForId(0, default);
 
-        Assert.That(measurements.All(gotMeasurements.Contains));
+        Assert.That(measurements.All(gotMeasurements.Measurements.ContainsValue));
     }
     [Test]
     public async Task TestRemoveMeasurement()
     {
         var measurement = new Measurement(Measurement.Protocol.Wifi, "11:22:33:44:55:66", 1);
         _localizationTargetService.AddMeasurements(0, new List<Measurement>() { measurement });
-        Task.Delay(180000); // Sleep for 3 minutes, making sure the 2 minute timeout of adding a measurement is up.
-        Assert.That(_localizationTargetService.GetMeasurementsForId(0, default).Count == 0);
+        Assert.That(_localizationTargetService.MeasurementRemover.ThreadState == ThreadState.Running);
+        await Task.Delay(180000); // Sleep for 3 minutes, making sure the 2 minute timeout of adding a measurement is up.
+        Assert.That(_localizationTargetService.MeasurementRemover.ThreadState == ThreadState.Stopped);
+        Assert.That(_localizationTargetService.GetMeasurementsForId(0, default).Measurements.Count == 0);
     }
 
     private class RoomRepository : IRoomRepository

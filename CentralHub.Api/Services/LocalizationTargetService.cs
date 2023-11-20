@@ -4,9 +4,9 @@ namespace CentralHub.Api.Services;
 
 public class LocalizationTargetService : ILocalizationTargetService
 {
-    private Dictionary<int, List<Measurement>> Measurements = new Dictionary<int, List<Measurement>>();
+    private Dictionary<int, MeasurementGroup> Measurements = new();
 
-    private Thread MeasurementRemover;
+    public Thread MeasurementRemover;
     private bool MeasurementRemoverRunning;
 
     public LocalizationTargetService()
@@ -17,29 +17,30 @@ public class LocalizationTargetService : ILocalizationTargetService
 
     public void AddMeasurements(int id, List<Measurement> measurements)
     {
-        if (!(MeasurementRemover.ThreadState == ThreadState.Running))
-        {
-            MeasurementRemover = new Thread(new ThreadStart(RemoveMeasurements));
-        }
         lock (Measurements)
         {
             if (Measurements.ContainsKey(id))
             {
-                Measurements[id].AddRange(measurements);
+                Measurements[id].AddMeasurements(measurements);
             }
             else
             {
-                Measurements.Add(id, measurements.ToList());
+                Measurements.Add(id, new MeasurementGroup(measurements));
             }
+        }
+        if (!(MeasurementRemover.ThreadState == ThreadState.Running))
+        {
+            MeasurementRemover = new Thread(new ThreadStart(RemoveMeasurements));
+            MeasurementRemover.Start();
         }
     }
 
-    public List<Measurement> GetMeasurementsForId(int id, CancellationToken token)
+    public MeasurementGroup GetMeasurementsForId(int id, CancellationToken token)
     {
-        List<Measurement> measurements;
+        MeasurementGroup measurements;
         lock (Measurements)
         {
-            measurements = new List<Measurement>(Measurements.GetValueOrDefault(id, new List<Measurement>()));
+            measurements = Measurements.GetValueOrDefault(id, new MeasurementGroup(new List<Measurement>()));
         }
         return measurements;
     }
@@ -48,22 +49,24 @@ public class LocalizationTargetService : ILocalizationTargetService
     {
         while (true)
         {
-            if (Measurements.Count == 0)
-            {
-                break;
-            }
-
-            foreach (var key in Measurements.Keys)
-            {
-                foreach (var measurement in Measurements[key])
+            lock(Measurements){
+                foreach (var key in Measurements.Keys)
                 {
-                    if (DateTime.Now >= DateTime.Now + TimeSpan.FromMinutes(2))
-                    { // TODO: Change second datetime.now to datetime from addMeasurements when it has been implemented
-                        Measurements[key].Remove(measurement);
+                    foreach (var measurementKey in Measurements[key].Measurements.Keys)
+                    {
+                        if (DateTime.Now >= measurementKey + TimeSpan.FromMinutes(2))
+                        {
+                            Measurements[key].Measurements.Remove(measurementKey);
+                        }
                     }
                 }
+
+                if (Measurements.Keys.All(key => Measurements[key].Measurements.Count == 0))
+                {
+                    break;
+                }
+                Task.Delay(Measurements.Keys.Select(key => Measurements[key].Measurements.Keys.Select(innerKey => ((innerKey+TimeSpan.FromMinutes(2)) - DateTime.Now).Seconds).Min()).Min());
             }
         }
     }
-
 }

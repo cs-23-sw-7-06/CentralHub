@@ -60,6 +60,6 @@ public class RoomController : ControllerBase
     [HttpGet("measurements")]
     public async Task<List<Measurement>> GetMeasurements(int id, CancellationToken token)
     {
-        return await Task.FromResult(_localizationTargetService.GetMeasurementsForId(id, token));
+        return await Task.FromResult(_localizationTargetService.GetMeasurementsForId(id, token).Measurements.Select(measurement => measurement.Value).ToList());
     }
 }
