@@ -55,7 +55,14 @@ public class LocalizationService : ILocalizationService
                 {
                     break;
                 }
-                Task.Delay(_measurements.Keys.Select(key => _measurements[key].Measurements.Keys.Select(innerKey => ((innerKey+TimeSpan.FromMinutes(2)) - DateTime.Now).Seconds).Min()).Min());
+                var delay = 120; 
+                foreach(var key in _measurements.Keys){
+                    foreach(var timestamp in _measurements[key].Measurements.Keys){
+                        var new_delay = (timestamp+TimeSpan.FromMinutes(2) - DateTime.Now).TotalSeconds;
+                        delay = new_delay < delay ? (int)new_delay : delay;
+                    }
+                }
+                Task.Delay(delay);
             }
         }
     }
