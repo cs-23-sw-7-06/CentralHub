@@ -22,15 +22,15 @@ public sealed class Measurement
 
     public enum Protocol
     {
-        wifi,
-        bluetooth
+        Wifi,
+        Bluetooth
     }
     public Protocol Type
     {
         get => _protocol;
         set
         {
-            if (value == Protocol.wifi || value == Protocol.bluetooth) _protocol = value;
+            if (value == Protocol.Wifi || value == Protocol.Bluetooth) _protocol = value;
             else throw new InvalidEnumArgumentException("Invalid Protocol Type");
         }
     }

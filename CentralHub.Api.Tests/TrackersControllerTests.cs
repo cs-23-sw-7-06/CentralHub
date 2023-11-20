@@ -54,8 +54,8 @@ public class TrackersControllerTests
     public void TestAddMeasurements()
     {
         var measurements = new List<Measurement>(){
-            new Measurement(Measurement.Protocol.bluetooth, "11:22:33:44:55:66", 10),
-            new Measurement(Measurement.Protocol.wifi, "aa:bb:cc:dd:ee:ff", 20)};
+            new Measurement(Measurement.Protocol.Bluetooth, "11:22:33:44:55:66", 10),
+            new Measurement(Measurement.Protocol.Wifi, "aa:bb:cc:dd:ee:ff", 20)};
         _localizationTargetService.AddMeasurements(0, measurements);
 
         var gotMeasurements = _localizationTargetService.GetMeasurementsForId(0, default);
