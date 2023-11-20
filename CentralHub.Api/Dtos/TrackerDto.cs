@@ -10,7 +10,9 @@ public sealed class TrackerDto
 
     public required string Description { get; set; }
 
-    public required string MacAddress { get; set; }
+    public required string WifiMacAddress { get; set; }
+
+    public required string BluetoothMacAddress { get; set; }
 
     public required int RoomDtoId { get; set; }
 

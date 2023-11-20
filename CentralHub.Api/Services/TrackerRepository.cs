@@ -33,7 +33,8 @@ public sealed class TrackerRepository : ITrackerRepository
         {
             Name = "Test TrackerDto 1",
             Description = "Test TrackerDto",
-            MacAddress = "AA:BB:CC:DD:EE:FF",
+            WifiMacAddress = "AA:BB:CC:DD:EE:FF",
+            BluetoothMacAddress = "00:11:22:33:44:55",
             RoomDtoId = room.RoomDtoId,
             RoomDto = room
         }, default).GetAwaiter().GetResult();
@@ -41,7 +42,8 @@ public sealed class TrackerRepository : ITrackerRepository
         {
             Name = "Test TrackerDto 2",
             Description = "Test TrackerDto",
-            MacAddress = "AA:BB:CC:DD:EE:FF",
+            WifiMacAddress = "FF:EE:DD:CC:BB:AA",
+            BluetoothMacAddress = "55:44:33:22:11:00",
             RoomDtoId = room.RoomDtoId,
             RoomDto = room
         }, default).GetAwaiter().GetResult();
@@ -127,6 +129,17 @@ public sealed class TrackerRepository : ITrackerRepository
             .Include(r => r.Trackers)
             .SelectMany(r => r.Trackers)
             .SingleOrDefaultAsync(t => t.TrackerDtoId == id, cancellationToken);
+
+        return tracker;
+    }
+
+    public async Task<TrackerDto?> GetTrackerByMacAddresses(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
+    {
+        var tracker = await _applicationDbContext.Rooms
+            .Include(r => r.Trackers)
+            .SelectMany(r => r.Trackers)
+            .SingleOrDefaultAsync(t =>
+                t.WifiMacAddress == wifiMacAddress && t.BluetoothMacAddress == bluetoothMacAddress, cancellationToken);
 
         return tracker;
     }

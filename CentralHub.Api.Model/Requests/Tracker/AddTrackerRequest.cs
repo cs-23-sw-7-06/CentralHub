@@ -1,16 +1,17 @@
 using System.Text.Json.Serialization;
 
-namespace CentralHub.Api.Model.Requests;
+namespace CentralHub.Api.Model.Requests.Tracker;
 
 public sealed class AddTrackerRequest
 {
     [JsonConstructor]
-    public AddTrackerRequest(int roomId, string name, string description, string macAddress)
+    public AddTrackerRequest(int roomId, string name, string description, string wifiMacAddress, string bluetoothMacAddress)
     {
         RoomId = roomId;
         Name = name;
         Description = description;
-        MacAddress = macAddress;
+        WifiMacAddress = wifiMacAddress;
+        BluetoothMacAddress = bluetoothMacAddress;
     }
 
     public int RoomId { get; }
@@ -19,5 +20,7 @@ public sealed class AddTrackerRequest
 
     public string Description { get; }
 
-    public string MacAddress { get; }
+    public string WifiMacAddress { get; }
+
+    public string BluetoothMacAddress { get; }
 }

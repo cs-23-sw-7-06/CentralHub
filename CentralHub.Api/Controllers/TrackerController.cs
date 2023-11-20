@@ -1,6 +1,7 @@
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
 using CentralHub.Api.Model.Requests;
+using CentralHub.Api.Model.Requests.Tracker;
 using CentralHub.Api.Model.Responses.Tracker;
 using CentralHub.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,8 @@ public class TrackerController : ControllerBase
         {
             Name = addTrackerRequest.Name,
             Description = addTrackerRequest.Description,
-            MacAddress = addTrackerRequest.MacAddress,
+            WifiMacAddress = addTrackerRequest.WifiMacAddress,
+            BluetoothMacAddress = addTrackerRequest.BluetoothMacAddress,
             RoomDtoId = room.RoomDtoId,
             RoomDto = room
         };
@@ -79,8 +81,23 @@ public class TrackerController : ControllerBase
         }
 
         var trackers =
-            possibleTrackers.Select(t => new Tracker(t.TrackerDtoId, t.Name, t.Description, t.MacAddress, t.RoomDtoId));
+            possibleTrackers.Select(t => new Tracker(t.TrackerDtoId, t.Name, t.Description, t.WifiMacAddress, t.BluetoothMacAddress, t.RoomDtoId));
 
         return GetTrackersResponse.CreateSuccessful(trackers);
+    }
+
+    [HttpGet("registration/info")]
+    public async Task<GetTrackerRegistrationInfoResponse> GetTrackerRegistrationInfo(string wifiMacAddress,
+        string bluetoothMacAddress, CancellationToken cancellationToken)
+    {
+        var possibleTracker =
+            await _trackerRepository.GetTrackerByMacAddresses(wifiMacAddress, bluetoothMacAddress, cancellationToken);
+
+        if (possibleTracker == null)
+        {
+            return GetTrackerRegistrationInfoResponse.CreateUnregistered();
+        }
+
+        return GetTrackerRegistrationInfoResponse.CreateRegistered(possibleTracker.TrackerDtoId);
     }
 }
