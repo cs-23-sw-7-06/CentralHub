@@ -32,8 +32,8 @@ public class LocalizationControllerTests
         Assert.That(_localizationService.Measurements, Has.Count.EqualTo(measurements.Length));
         Assert.That(_localizationService.Measurements, Does.Contain(measurements[0]));
         Assert.That(_localizationService.Measurements, Does.Contain(measurements[1]));
-    }    
-    
+    }
+
 
     private sealed class LocalizationService : ILocalizationService
     {
@@ -48,6 +48,6 @@ public class LocalizationControllerTests
 
             Measurements.AddRange(measurements);
         }
-        
+
     }
 }

@@ -33,13 +33,14 @@ public class LocalizationService : ILocalizationService
         }
         Console.WriteLine(_measurements.Values.First().Measurements.Count);
     }
-    
-    
+
+
     private void RemoveMeasurements()
     {
         while (true)
         {
-            lock(_measurements){
+            lock (_measurements)
+            {
                 foreach (var key in _measurements.Keys)
                 {
                     foreach (var measurementKey in _measurements[key].Measurements.Keys)
@@ -55,10 +56,12 @@ public class LocalizationService : ILocalizationService
                 {
                     break;
                 }
-                var delay = 120; 
-                foreach(var key in _measurements.Keys){
-                    foreach(var timestamp in _measurements[key].Measurements.Keys){
-                        var new_delay = (timestamp+TimeSpan.FromMinutes(2) - DateTime.Now).TotalSeconds;
+                var delay = 120;
+                foreach (var key in _measurements.Keys)
+                {
+                    foreach (var timestamp in _measurements[key].Measurements.Keys)
+                    {
+                        var new_delay = (timestamp + TimeSpan.FromMinutes(2) - DateTime.Now).TotalSeconds;
                         delay = new_delay < delay ? (int)new_delay : delay;
                     }
                 }
