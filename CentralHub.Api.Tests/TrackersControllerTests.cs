@@ -62,6 +62,14 @@ public class TrackersControllerTests
 
         Assert.That(measurements.All(gotMeasurements.Contains));
     }
+    [Test]
+    public async Task TestRemoveMeasurement()
+    {
+        var measurement = new Measurement(Measurement.Protocol.Wifi, "11:22:33:44:55:66", 1);
+        _localizationTargetService.AddMeasurements(0, new List<Measurement>() { measurement });
+        Task.Delay(180000); // Sleep for 3 minutes, making sure the 2 minute timeout of adding a measurement is up.
+        Assert.That(_localizationTargetService.GetMeasurementsForId(0, default).Count == 0);
+    }
 
     private class RoomRepository : IRoomRepository
     {
