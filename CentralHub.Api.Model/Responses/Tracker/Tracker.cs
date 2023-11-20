@@ -5,12 +5,13 @@ namespace CentralHub.Api.Model.Responses.Tracker;
 public sealed class Tracker
 {
     [JsonConstructor]
-    public Tracker(int trackerId, string name, string description, string macAddress, int roomId)
+    public Tracker(int trackerId, string name, string description, string wifiMacAddress, string bluetoothMacAddress, int roomId)
     {
         TrackerId = trackerId;
         Name = name;
         Description = description;
-        MacAddress = macAddress;
+        WifiMacAddress = wifiMacAddress;
+        BluetoothMacAddress = bluetoothMacAddress;
         RoomId = roomId;
     }
 
@@ -20,7 +21,9 @@ public sealed class Tracker
 
     public string Description { get; }
 
-    public string MacAddress { get; }
+    public string WifiMacAddress { get; }
+
+    public string BluetoothMacAddress { get; }
 
     public int RoomId { get; }
 }

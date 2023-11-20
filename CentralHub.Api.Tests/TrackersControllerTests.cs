@@ -3,6 +3,7 @@ using System.Diagnostics.Metrics;
 using CentralHub.Api.Controllers;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model.Requests;
+using CentralHub.Api.Model.Requests.Tracker;
 using CentralHub.Api.Services;
 
 namespace CentralHub.Api.Tests;
@@ -38,7 +39,7 @@ public class TrackersControllerTests
     public async Task TestAddTracker()
     {
         var room = _trackerRepository.RoomDto;
-        var tracker = new AddTrackerRequest(room.RoomDtoId, "Test TrackerDto", "0.1.95", "AA:BB:CC:DD:EE:FF");
+        var tracker = new AddTrackerRequest(room.RoomDtoId, "Test TrackerDto", "0.1.95", "AA:BB:CC:DD:EE:FF", "00:11:22:33:44:55");
         var addTrackerResponse = await _trackerController.AddTracker(tracker, default);
 
         // First element is 0
@@ -55,7 +56,7 @@ public class TrackersControllerTests
     public async Task TestRemoveTracker()
     {
         var room = _trackerRepository.RoomDto;
-        var tracker = new AddTrackerRequest(room.RoomDtoId, "Test TrackerDto", "0.1.95", "AA:BB:CC:DD:EE:FF");
+        var tracker = new AddTrackerRequest(room.RoomDtoId, "Test TrackerDto", "0.1.95", "AA:BB:CC:DD:EE:FF", "00:11:22:33:44:55");
         var addTrackerResponse = await _trackerController.AddTracker(tracker, default);
 
         var trackerId = addTrackerResponse.TrackerId;
@@ -65,6 +66,30 @@ public class TrackersControllerTests
         var trackers = await _trackerController.GetTrackers(room.RoomDtoId, default);
         Assert.That(trackers.Success, Is.True);
         Assert.That(trackers.Trackers, Is.Empty);
+    }
+
+    [Test]
+    public async Task TestUnregisteredTracker()
+    {
+        var trackerRegistrationInfo = await _trackerController.GetTrackerRegistrationInfo("00:00:00:00:00", "00:00:00:00:00", default);
+
+        Assert.That(trackerRegistrationInfo.Registered, Is.False);
+        Assert.That(trackerRegistrationInfo.TrackerId, Is.Null);
+    }
+
+    [Test]
+    public async Task TestRegisteredTracker()
+    {
+        var addTrackerRequest = new AddTrackerRequest(_trackerRepository.RoomDto.RoomDtoId, "Test Tracker",
+            "Test Tracker", "00:00:00:00:00", "00:00:00:00:00");
+        var addTrackerResponse = await _trackerController.AddTracker(addTrackerRequest, default);
+
+        var trackerRegistrationInfo =
+            await _trackerController.GetTrackerRegistrationInfo(addTrackerRequest.WifiMacAddress,
+                addTrackerRequest.BluetoothMacAddress, default);
+
+        Assert.That(trackerRegistrationInfo.Registered, Is.True);
+        Assert.That(trackerRegistrationInfo.TrackerId, Is.EqualTo(addTrackerResponse.TrackerId));
     }
 
     private sealed class RoomRepository : IRoomRepository
@@ -167,5 +192,10 @@ public class TrackersControllerTests
             return Task.FromResult(RoomDto.Trackers.SingleOrDefault(t => t.TrackerDtoId == id));
         }
 
+        public Task<TrackerDto> GetTrackerByMacAddresses(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(RoomDto.Trackers.SingleOrDefault(t =>
+                t.WifiMacAddress == wifiMacAddress && t.BluetoothMacAddress == bluetoothMacAddress));
+        }
     }
 }
