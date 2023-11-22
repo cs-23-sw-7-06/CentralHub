@@ -1,21 +1,14 @@
 using CentralHub.Api.Model;
 
+namespace CentralHub.Api;
+
 public class MeasurementGroup
 {
     public MeasurementGroup(List<Measurement> measurements)
     {
-        Measurements = new Dictionary<DateTime, Measurement>();
-        foreach (var measurement in measurements)
-        {
-            Measurements.Add(DateTime.Now, measurement);
-        }
+        Timestamp = DateTime.Now;
+        Measurements = measurements.ToList();
     }
-    public void AddMeasurements(List<Measurement> measurements)
-    {
-        foreach (var measurement in measurements)
-        {
-            Measurements.Add(DateTime.Now, measurement);
-        }
-    }
-    public Dictionary<DateTime, Measurement> Measurements { get; set; }
+    public DateTime Timestamp { get; }
+    public List<Measurement> Measurements { get; }
 }

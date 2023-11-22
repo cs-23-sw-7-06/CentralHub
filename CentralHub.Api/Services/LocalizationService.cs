@@ -4,59 +4,63 @@ namespace CentralHub.Api.Services;
 
 public class LocalizationService : ILocalizationService
 {
-    private Thread MeasurementRemover;
-    private Dictionary<int, MeasurementGroup> _measurements = new Dictionary<int, MeasurementGroup>();
+    private Thread? MeasurementRemover;
+    private readonly List<ThreadState> validStates = new List<ThreadState>() { ThreadState.Running, ThreadState.WaitSleepJoin };
+    private Dictionary<int, List<MeasurementGroup>> _measurements = new Dictionary<int, List<MeasurementGroup>>();
     public void AddMeasurements(int id, IReadOnlyCollection<Measurement> measurements)
     {
         lock (_measurements)
         {
-            if (_measurements.TryGetValue(id, out MeasurementGroup value))
+            if (_measurements.TryGetValue(id, out List<MeasurementGroup> value))
             {
-                value.AddMeasurements(measurements.ToList());
+                value.Add(new MeasurementGroup(measurements.ToList()));
             }
             else
             {
-                _measurements.Add(id, new MeasurementGroup(measurements.ToList()));
+                _measurements.Add(id, new List<MeasurementGroup>() { new MeasurementGroup(measurements.ToList()) });
             }
         }
-        if (MeasurementRemover == null || !(MeasurementRemover.ThreadState == ThreadState.Running))
+        if (MeasurementRemover == null || !validStates.Contains(MeasurementRemover.ThreadState))
         {
             MeasurementRemover = new Thread(new ThreadStart(RemoveMeasurements));
             MeasurementRemover.Start();
         }
-        Console.WriteLine(_measurements.Values.First().Measurements.Count);
     }
     private void RemoveMeasurements()
     {
+        var toBeRemoved = new List<MeasurementGroup>();
         while (true)
         {
+            var delay = 120;
             lock (_measurements)
             {
                 foreach (var key in _measurements.Keys)
                 {
-                    foreach (var measurementKey in _measurements[key].Measurements.Keys)
+                    toBeRemoved.Clear();
+                    foreach (var group in _measurements[key])
                     {
-                        if (DateTime.Now >= measurementKey + TimeSpan.FromMinutes(2))
+                        if (DateTime.Now >= group.Timestamp + TimeSpan.FromMinutes(2))
                         {
-                            _measurements[key].Measurements.Remove(measurementKey);
+                            toBeRemoved.Add(group);
+                        }
+                        else
+                        {
+                            var new_delay = (group.Timestamp + TimeSpan.FromMinutes(2) - DateTime.Now).TotalSeconds;
+                            delay = new_delay < delay ? (int)new_delay : delay;
+
                         }
                     }
-                }
-                if (_measurements.Keys.All(key => _measurements[key].Measurements.Count == 0))
-                {
-                    break;
-                }
-                var delay = 120;
-                foreach (var key in _measurements.Keys)
-                {
-                    foreach (var timestamp in _measurements[key].Measurements.Keys)
+                    foreach (var group in toBeRemoved)
                     {
-                        var new_delay = (timestamp + TimeSpan.FromMinutes(2) - DateTime.Now).TotalSeconds;
-                        delay = new_delay < delay ? (int)new_delay : delay;
+                        _measurements[key].Remove(group);
                     }
                 }
-                Task.Delay(delay);
+                if (_measurements.Keys.All(key => _measurements[key].Count == 0))
+                {
+                    return;
+                }
             }
+            Thread.Sleep(delay * 1000);
         }
     }
 }
