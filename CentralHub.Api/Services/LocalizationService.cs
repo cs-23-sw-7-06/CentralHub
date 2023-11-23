@@ -31,7 +31,7 @@ public class LocalizationService : ILocalizationService
         var toBeRemoved = new List<MeasurementGroup>();
         while (true)
         {
-            var delay = 120;
+            var delay = 120000;
             lock (_measurements)
             {
                 foreach (var key in _measurements.Keys)
@@ -45,7 +45,7 @@ public class LocalizationService : ILocalizationService
                         }
                         else
                         {
-                            var new_delay = (group.Timestamp + TimeSpan.FromMinutes(2) - DateTime.Now).TotalSeconds;
+                            var new_delay = (group.Timestamp + TimeSpan.FromMinutes(2) - DateTime.Now).TotalMilliseconds;
                             delay = new_delay < delay ? (int)new_delay : delay;
 
                         }
@@ -60,7 +60,7 @@ public class LocalizationService : ILocalizationService
                     return;
                 }
             }
-            Thread.Sleep(delay * 1000);
+            Thread.Sleep(delay);
         }
     }
 }
