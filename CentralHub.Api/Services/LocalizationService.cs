@@ -4,9 +4,12 @@ namespace CentralHub.Api.Services;
 
 public class LocalizationService : ILocalizationService
 {
-    private Thread? MeasurementRemover;
+    protected Thread? MeasurementRemover;
+    public TimeSpan MaxAge { get; set; }
+
     private readonly List<ThreadState> validStates = new List<ThreadState>() { ThreadState.Running, ThreadState.WaitSleepJoin };
-    private Dictionary<int, List<MeasurementGroup>> _measurements = new Dictionary<int, List<MeasurementGroup>>();
+    protected Dictionary<int, List<MeasurementGroup>> _measurements = new Dictionary<int, List<MeasurementGroup>>();
+
     public void AddMeasurements(int id, IReadOnlyCollection<Measurement> measurements)
     {
         lock (_measurements)
@@ -26,7 +29,7 @@ public class LocalizationService : ILocalizationService
             MeasurementRemover.Start();
         }
     }
-    private void RemoveMeasurements()
+    protected void RemoveMeasurements()
     {
         var toBeRemoved = new List<MeasurementGroup>();
         while (true)
@@ -40,13 +43,13 @@ public class LocalizationService : ILocalizationService
                     toBeRemoved.Clear();
                     foreach (var group in value)
                     {
-                        if (now >= group.Timestamp + TimeSpan.FromMinutes(2))
+                        if (now >= group.Timestamp + MaxAge)
                         {
                             toBeRemoved.Add(group);
                         }
                         else
                         {
-                            var new_delay = (group.Timestamp + TimeSpan.FromMinutes(2) - now).TotalMilliseconds;
+                            var new_delay = (group.Timestamp + MaxAge - now).TotalMilliseconds;
                             delay = new_delay < delay ? (int)new_delay : delay;
 
                         }
