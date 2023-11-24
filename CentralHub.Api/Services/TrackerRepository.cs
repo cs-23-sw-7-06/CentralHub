@@ -138,7 +138,7 @@ public sealed class TrackerRepository : ITrackerRepository
         return room.Trackers.ToArray();
     }
 
-    public async Task<TrackerDto?> GetTrackerAsync(int id, CancellationToken cancellationToken)
+    public async Task<TrackerDto?> GetTrackerByIdAsync(int id, CancellationToken cancellationToken)
     {
         var tracker = await _applicationDbContext.Rooms
             .Include(r => r.Trackers)

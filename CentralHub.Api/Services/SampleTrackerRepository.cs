@@ -110,7 +110,7 @@ public sealed class SampleTrackerRepository : ITrackerRepository
         }, cancellationToken);
     }
 
-    public async Task<TrackerDto?> GetTrackerAsync(int id, CancellationToken cancellationToken)
+    public async Task<TrackerDto?> GetTrackerByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await LockedStuffMutex.Lock(stuff =>
         {

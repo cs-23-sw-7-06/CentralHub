@@ -12,7 +12,7 @@ public interface ITrackerRepository
 
     Task<IEnumerable<TrackerDto>?> GetTrackersInRoomAsync(int roomId, CancellationToken cancellationToken);
 
-    Task<TrackerDto?> GetTrackerAsync(int id, CancellationToken cancellationToken);
+    Task<TrackerDto?> GetTrackerByIdAsync(int id, CancellationToken cancellationToken);
 
     Task<TrackerDto?> GetTrackerByMacAddresses(string wifiMacAddress, string bluetoothMacAddress,
         CancellationToken cancellationToken);

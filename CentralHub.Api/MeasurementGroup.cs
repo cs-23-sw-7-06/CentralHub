@@ -1,14 +1,15 @@
+using System.Collections.Immutable;
 using CentralHub.Api.Model;
 
 namespace CentralHub.Api;
 
 public class MeasurementGroup
 {
-    public MeasurementGroup(List<Measurement> measurements)
+    public MeasurementGroup(IEnumerable<Measurement> measurements)
     {
         Timestamp = DateTime.Now;
-        Measurements = measurements.ToList();
+        Measurements = measurements.ToImmutableArray();
     }
     public DateTime Timestamp { get; }
-    public List<Measurement> Measurements { get; }
+    public IReadOnlyList<Measurement> Measurements { get; }
 }
