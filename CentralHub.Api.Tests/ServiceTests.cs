@@ -25,15 +25,15 @@ class ServiceTests
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Wifi, 1),
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10)
         });
-        Assert.That(_localizationService.getMeasurements(1).Count == 1);
+        Assert.That(_localizationService.GetMeasurements(1).Count == 1);
         Thread.Sleep((int)(_localizationService.MaxAge.TotalMilliseconds / 4)); // wait period/4 seconds
         _localizationService.AddMeasurements(1, new List<Measurement>(){
             new Measurement("aa:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 1),
             new Measurement("aa:bb:cc:dd:ee:ff", Measurement.Protocol.Bluetooth, 10)
         });
-        Assert.That(_localizationService.getMeasurements(1).Count == 2);
+        Assert.That(_localizationService.GetMeasurements(1).Count == 2);
         _localizationService.RunRemoveMeasurements();
-        Assert.That(_localizationService.getMeasurements(1).Count == 0);
+        Assert.That(_localizationService.GetMeasurements(1).Count == 0);
     }
 }
 
@@ -47,7 +47,7 @@ class TestLocalizationService : LocalizationService
     {
         Thread.Sleep(int.MaxValue);
     }
-    public List<MeasurementGroup> getMeasurements(int id)
+    public List<MeasurementGroup> GetMeasurements(int id)
     {
         return _measurements[id];
     }
