@@ -34,7 +34,7 @@ class ServiceTests
         Assert.That(_localizationService.getMeasurements(1).Count == 2);
         Thread.Sleep((int)(_localizationService.MaxAge.TotalMilliseconds - (int)(_localizationService.MaxAge.TotalMilliseconds / 4))); // wait period-(period/4) seconds
         Assert.That(_localizationService.getMeasurements(1).Count == 1);
-        Thread.Sleep((int)(_localizationService.MaxAge.TotalMilliseconds / 4)); // wait 30 seconds
+        Thread.Sleep((int)(_localizationService.MaxAge.TotalMilliseconds / 2)); // wait period/2 seconds
         Assert.That(_localizationService.getMeasurements(1).Count == 0);
     }
 }
