@@ -95,9 +95,19 @@ public class TrackerController : ControllerBase
 
         if (possibleTracker == null)
         {
+            await _trackerRepository.AddUnregisteredTracker(wifiMacAddress, bluetoothMacAddress, cancellationToken);
             return GetTrackerRegistrationInfoResponse.CreateUnregistered();
         }
 
         return GetTrackerRegistrationInfoResponse.CreateRegistered(possibleTracker.TrackerDtoId);
+    }
+
+    [HttpGet("registration/unregistered")]
+    public async Task<GetUnregisteredTrackersResponse> GetUnregisteredTrackers(CancellationToken cancellationToken)
+    {
+        var unregisteredTrackers = await _trackerRepository.GetUnregisteredTrackers(cancellationToken);
+
+        return new GetUnregisteredTrackersResponse(
+            unregisteredTrackers.Select(t => new UnregisteredTracker(t.WifiMacAddress, t.BluetoothMacAddress)));
     }
 }

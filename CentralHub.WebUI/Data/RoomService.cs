@@ -53,24 +53,4 @@ public sealed class RoomService
         return rooms;
     }
 
-    public async Task<Tracker[]> GetTrackersAsync(Room room, CancellationToken cancellationToken)
-    {
-        var request = new HttpRequestMessage(
-            HttpMethod.Get,
-            $"http://localhost:8081/tracker/all?roomId={room.RoomId}");
-        request.Headers.Add("Accept", "application/json");
-        request.Headers.Add("User-Agent", "CentralHub.WebUI");
-
-        var client = _clientFactory.CreateClient();
-
-        var response = await client.SendAsync(request, cancellationToken);
-        var trackers = await response.Content.ReadFromJsonAsync<GetTrackersResponse>(cancellationToken: cancellationToken);
-
-        if (trackers == null || !trackers.Success)
-        {
-            throw new InvalidOperationException("Shit brokey");
-        }
-
-        return trackers.Trackers.ToArray();
-    }
 }

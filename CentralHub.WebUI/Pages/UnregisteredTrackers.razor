@@ -1,0 +1,55 @@
+@page "/unregisteredtrackers"
+@using CentralHub.WebUI.Data
+@using CentralHub.Api.Model.Responses.Room
+@using CentralHub.Api.Model.Responses.Tracker
+@implements IDisposable
+@inject TrackerService TrackerService
+
+<PageTitle>Unregistered Trackers</PageTitle>
+
+<h1>Unregistered Trackers</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (_unregisteredTrackers == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Wifi Mac Address</th>
+            <th scope="col">Bluetooth Mac Address</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var unregisteredTracker in _unregisteredTrackers)
+        {
+            <tr>
+                <td>@unregisteredTracker.WifiMacAddress</td>
+                <td>@unregisteredTracker.BluetoothMacAddress</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private List<UnregisteredTracker>? _unregisteredTrackers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _unregisteredTrackers = (await TrackerService.GetUnregisteredTrackersAsync(_cancellationTokenSource.Token)).ToList();
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+    }
+}

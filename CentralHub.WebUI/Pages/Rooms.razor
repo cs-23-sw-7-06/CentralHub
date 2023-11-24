@@ -4,6 +4,7 @@
 @using CentralHub.Api.Model.Responses.Room
 @implements IDisposable
 @inject RoomService RoomService
+@inject TrackerService TrackerService
 
 <PageTitle>Rooms</PageTitle>
 
@@ -70,7 +71,7 @@ else
 
     private async Task<int> GetTrackerCountAsync(Room room)
     {
-        var trackers = await RoomService.GetTrackersAsync(room, _cancellationTokenSource.Token);
+        var trackers = await TrackerService.GetTrackersAsync(room, _cancellationTokenSource.Token);
 
         return trackers.Length;
     }

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using CentralHub.Api.DbContexts;
 using CentralHub.Api.Dtos;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,8 @@ namespace CentralHub.Api.Services;
 
 public sealed class TrackerRepository : ITrackerRepository
 {
+    private static readonly List<UnregisteredTrackerDto> UnregisteredTrackers = new List<UnregisteredTrackerDto>();
+
     private readonly ApplicationDbContext _applicationDbContext;
     private static bool _hasAddedTrackers;
 
@@ -64,6 +67,17 @@ public sealed class TrackerRepository : ITrackerRepository
         try
         {
             await _applicationDbContext.SaveChangesAsync(cancellationToken);
+            lock (UnregisteredTrackers)
+            {
+                var possibleUnregisteredTracker = UnregisteredTrackers.SingleOrDefault(t =>
+                    t.WifiMacAddress == trackerDto.WifiMacAddress &&
+                    t.BluetoothMacAddress == trackerDto.BluetoothMacAddress);
+
+                if (possibleUnregisteredTracker != null)
+                {
+                    UnregisteredTrackers.Remove(possibleUnregisteredTracker);
+                }
+            }
             return trackerDto.TrackerDtoId;
         }
         catch (OperationCanceledException)
@@ -142,5 +156,30 @@ public sealed class TrackerRepository : ITrackerRepository
                 t.WifiMacAddress == wifiMacAddress && t.BluetoothMacAddress == bluetoothMacAddress, cancellationToken);
 
         return tracker;
+    }
+
+    public async Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackers(CancellationToken cancellationToken)
+    {
+        lock (UnregisteredTrackers)
+        {
+            return UnregisteredTrackers.ToImmutableArray();
+        }
+    }
+
+    public async Task AddUnregisteredTracker(string wifiMacAddress, string bluetoothMacAddress,
+        CancellationToken cancellationToken)
+    {
+        lock (UnregisteredTrackers)
+        {
+            if (UnregisteredTrackers.SingleOrDefault(t =>
+                    t.WifiMacAddress == wifiMacAddress && t.BluetoothMacAddress == bluetoothMacAddress) == null)
+            {
+                UnregisteredTrackers.Add(new UnregisteredTrackerDto()
+                {
+                    WifiMacAddress = wifiMacAddress,
+                    BluetoothMacAddress = bluetoothMacAddress,
+                });
+            }
+        }
     }
 }
