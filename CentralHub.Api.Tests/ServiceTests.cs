@@ -43,14 +43,16 @@ class TestLocalizationService : LocalizationService
     {
         MeasurementRemover = new Thread(new ThreadStart(SleepForever));
     }
-    private void SleepForever(){
+    private void SleepForever()
+    {
         Thread.Sleep(int.MaxValue);
     }
     public List<MeasurementGroup> getMeasurements(int id)
     {
         return _measurements[id];
     }
-    public void RunRemoveMeasurements(){
+    public void RunRemoveMeasurements()
+    {
         RemoveMeasurements();
     }
 }
