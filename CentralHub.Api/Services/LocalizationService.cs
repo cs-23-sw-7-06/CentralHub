@@ -4,7 +4,7 @@ namespace CentralHub.Api.Services;
 
 public class LocalizationService : ILocalizationService
 {
-    private Thread? MeasurementRemover;
+    protected Thread? MeasurementRemover;
     public TimeSpan MaxAge { get; set; }
 
     private readonly List<ThreadState> validStates = new List<ThreadState>() { ThreadState.Running, ThreadState.WaitSleepJoin };
@@ -29,7 +29,7 @@ public class LocalizationService : ILocalizationService
             MeasurementRemover.Start();
         }
     }
-    private void RemoveMeasurements()
+    protected void RemoveMeasurements()
     {
         var toBeRemoved = new List<MeasurementGroup>();
         while (true)

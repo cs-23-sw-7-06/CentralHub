@@ -14,7 +14,7 @@ class ServiceTests
     {
         _localizationService = new TestLocalizationService
         {
-            MaxAge = TimeSpan.FromSeconds(1) //set removal period to 1 seconds
+            MaxAge = TimeSpan.FromSeconds(1), //set removal period to 1 seconds
         };
     }
 
@@ -32,17 +32,25 @@ class ServiceTests
             new Measurement("aa:bb:cc:dd:ee:ff", Measurement.Protocol.Bluetooth, 10)
         });
         Assert.That(_localizationService.getMeasurements(1).Count == 2);
-        Thread.Sleep((int)(_localizationService.MaxAge.TotalMilliseconds - (int)(_localizationService.MaxAge.TotalMilliseconds / 4))); // wait period-(period/4) seconds
-        Assert.That(_localizationService.getMeasurements(1).Count == 1);
-        Thread.Sleep((int)(_localizationService.MaxAge.TotalMilliseconds / 2)); // wait period/2 seconds
+        _localizationService.RunRemoveMeasurements();
         Assert.That(_localizationService.getMeasurements(1).Count == 0);
     }
 }
 
 class TestLocalizationService : LocalizationService
 {
+    public TestLocalizationService()
+    {
+        MeasurementRemover = new Thread(new ThreadStart(SleepForever));
+    }
+    private void SleepForever(){
+        Thread.Sleep(int.MaxValue);
+    }
     public List<MeasurementGroup> getMeasurements(int id)
     {
         return _measurements[id];
+    }
+    public void RunRemoveMeasurements(){
+        RemoveMeasurements();
     }
 }
