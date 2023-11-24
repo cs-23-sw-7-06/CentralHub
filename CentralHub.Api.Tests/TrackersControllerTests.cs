@@ -134,7 +134,10 @@ public class TrackersControllerTests
 
     private sealed class TrackerRepository : ITrackerRepository
     {
+        private readonly List<UnregisteredTrackerDto> _unregisteredTrackers = new List<UnregisteredTrackerDto>();
+
         private int _nextId = 0;
+
 
         public RoomDto RoomDto { get; }
 
@@ -196,6 +199,22 @@ public class TrackersControllerTests
         {
             return Task.FromResult(RoomDto.Trackers.SingleOrDefault(t =>
                 t.WifiMacAddress == wifiMacAddress && t.BluetoothMacAddress == bluetoothMacAddress));
+        }
+
+        public Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackers(CancellationToken cancellationToken)
+        {
+            return Task.FromResult<IEnumerable<UnregisteredTrackerDto>>(_unregisteredTrackers.ToArray());
+        }
+
+        public Task AddUnregisteredTracker(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
+        {
+            _unregisteredTrackers.Add(
+                new UnregisteredTrackerDto
+                {
+                    WifiMacAddress = wifiMacAddress,
+                    BluetoothMacAddress = bluetoothMacAddress,
+                });
+            return Task.CompletedTask;
         }
     }
 }
