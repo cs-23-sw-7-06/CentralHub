@@ -31,13 +31,13 @@ public class LocalizationService : ILocalizationService
         var toBeRemoved = new List<MeasurementGroup>();
         while (true)
         {
-            var delay = 120000;
+            var delay = int.MaxValue;
             lock (_measurements)
             {
-                foreach (var key in _measurements.Keys)
+                foreach (var value in _measurements.Values)
                 {
                     toBeRemoved.Clear();
-                    foreach (var group in _measurements[key])
+                    foreach (var group in value)
                     {
                         if (DateTime.Now >= group.Timestamp + TimeSpan.FromMinutes(2))
                         {
@@ -52,10 +52,10 @@ public class LocalizationService : ILocalizationService
                     }
                     foreach (var group in toBeRemoved)
                     {
-                        _measurements[key].Remove(group);
+                        value.Remove(group);
                     }
                 }
-                if (_measurements.Keys.All(key => _measurements[key].Count == 0))
+                if (_measurements.Values.All(value => value.Count == 0))
                 {
                     return;
                 }
