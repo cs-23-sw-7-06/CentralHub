@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using App.ScopedService;
 using CentralHub.Api.DbContexts;
 using CentralHub.Api.Services;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +44,9 @@ internal static class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
         builder.Services.AddScoped<ITrackerRepository, TrackerRepository>();
-        builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
+        builder.Services.AddScoped<IAggregatedMeasurementRepository, AggregatedMeasurementRepository>();
+        builder.Services.AddHostedService<ScopedBackgroundService>();
+        builder.Services.AddScoped<IScopedProcessingService, LocalizationService>();
 
         var app = builder.Build();
 

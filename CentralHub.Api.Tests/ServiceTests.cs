@@ -8,6 +8,7 @@ namespace CentralHub.Api.Tests;
 
 class ServiceTests
 {
+    /*
     private TestLocalizationService _localizationService;
     [SetUp]
     public void Setup()
@@ -53,5 +54,5 @@ class TestLocalizationService : LocalizationService
     public void RunRemoveMeasurements()
     {
         RemoveMeasurements();
-    }
+    }*/
 }

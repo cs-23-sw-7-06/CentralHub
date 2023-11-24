@@ -1,20 +1,25 @@
 using CentralHub.Api.Controllers;
+using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
 using CentralHub.Api.Model.Requests.Localization;
 using CentralHub.Api.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CentralHub.Api.Tests;
 
 public class LocalizationControllerTests
 {
-    private LocalizationService _localizationService;
-    private LocalizationController _localizationController;
+    private MeasurementController _measurementController;
+    private IAggregatedMeasurementRepository _aggregatorRepository;
 
     [SetUp]
     public void Setup()
     {
-        _localizationService = new LocalizationService();
-        _localizationController = new LocalizationController(_localizationService);
+        _aggregatorRepository = new MockAggregatedMeasurementRepository();
+        _measurementController = new MeasurementController(
+            NullLogger<MeasurementController>.Instance,
+            _aggregatorRepository);
     }
 
     [Test]
@@ -27,25 +32,11 @@ public class LocalizationControllerTests
         };
 
         var addMeasurementsRequest = new AddMeasurementsRequest(0, measurements);
-        await _localizationController.AddMeasurements(addMeasurementsRequest, default);
+        await _measurementController.AddMeasurements(addMeasurementsRequest, default);
+        var addedMeasurements = (await _aggregatorRepository.GetTrackerMeasurementGroupsAsync(default))[0][0].Measurements;
 
-        Assert.That(_localizationService.Measurements, Has.Count.EqualTo(measurements.Length));
-        Assert.That(_localizationService.Measurements, Does.Contain(measurements[0]));
-        Assert.That(_localizationService.Measurements, Does.Contain(measurements[1]));
-    }
-
-    private sealed class LocalizationService : ILocalizationService
-    {
-        public List<Measurement> Measurements { get; } = new List<Measurement>();
-
-        public void AddMeasurements(int id, IReadOnlyCollection<Measurement> measurements)
-        {
-            if (id != 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(id), "id is not 0");
-            }
-
-            Measurements.AddRange(measurements);
-        }
+        Assert.That(addedMeasurements, Has.Count.EqualTo(measurements.Length));
+        Assert.That(addedMeasurements, Does.Contain(measurements[0]));
+        Assert.That(addedMeasurements, Does.Contain(measurements[1]));
     }
 }

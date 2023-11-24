@@ -15,4 +15,6 @@ public sealed class RoomDto
     /// Gets a collection of all trackers in the room.
     /// </summary>
     public ICollection<TrackerDto> Trackers { get; set; } = new List<TrackerDto>();
+
+    public ICollection<AggregatedMeasurementDto> AggregatedMeasurements { get; set; } = new List<AggregatedMeasurementDto>();
 }

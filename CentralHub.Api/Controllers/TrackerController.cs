@@ -47,7 +47,7 @@ public class TrackerController : ControllerBase
     [HttpPut("update")]
     public async Task<UpdateTrackerResponse> UpdateTracker(UpdateTrackerRequest updateTrackerRequest, CancellationToken cancellationToken)
     {
-        var trackerDto = await _trackerRepository.GetTrackerAsync(updateTrackerRequest.TrackerId, cancellationToken);
+        var trackerDto = await _trackerRepository.GetTrackerByIdAsync(updateTrackerRequest.TrackerId, cancellationToken);
 
         if (trackerDto == null)
         {
@@ -66,7 +66,7 @@ public class TrackerController : ControllerBase
     public async Task<RemoveTrackerResponse> RemoveTracker(int trackerId, CancellationToken cancellationToken)
     {
         var trackerDto =
-            await _trackerRepository.GetTrackerAsync(trackerId, cancellationToken);
+            await _trackerRepository.GetTrackerByIdAsync(trackerId, cancellationToken);
 
         if (trackerDto == null)
         {

@@ -191,7 +191,7 @@ public class TrackersControllerTests
             return Task.FromResult(RoomDto.Trackers.AsEnumerable());
         }
 
-        public Task<TrackerDto> GetTrackerAsync(int id, CancellationToken cancellationToken)
+        public Task<TrackerDto> GetTrackerByIdAsync(int id, CancellationToken cancellationToken)
         {
             return Task.FromResult(RoomDto.Trackers.SingleOrDefault(t => t.TrackerDtoId == id));
         }
