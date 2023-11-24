@@ -44,7 +44,7 @@ class TestLocalizationService : LocalizationService
     }
     private void SleepForever()
     {
-        Thread.Sleep(int.MaxValue);
+        Thread.Sleep(-1);
     }
     public List<MeasurementGroup> GetMeasurements(int id)
     {
