@@ -26,7 +26,6 @@ class ServiceTests
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10)
         });
         Assert.That(_localizationService.GetMeasurements(1).Count == 1);
-        Thread.Sleep((int)(_localizationService.MaxAge.TotalMilliseconds / 4)); // wait period/4 seconds
         _localizationService.AddMeasurements(1, new List<Measurement>(){
             new Measurement("aa:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 1),
             new Measurement("aa:bb:cc:dd:ee:ff", Measurement.Protocol.Bluetooth, 10)
