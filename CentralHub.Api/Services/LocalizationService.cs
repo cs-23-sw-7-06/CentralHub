@@ -32,9 +32,9 @@ public class LocalizationService : ILocalizationService
         while (true)
         {
             var delay = int.MaxValue;
+            var now = DateTime.Now;
             lock (_measurements)
             {
-                var now = DateTime.Now;
                 foreach (var value in _measurements.Values)
                 {
                     toBeRemoved.Clear();
