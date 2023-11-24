@@ -34,18 +34,19 @@ public class LocalizationService : ILocalizationService
             var delay = int.MaxValue;
             lock (_measurements)
             {
+                var now = DateTime.Now;
                 foreach (var value in _measurements.Values)
                 {
                     toBeRemoved.Clear();
                     foreach (var group in value)
                     {
-                        if (DateTime.Now >= group.Timestamp + TimeSpan.FromMinutes(2))
+                        if (now >= group.Timestamp + TimeSpan.FromMinutes(2))
                         {
                             toBeRemoved.Add(group);
                         }
                         else
                         {
-                            var new_delay = (group.Timestamp + TimeSpan.FromMinutes(2) - DateTime.Now).TotalMilliseconds;
+                            var new_delay = (group.Timestamp + TimeSpan.FromMinutes(2) - now).TotalMilliseconds;
                             delay = new_delay < delay ? (int)new_delay : delay;
 
                         }
