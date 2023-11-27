@@ -50,7 +50,34 @@
 			"request": {
 				"method": "POST",
 				"header": [],
-				"url": "http://localhost:8081/measurements/add"
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"measurements\":[\n        {\n            \"type\": \"0\",\n            \"macaddress\": \"11:22:33:44:55:66\",\n            \"measurement\": -30\n        },\n        {\n            \"type\": \"0\",\n            \"macaddress\": \"11:22:33:44:55:77\",\n            \"measurement\": -40\n        },\n        {\n            \"type\": \"1\",\n            \"macaddress\": \"11:22:33:44:55:66\",\n            \"measurement\": -20\n        },\n        {\n            \"type\": \"1\",\n            \"macaddress\": \"11:22:33:44:55:77\",\n            \"measurement\": -30\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/measurements/add?roomId=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"measurements",
+						"add"
+					],
+					"query": [
+						{
+							"key": "roomId",
+							"value": "1",
+							"type": "text"
+						}
+					]
+				}
 			},
 			"response": []
 		}
