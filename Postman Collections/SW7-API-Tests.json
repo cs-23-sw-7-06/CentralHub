@@ -42,7 +42,7 @@
 			"response": []
 		},
 		{
-			"name": "AddMeasurements",
+			"name": "Add Measurements",
 			"id": "b6bc2627-eba2-409d-b32e-c7d573581300",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
