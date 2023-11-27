@@ -48,8 +48,9 @@
 				"disableBodyPruning": true
 			},
 			"request": {
-				"method": "GET",
-				"header": []
+				"method": "POST",
+				"header": [],
+				"url": "http://localhost:8081/measurements/add"
 			},
 			"response": []
 		}
