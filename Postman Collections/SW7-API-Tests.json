@@ -1,0 +1,57 @@
+{
+	"info": {
+		"_postman_id": "ebe740bc-2741-48ef-bdb6-e9ad85e8d39a",
+		"name": "SW7-API-Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Add Room",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2e729a33-8d83-4858-8712-26fb7ce08576",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"id": "c2e1a61f-d755-43cc-8201-7fb289ef1c48",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"RoomId\": -1,\n    \"Name\": \"Test room\",\n    \"Description\": \"Postman Test Room\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8081/room/add"
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"id": "b6bc2627-eba2-409d-b32e-c7d573581300",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
