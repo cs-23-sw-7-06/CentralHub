@@ -52,7 +52,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"roomId\": 1,\n  \"measurements\":[\n        {\n            \"macaddress\": \"11:22:33:44:55:66\",\n            \"type\": 0,\n            \"rssi\": -30\n        },\n        {\n            \"macaddress\": \"11:22:33:44:55:77\",\n            \"type\": 0,\n            \"rssi\": -40\n        },\n        {\n            \"macaddress\": \"11:22:33:44:55:66\",\n            \"type\": 1,\n            \"rssi\": -20\n        },\n        {\n            \"macaddress\": \"11:22:33:44:55:77\",\n            \"type\": 1,\n            \"rssi\": -30\n        }\n    ]\n}",
+					"raw": "{\n  \"roomId\": 1,\n  \"measurements\":[\n        {\n            \"macAddress\": \"11:22:33:44:55:66\",\n            \"type\": 0,\n            \"rssi\": -30\n        },\n        {\n            \"macAddress\": \"11:22:33:44:55:77\",\n            \"type\": 0,\n            \"rssi\": -40\n        },\n        {\n            \"macAddress\": \"11:22:33:44:55:66\",\n            \"type\": 1,\n            \"rssi\": -20\n        },\n        {\n            \"macAddress\": \"11:22:33:44:55:77\",\n            \"type\": 1,\n            \"rssi\": -30\n        }\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
