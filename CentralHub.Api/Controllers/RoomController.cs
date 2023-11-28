@@ -11,15 +11,11 @@ namespace CentralHub.Api.Controllers;
 [Route("/room")]
 public class RoomController : ControllerBase
 {
-    private readonly ILogger<RoomController> _logger;
     private readonly IRoomRepository _roomRepository;
-    private readonly ILocalizationService _localizationService;
 
-    public RoomController(ILogger<RoomController> logger, IRoomRepository roomRepository, ILocalizationService localizationService)
+    public RoomController(IRoomRepository roomRepository)
     {
-        _logger = logger;
         _roomRepository = roomRepository;
-        _localizationService = localizationService;
     }
 
     [HttpPost("add")]
@@ -37,32 +33,34 @@ public class RoomController : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task UpdateRoom(UpdateRoomRequest updateRoomRequest, CancellationToken cancellationToken)
+    public async Task<UpdateRoomResponse> UpdateRoom(UpdateRoomRequest updateRoomRequest, CancellationToken cancellationToken)
     {
         var roomDto = await _roomRepository.GetRoomByIdAsync(updateRoomRequest.RoomId, cancellationToken);
         if (roomDto == null)
         {
-            // TODO: Report error
-            throw new InvalidOperationException("roomDto was null");
+            return UpdateRoomResponse.CreateUnsuccessful();
         }
 
         roomDto.Name = updateRoomRequest.Name;
         roomDto.Description = updateRoomRequest.Description;
 
         await _roomRepository.UpdateRoomAsync(roomDto, cancellationToken);
+
+        return UpdateRoomResponse.CreateSuccessful();
     }
 
     [HttpDelete("remove")]
-    public async Task RemoveRoom(int roomId, CancellationToken cancellationToken)
+    public async Task<RemoveRoomResponse> RemoveRoom(int roomId, CancellationToken cancellationToken)
     {
         var room = await _roomRepository.GetRoomByIdAsync(roomId, cancellationToken);
         if (room == null)
         {
-            // TODO: Report error
-            _logger.LogError("Room did not exist!");
-            return;
+            return RemoveRoomResponse.CreateUnsuccessful();
         }
+
         await _roomRepository.RemoveRoomAsync(room, cancellationToken);
+
+        return RemoveRoomResponse.CreateSuccessful();
     }
 
     [HttpGet("all")]

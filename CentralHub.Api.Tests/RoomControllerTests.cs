@@ -2,22 +2,19 @@ using CentralHub.Api.Controllers;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model.Requests.Room;
 using CentralHub.Api.Services;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CentralHub.Api.Tests;
 
 public class RoomControllerTests
 {
     private RoomRepository _roomRepository;
-    private ILocalizationService _localizationService;
     private RoomController _roomController;
 
     [SetUp]
     public void Setup()
     {
         _roomRepository = new RoomRepository();
-        _localizationService = new LocalizationService();
-        _roomController = new RoomController(NullLogger<RoomController>.Instance, _roomRepository, _localizationService);
+        _roomController = new RoomController(_roomRepository);
     }
 
     [Test]
@@ -52,11 +49,16 @@ public class RoomControllerTests
         var room = new AddRoomRequest("Test Room", "0.1.95");
         var addRoomResponse = await _roomController.AddRoom(room, default);
 
-        await _roomController.RemoveRoom(addRoomResponse.RoomId, default);
+        var removeRoomResponse = await _roomController.RemoveRoom(addRoomResponse.RoomId, default);
+        Assert.That(removeRoomResponse.Success, Is.True);
 
         var rooms = await _roomController.GetRooms(default);
         Assert.That(rooms, Is.Empty);
+
+        var removeRoomResponse2 = await _roomController.RemoveRoom(addRoomResponse.RoomId, default);
+        Assert.That(removeRoomResponse2.Success, Is.False);
     }
+
 
     private class RoomRepository : IRoomRepository
     {
@@ -91,7 +93,7 @@ public class RoomControllerTests
 
         public Task<RoomDto> GetRoomByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return new ValueTask<RoomDto>(_rooms.Single(r => r.RoomDtoId == id)).AsTask();
+            return Task.FromResult(_rooms.SingleOrDefault(r => r.RoomDtoId == id));
         }
     }
 }
