@@ -1,8 +1,5 @@
-using System.ComponentModel;
-using System.Diagnostics.Metrics;
 using CentralHub.Api.Controllers;
 using CentralHub.Api.Dtos;
-using CentralHub.Api.Model.Requests;
 using CentralHub.Api.Model.Requests.Tracker;
 using CentralHub.Api.Services;
 
@@ -61,11 +58,15 @@ public class TrackersControllerTests
 
         var trackerId = addTrackerResponse.TrackerId;
         Assert.That(trackerId.HasValue, Is.True);
-        await _trackerController.RemoveTracker(trackerId.Value, default);
+        var removeTrackerResponse = await _trackerController.RemoveTracker(trackerId.Value, default);
+        Assert.That(removeTrackerResponse.Success, Is.True);
 
         var trackers = await _trackerController.GetTrackers(room.RoomDtoId, default);
         Assert.That(trackers.Success, Is.True);
         Assert.That(trackers.Trackers, Is.Empty);
+
+        var removeTrackerResponse2 = await _trackerController.RemoveTracker(trackerId.Value, default);
+        Assert.That(removeTrackerResponse2.Success, Is.False);
     }
 
     [Test]

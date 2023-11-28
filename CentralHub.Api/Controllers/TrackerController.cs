@@ -1,5 +1,4 @@
 using CentralHub.Api.Dtos;
-using CentralHub.Api.Model;
 using CentralHub.Api.Model.Requests;
 using CentralHub.Api.Model.Requests.Tracker;
 using CentralHub.Api.Model.Responses.Tracker;
@@ -46,28 +45,36 @@ public class TrackerController : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task UpdateTracker(UpdateTrackerRequest updateTrackerRequest, CancellationToken cancellationToken)
+    public async Task<UpdateTrackerResponse> UpdateTracker(UpdateTrackerRequest updateTrackerRequest, CancellationToken cancellationToken)
     {
-        // TODO: Report error
         var trackerDto = await _trackerRepository.GetTrackerAsync(updateTrackerRequest.TrackerId, cancellationToken);
+
+        if (trackerDto == null)
+        {
+            return UpdateTrackerResponse.CreateUnsuccessful();
+        }
 
         trackerDto.Name = updateTrackerRequest.Name;
         trackerDto.Description = updateTrackerRequest.Description;
 
         await _trackerRepository.UpdateTrackerAsync(trackerDto, cancellationToken);
+
+        return UpdateTrackerResponse.CreateSuccessful();
     }
 
     [HttpDelete("remove")]
-    public async Task RemoveTracker(int trackerId, CancellationToken cancellationToken)
+    public async Task<RemoveTrackerResponse> RemoveTracker(int trackerId, CancellationToken cancellationToken)
     {
         var trackerDto =
             await _trackerRepository.GetTrackerAsync(trackerId, cancellationToken);
 
-        if (trackerDto != null)
+        if (trackerDto == null)
         {
-            // TODO: Report an error if no tracker was found
-            await _trackerRepository.RemoveTrackerAsync(trackerDto, cancellationToken);
+            return RemoveTrackerResponse.CreateUnsuccessful();
         }
+
+        await _trackerRepository.RemoveTrackerAsync(trackerDto, cancellationToken);
+        return RemoveTrackerResponse.CreateSuccessful();
     }
 
     [HttpGet("all")]

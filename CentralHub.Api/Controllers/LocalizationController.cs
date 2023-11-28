@@ -16,10 +16,12 @@ public sealed class LocalizationController : ControllerBase
     }
 
     [HttpPost("measurements/add")]
-    public async Task AddMeasurements(AddMeasurementsRequest addMeasurementsRequest, CancellationToken token)
+    public Task AddMeasurements(AddMeasurementsRequest addMeasurementsRequest, CancellationToken cancellationToken)
     {
         _localizationService.AddMeasurements(
             addMeasurementsRequest.TrackerId,
             addMeasurementsRequest.Measurements);
+
+        return Task.CompletedTask;
     }
 }
