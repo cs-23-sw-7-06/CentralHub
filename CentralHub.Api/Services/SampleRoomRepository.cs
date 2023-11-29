@@ -1,14 +1,18 @@
 using System.Collections.Immutable;
 using CentralHub.Api.Dtos;
+using CentralHub.Api.Threading;
 
 namespace CentralHub.Api.Services;
 
 public sealed class SampleRoomRepository : IRoomRepository
 {
-    private static readonly Dictionary<int, RoomDto> Rooms = new Dictionary<int, RoomDto>();
-    private static int _nextId;
+    private sealed class LockedStuff
+    {
+        public Dictionary<int, RoomDto> Rooms { get; } = new Dictionary<int, RoomDto>();
+        public int NextId { get; set; }
+    }
 
-    private static readonly object LockObject = new object();
+    private static readonly CancellableMutex<LockedStuff> LockedStuffMutex = new CancellableMutex<LockedStuff>(new LockedStuff());
 
     static SampleRoomRepository()
     {
@@ -33,15 +37,15 @@ public sealed class SampleRoomRepository : IRoomRepository
         sampleRoomRepository.AddRoomAsync(room2, default).GetAwaiter().GetResult();
     }
 
-    public Task<int> AddRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
+    public async Task<int> AddRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        await LockedStuffMutex.Lock(stuff =>
         {
-            roomDto.RoomDtoId = _nextId++;
-            Rooms.Add(roomDto.RoomDtoId, roomDto);
-        }
+            roomDto.RoomDtoId = stuff.NextId++;
+            stuff.Rooms.Add(roomDto.RoomDtoId, roomDto);
+        }, cancellationToken);
 
-        return Task.FromResult(roomDto.RoomDtoId);
+        return roomDto.RoomDtoId;
     }
 
     public Task UpdateRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
@@ -51,34 +55,27 @@ public sealed class SampleRoomRepository : IRoomRepository
         return Task.CompletedTask;
     }
 
-    public Task RemoveRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
+    public async Task RemoveRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        await LockedStuffMutex.Lock(stuff =>
         {
-            Rooms.Remove(roomDto.RoomDtoId);
-        }
-
-        return Task.CompletedTask;
+            stuff.Rooms.Remove(roomDto.RoomDtoId);
+        }, cancellationToken);
     }
 
-    public Task<IEnumerable<RoomDto>> GetRoomsAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<RoomDto>> GetRoomsAsync(CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        return await LockedStuffMutex.Lock(stuff =>
         {
-            return Task.FromResult((IEnumerable<RoomDto>)Rooms.Values.ToImmutableArray());
-        }
+            return stuff.Rooms.Values.ToImmutableArray();
+        }, cancellationToken);
     }
 
-    public Task<RoomDto?> GetRoomByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<RoomDto?> GetRoomByIdAsync(int id, CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        return await LockedStuffMutex.Lock(stuff =>
         {
-            if (Rooms.TryGetValue(id, out var roomDto))
-            {
-                return Task.FromResult<RoomDto?>(roomDto);
-            }
-        }
-
-        return Task.FromResult<RoomDto?>(null);
+            return stuff.Rooms.TryGetValue(id, out var roomDto) ? roomDto : null;
+        }, cancellationToken);
     }
 }

@@ -1,17 +1,19 @@
 using System.Collections.Immutable;
 using CentralHub.Api.Dtos;
+using CentralHub.Api.Threading;
 
 namespace CentralHub.Api.Services;
 
 public sealed class SampleTrackerRepository : ITrackerRepository
 {
-    private static readonly Dictionary<int, TrackerDto> Trackers = new Dictionary<int, TrackerDto>();
-    private static int _nextId;
+    private sealed class LockedStuff
+    {
+        public Dictionary<int, TrackerDto> Trackers { get; } = new Dictionary<int, TrackerDto>();
+        public int NextId { get; set; }
+        public List<UnregisteredTrackerDto> UnregisteredTrackers { get; } = new List<UnregisteredTrackerDto>();
+    }
 
-    private static readonly List<UnregisteredTrackerDto> UnregisteredTrackers = new List<UnregisteredTrackerDto>();
-
-
-    private static readonly object LockObject = new object();
+    private static readonly CancellableMutex<LockedStuff> LockedStuffMutex = new CancellableMutex<LockedStuff>(new LockedStuff());
 
     static SampleTrackerRepository()
     {
@@ -64,24 +66,24 @@ public sealed class SampleTrackerRepository : ITrackerRepository
         sampleTrackerRepository.AddUnregisteredTracker("BB:AA:DD:CC:FF:EE", "EE:FF:CC:DD:AA:BB", default).GetAwaiter().GetResult();
     }
 
-    public Task<int> AddTrackerAsync(TrackerDto trackerDto, CancellationToken cancellationToken)
+    public async Task<int> AddTrackerAsync(TrackerDto trackerDto, CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        await LockedStuffMutex.Lock(stuff =>
         {
-            trackerDto.TrackerDtoId = _nextId++;
-            Trackers.Add(trackerDto.TrackerDtoId, trackerDto);
+            trackerDto.TrackerDtoId = stuff.NextId++;
+            stuff.Trackers.Add(trackerDto.TrackerDtoId, trackerDto);
 
-            var possibleUnregisteredTracker = UnregisteredTrackers.SingleOrDefault(t =>
+            var possibleUnregisteredTracker = stuff.UnregisteredTrackers.SingleOrDefault(t =>
                 t.WifiMacAddress == trackerDto.WifiMacAddress &&
                 t.BluetoothMacAddress == trackerDto.BluetoothMacAddress);
 
             if (possibleUnregisteredTracker != null)
             {
-                UnregisteredTrackers.Remove(possibleUnregisteredTracker);
+                stuff.UnregisteredTrackers.Remove(possibleUnregisteredTracker);
             }
-        }
+        }, cancellationToken);
 
-        return Task.FromResult(trackerDto.TrackerDtoId);
+        return trackerDto.TrackerDtoId;
     }
 
     public Task UpdateTrackerAsync(TrackerDto trackerDto, CancellationToken cancellationToken)
@@ -91,67 +93,58 @@ public sealed class SampleTrackerRepository : ITrackerRepository
         return Task.CompletedTask;
     }
 
-    public Task RemoveTrackerAsync(TrackerDto trackerDto, CancellationToken cancellationToken)
+    public async Task RemoveTrackerAsync(TrackerDto trackerDto, CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        await LockedStuffMutex.Lock(stuff =>
         {
-            Trackers.Remove(trackerDto.TrackerDtoId);
-        }
-
-        return Task.CompletedTask;
+            stuff.Trackers.Remove(trackerDto.TrackerDtoId);
+        }, cancellationToken);
     }
 
-    public Task<IEnumerable<TrackerDto>?> GetTrackersInRoomAsync(int roomId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<TrackerDto>?> GetTrackersInRoomAsync(int roomId, CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        return await LockedStuffMutex.Lock(stuff =>
         {
-            var trackers = Trackers.Values.Where(t => t.RoomDtoId == roomId).ToImmutableArray();
-            return Task.FromResult<IEnumerable<TrackerDto>?>(trackers);
-        }
+            var trackers = stuff.Trackers.Values.Where(t => t.RoomDtoId == roomId).ToImmutableArray();
+            return trackers;
+        }, cancellationToken);
     }
 
-    public Task<TrackerDto?> GetTrackerAsync(int id, CancellationToken cancellationToken)
+    public async Task<TrackerDto?> GetTrackerAsync(int id, CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        return await LockedStuffMutex.Lock(stuff =>
         {
-            if (Trackers.TryGetValue(id, out var trackerDto))
-            {
-                return Task.FromResult<TrackerDto?>(trackerDto);
-            }
-        }
-
-        return Task.FromResult<TrackerDto?>(null);
+            return stuff.Trackers.TryGetValue(id, out var trackerDto) ? trackerDto : null;
+        }, cancellationToken);
     }
 
-    public Task<TrackerDto?> GetTrackerByMacAddresses(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
+    public async Task<TrackerDto?> GetTrackerByMacAddresses(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        return await LockedStuffMutex.Lock(stuff =>
         {
-            var possibleTracker = Trackers.Values.SingleOrDefault(t => t.WifiMacAddress == wifiMacAddress && t.BluetoothMacAddress == bluetoothMacAddress);
-            return Task.FromResult(possibleTracker);
-        }
+            return stuff.Trackers.Values.SingleOrDefault(t =>
+                t.WifiMacAddress == wifiMacAddress && t.BluetoothMacAddress == bluetoothMacAddress);
+        }, cancellationToken);
     }
 
-    public Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackers(CancellationToken cancellationToken)
+    public async Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackers(CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        return await LockedStuffMutex.Lock(stuff =>
         {
-            return Task.FromResult<IEnumerable<UnregisteredTrackerDto>>(UnregisteredTrackers.ToImmutableArray());
-        }
+            return stuff.UnregisteredTrackers.ToImmutableArray();
+        }, cancellationToken);
     }
 
-    public Task AddUnregisteredTracker(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
+    public async Task AddUnregisteredTracker(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
     {
-        lock (LockObject)
+        await LockedStuffMutex.Lock(stuff =>
         {
-            UnregisteredTrackers.Add(
+            stuff.UnregisteredTrackers.Add(
                 new UnregisteredTrackerDto()
                 {
                     WifiMacAddress = wifiMacAddress,
                     BluetoothMacAddress = bluetoothMacAddress
                 });
-        }
-
-        return Task.CompletedTask;
+        }, cancellationToken);
     }
 }
