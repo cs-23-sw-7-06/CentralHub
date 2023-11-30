@@ -20,6 +20,7 @@ internal static class Program
         builder.Services.AddServerSideBlazor();
         builder.Services.AddSingleton<RoomService>();
         builder.Services.AddSingleton<TrackerService>();
+        builder.Services.AddSingleton<MeasurementService>();
         builder.Services.AddHttpClient();
 
         var app = builder.Build();

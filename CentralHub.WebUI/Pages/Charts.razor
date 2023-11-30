@@ -1,0 +1,124 @@
+@page "/charts/{roomId:int}"
+@using ApexCharts
+@using CentralHub.Api.Model.Responses.AggregatedMeasurements
+@using CentralHub.WebUI.Data
+@using System.Collections.Immutable
+@implements IDisposable
+@inject MeasurementService MeasurementService
+
+<PageTitle>Charts</PageTitle>
+
+<h1>Charts</h1>
+
+<div class="container">
+    <div class="row">
+        <div class="col-xl">
+            <ApexChart TItem="AggregatedMeasurements" Title="Wifi Data" Debug="true" Options="_options1">
+                <ApexRangeAreaSeries
+                    TItem="AggregatedMeasurements"
+                    Items="_data1"
+                    Name="Min - Max"
+                    XValue="e => e.EndTime"
+                    Top="e => e.WifiMax"
+                    Bottom="e => e.WifiMin"
+                    Stroke="@(new SeriesStroke{ Width=0 })"
+                />
+                <ApexPointSeries
+                    TItem="AggregatedMeasurements"
+                    Items="_data1"
+                    Name="Median"
+                    SeriesType="SeriesType.Line"
+                    XValue="e => e.EndTime"
+                    YValue="e => e.WifiMedian"
+                    Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#ff3300" })"
+                />
+                <ApexPointSeries
+                    TItem="AggregatedMeasurements"
+                    Items="_data1"
+                    Name="Mean"
+                    SeriesType="SeriesType.Line"
+                    XValue="e => e.EndTime"
+                    YValue="e => (decimal)e.WifiMean"
+                    Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#0033ff" })"
+                />
+            </ApexChart>
+        </div>
+        <div class="col-xl">
+            <ApexChart TItem="AggregatedMeasurements" Title="Bluetooth Data" Debug="true" Options="_options2">
+                <ApexRangeAreaSeries
+                    TItem="AggregatedMeasurements"
+                    Items="_data2"
+                    Name="Min - Max"
+                    XValue="e => e.EndTime"
+                    Top="e => e.BluetoothMax"
+                    Bottom="e => e.BluetoothMin"
+                    Stroke="@(new SeriesStroke{ Width=0 })"
+                />
+                <ApexPointSeries
+                    TItem="AggregatedMeasurements"
+                    Items="_data2"
+                    Name="Median"
+                    SeriesType="SeriesType.Line"
+                    XValue="e => e.EndTime"
+                    YValue="e => e.BluetoothMedian"
+                    Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#ff3300" })"
+                />
+                <ApexPointSeries
+                    TItem="AggregatedMeasurements"
+                    Items="_data2"
+                    Name="Mean"
+                    SeriesType="SeriesType.Line"
+                    XValue="e => e.EndTime"
+                    YValue="e => (decimal)e.BluetoothMean"
+                    Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#0033ff" })"
+                />
+            </ApexChart>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public int RoomId { get; set; }
+    
+    private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+    private IReadOnlyCollection<AggregatedMeasurements>? _data1;
+    private IReadOnlyCollection<AggregatedMeasurements>? _data2;
+
+    private readonly ApexChartOptions<AggregatedMeasurements> _options1 = new();
+    private readonly ApexChartOptions<AggregatedMeasurements> _options2 = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _data1 = await MeasurementService.GetAggregatedMeasurements(RoomId, DateTime.MinValue, DateTime.MaxValue, _cancellationTokenSource.Token);
+        _data2 = _data1.ToImmutableArray();
+        _options1.Chart = new Chart()
+        {
+            Type = ChartType.RangeArea
+        };
+        
+        _options1.Colors = new List<string> { "#d4526e", "#ff3300", "#0033ff" };
+        _options1.Fill = new Fill
+        {
+            Opacity = new List<double> { 0.24, 1, 1 }
+        };
+        
+        _options2.Chart = new Chart()
+        {
+            Type = ChartType.RangeArea
+        };
+        
+        _options2.Colors = new List<string> { "#d4526e", "#ff3300", "#0033ff" };
+        _options2.Fill = new Fill
+        {
+            Opacity = new List<double> { 0.24, 1, 1 }
+        };
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
+    }
+}

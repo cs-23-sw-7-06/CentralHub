@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using CentralHub.Api.Model;
 using CentralHub.Api.Model.Requests.Localization;
 using CentralHub.Api.Model.Responses.AggregatedMeasurements;
@@ -31,7 +32,7 @@ public sealed class MeasurementController : ControllerBase
             token);
     }
 
-    [HttpGet("get")]
+    [HttpGet("all")]
     public async Task<GetAggregatedMeasurementsResponse> GetAggregateMeasurements(int roomId, CancellationToken token)
     {
         var aggregatedMeasurements = await _aggregatorRepository.GetAggregatedMeasurementsAsync(roomId, token);
@@ -42,7 +43,7 @@ public sealed class MeasurementController : ControllerBase
         }
 
         return GetAggregatedMeasurementsResponse.CreateSuccessful(
-            (IReadOnlyCollection<AggregatedMeasurements>)aggregatedMeasurements.Select(am => new AggregatedMeasurements(
+            aggregatedMeasurements.Select(am => new AggregatedMeasurements(
             am.AggregatedMeasurementDtoId,
             am.StartTime,
             am.EndTime,
@@ -56,10 +57,10 @@ public sealed class MeasurementController : ControllerBase
             am.WifiMeanDeviceCount,
             am.WifiMaxDeviceCount,
             am.WifiMinDeviceCount,
-            am.TotalWifiDeviceCount)));
+            am.TotalWifiDeviceCount)).ToImmutableArray());
     }
 
-    [HttpGet("get")]
+    [HttpGet("range")]
     public async Task<GetAggregatedMeasurementsResponse> GetAggregateMeasurements(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken token)
     {
         var aggregatedMeasurements = await GetAggregateMeasurements(roomId, token);
@@ -70,7 +71,8 @@ public sealed class MeasurementController : ControllerBase
         }
 
         return GetAggregatedMeasurementsResponse
-            .CreateSuccessful((IReadOnlyCollection<AggregatedMeasurements>)aggregatedMeasurements.AggregatedMeasurements!
-            .Where(am => am.StartTime >= timeStart && am.EndTime <= timeEnd));
+            .CreateSuccessful(aggregatedMeasurements.AggregatedMeasurements!
+            .Where(am => am.StartTime >= timeStart && am.EndTime <= timeEnd)
+            .ToImmutableArray());
     }
 }
