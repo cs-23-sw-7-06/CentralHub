@@ -7,13 +7,13 @@ namespace CentralHub.Api.Tests;
 
 public class RoomControllerTests
 {
-    private RoomRepository _roomRepository;
+    private MockRoomRepository _roomRepository;
     private RoomController _roomController;
 
     [SetUp]
     public void Setup()
     {
-        _roomRepository = new RoomRepository();
+        _roomRepository = new MockRoomRepository();
         _roomController = new RoomController(_roomRepository);
     }
 
@@ -57,43 +57,5 @@ public class RoomControllerTests
 
         var removeRoomResponse2 = await _roomController.RemoveRoom(addRoomResponse.RoomId, default);
         Assert.That(removeRoomResponse2.Success, Is.False);
-    }
-
-
-    private class RoomRepository : IRoomRepository
-    {
-        private readonly List<RoomDto> _rooms = new List<RoomDto>();
-        private int _nextId = 0;
-
-        public Task<int> AddRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
-        {
-            _rooms.Add(roomDto);
-            roomDto.RoomDtoId = _nextId;
-            _nextId++;
-
-            return new ValueTask<int>(roomDto.RoomDtoId).AsTask();
-        }
-
-        public Task UpdateRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task RemoveRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
-        {
-            _rooms.Remove(roomDto);
-
-            return Task.CompletedTask;
-        }
-
-        public Task<IEnumerable<RoomDto>> GetRoomsAsync(CancellationToken cancellationToken)
-        {
-            return new ValueTask<IEnumerable<RoomDto>>(_rooms).AsTask();
-        }
-
-        public Task<RoomDto> GetRoomByIdAsync(int id, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(_rooms.SingleOrDefault(r => r.RoomDtoId == id));
-        }
     }
 }

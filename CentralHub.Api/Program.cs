@@ -44,7 +44,7 @@ internal static class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
         builder.Services.AddScoped<ITrackerRepository, TrackerRepository>();
-        builder.Services.AddScoped<IAggregatedMeasurementRepository, AggregatedMeasurementRepository>();
+        builder.Services.AddScoped<IMeasurementRepository, MeasurementRepository>();
         builder.Services.AddHostedService<ScopedBackgroundService>();
         builder.Services.AddScoped<IScopedProcessingService, LocalizationService>();
 
