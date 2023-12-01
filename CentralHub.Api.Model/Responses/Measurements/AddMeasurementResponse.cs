@@ -2,23 +2,23 @@ using System.Text.Json.Serialization;
 
 namespace CentralHub.Api.Model.Responses.AggregatedMeasurements;
 
-public sealed class AddMeasurementResponse
+public sealed class AddMeasurementsResponse
 {
     [JsonConstructor]
-    public AddMeasurementResponse(bool success)
+    public AddMeasurementsResponse(bool success)
     {
         Success = success;
     }
 
     public bool Success { get; }
 
-    public static AddMeasurementResponse CreateUnsuccessful()
+    public static AddMeasurementsResponse CreateUnsuccessful()
     {
-        return new AddMeasurementResponse(false);
+        return new AddMeasurementsResponse(false);
     }
 
-    public static AddMeasurementResponse CreateSuccessful()
+    public static AddMeasurementsResponse CreateSuccessful()
     {
-        return new AddMeasurementResponse(true);
+        return new AddMeasurementsResponse(true);
     }
 }

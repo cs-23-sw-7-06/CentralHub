@@ -15,8 +15,6 @@ class ServiceTests
 
     private int _roomId = 0;
 
-    private int _trackerId = 0;
-
     private LocalizationService _localizationService;
 
     [SetUp]
@@ -41,14 +39,13 @@ class ServiceTests
             RoomDto = roomDto
         };
         _trackerRepository = new MockTrackerRepository(roomDto);
-        _trackerId = _trackerRepository.AddTrackerAsync(trackerDto, default).GetAwaiter().GetResult();
+        _trackerRepository.AddTrackerAsync(trackerDto, default).GetAwaiter().GetResult();
 
         _aggregatedMeasurementRepository = new MockAggregatedMeasurementRepository();
         _localizationService = new LocalizationService(
             NullLogger<LocalizationService>.Instance,
             _aggregatedMeasurementRepository,
-            _roomRepository,
-            _trackerRepository);
+            _roomRepository);
     }
 
     [TearDown]
@@ -64,13 +61,13 @@ class ServiceTests
     [Test]
     public async Task TestAggregateSingleGroupMeasurements()
     {
-        await _aggregatedMeasurementRepository.AddMeasurementsAsync(_trackerId, new List<Measurement>(){
+        await _aggregatedMeasurementRepository.AddMeasurementsAsync(_roomId, new List<Measurement>(){
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Wifi, -40),
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Bluetooth, -10),
         }, default);
 
         await _localizationService.AggregateMeasurementsAsync(default);
-        Assert.That(await _aggregatedMeasurementRepository.GetTrackerMeasurementGroupsAsync(default), Is.Empty);
+        Assert.That(await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default), Is.Empty);
 
         var aggregatedMeasurements = await _aggregatedMeasurementRepository.GetAggregatedMeasurementsAsync(_roomId, default);
 
@@ -94,14 +91,14 @@ class ServiceTests
     [Test]
     public async Task TestAggregateMultipleGroupsOfMeasurements()
     {
-        await _aggregatedMeasurementRepository.AddMeasurementsAsync(_trackerId, new List<Measurement>(){
+        await _aggregatedMeasurementRepository.AddMeasurementsAsync(_roomId, new List<Measurement>(){
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Wifi, -40),
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Bluetooth, -10),
             new Measurement("21:22:33:44:55:66", Measurement.Protocol.Wifi, -40),
             new Measurement("21:22:33:44:55:66", Measurement.Protocol.Bluetooth, -10),
         }, default);
 
-        await _aggregatedMeasurementRepository.AddMeasurementsAsync(_trackerId, new List<Measurement>(){
+        await _aggregatedMeasurementRepository.AddMeasurementsAsync(_roomId, new List<Measurement>(){
             new Measurement("31:22:33:44:55:66", Measurement.Protocol.Wifi, -40),
             new Measurement("41:22:33:44:55:66", Measurement.Protocol.Bluetooth, -10),
             new Measurement("51:22:33:44:55:66", Measurement.Protocol.Wifi, -40),
@@ -111,7 +108,7 @@ class ServiceTests
         }, default);
 
         await _localizationService.AggregateMeasurementsAsync(default);
-        Assert.That(await _aggregatedMeasurementRepository.GetTrackerMeasurementGroupsAsync(default), Is.Empty);
+        Assert.That(await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default), Is.Empty);
 
         var aggregatedMeasurements = await _aggregatedMeasurementRepository.GetAggregatedMeasurementsAsync(_roomId, default);
 
@@ -135,7 +132,7 @@ class ServiceTests
     [Test]
     public async Task TestAggregateDuplicateMeasurements()
     {
-        await _aggregatedMeasurementRepository.AddMeasurementsAsync(_trackerId, new List<Measurement>(){
+        await _aggregatedMeasurementRepository.AddMeasurementsAsync(_roomId, new List<Measurement>(){
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Wifi, -40),
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Wifi, -10),
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Bluetooth, -40),
@@ -143,7 +140,7 @@ class ServiceTests
         }, default);
 
         await _localizationService.AggregateMeasurementsAsync(default);
-        Assert.That(await _aggregatedMeasurementRepository.GetTrackerMeasurementGroupsAsync(default), Is.Empty);
+        Assert.That(await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default), Is.Empty);
 
         var aggregatedMeasurements = await _aggregatedMeasurementRepository.GetAggregatedMeasurementsAsync(_roomId, default);
 
@@ -160,7 +157,7 @@ class ServiceTests
     public async Task TestNoMeasurements()
     {
         await _localizationService.AggregateMeasurementsAsync(default);
-        Assert.That(await _aggregatedMeasurementRepository.GetTrackerMeasurementGroupsAsync(default), Is.Empty);
+        Assert.That(await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default), Is.Empty);
 
         var aggregatedMeasurements = await _aggregatedMeasurementRepository.GetAggregatedMeasurementsAsync(_roomId, default);
 

@@ -28,25 +28,26 @@ public sealed class MeasurementController : ControllerBase
     }
 
     [HttpPost("add")]
-    public async Task<AddMeasurementResponse> AddMeasurements(AddMeasurementsRequest addMeasurementsRequest, CancellationToken token)
+    public async Task<AddMeasurementsResponse> AddMeasurements(AddMeasurementsRequest addMeasurementsRequest, CancellationToken token)
     {
         var registeredTrackers = await _trackerRepository.GetRegisteredTrackers(token);
         var unregisteredTrackers = await _trackerRepository.GetUnregisteredTrackers(token);
 
-        if (registeredTrackers.Any(t => t.TrackerDtoId == addMeasurementsRequest.TrackerId))
+        var tracker = registeredTrackers.SingleOrDefault(t => t.TrackerDtoId == addMeasurementsRequest.TrackerId);
+
+        if (tracker == null)
         {
-            await _aggregatorRepository.AddMeasurementsAsync(
-                addMeasurementsRequest.TrackerId,
-                addMeasurementsRequest.Measurements
-                .Where(m => !registeredTrackers.Any(t => t.WifiMacAddress == m.MacAddress || t.BluetoothMacAddress == m.MacAddress))
-                .Where(m => !unregisteredTrackers.Any(t => t.WifiMacAddress == m.MacAddress || t.BluetoothMacAddress == m.MacAddress))
-                .ToImmutableArray(),
-                token);
-            return AddMeasurementResponse.CreateSuccessful();
+            return AddMeasurementsResponse.CreateUnsuccessful();
         }
 
-        return AddMeasurementResponse.CreateUnsuccessful();
-
+        await _aggregatorRepository.AddMeasurementsAsync(
+            tracker.RoomDtoId,
+            addMeasurementsRequest.Measurements
+            .Where(m => !registeredTrackers.Any(t => t.WifiMacAddress == m.MacAddress || t.BluetoothMacAddress == m.MacAddress))
+            .Where(m => !unregisteredTrackers.Any(t => t.WifiMacAddress == m.MacAddress || t.BluetoothMacAddress == m.MacAddress))
+            .ToImmutableArray(),
+            token);
+        return AddMeasurementsResponse.CreateSuccessful();
     }
 
     [HttpGet("all")]

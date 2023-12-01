@@ -16,18 +16,14 @@ public class LocalizationService : IScopedProcessingService
 
     private readonly IRoomRepository _roomRepository;
 
-    private readonly ITrackerRepository _trackerRepository;
-
     public LocalizationService(
         ILogger<LocalizationService> logger,
         IMeasurementRepository aggregatorRepository,
-        IRoomRepository roomRepository,
-        ITrackerRepository trackerRepository)
+        IRoomRepository roomRepository)
     {
         _logger = logger;
         _aggregatorRepository = aggregatorRepository;
         _roomRepository = roomRepository;
-        _trackerRepository = trackerRepository;
     }
 
     public async Task DoWorkAsync(CancellationToken stoppingToken)
@@ -41,28 +37,18 @@ public class LocalizationService : IScopedProcessingService
 
     public async Task AggregateMeasurementsAsync(CancellationToken stoppingToken)
     {
-        var trackerMeasurementGroups = await _aggregatorRepository.GetTrackerMeasurementGroupsAsync(stoppingToken);
+        var roomMeasurementGroups = await _aggregatorRepository.GetRoomMeasurementGroupsAsync(stoppingToken);
         var measuredRooms = new List<RoomDto>();
 
-        foreach (var (trackerId, measurementGroups) in trackerMeasurementGroups)
+        foreach (var (roomId, measurementGroups) in roomMeasurementGroups)
         {
-            var tracker = await _trackerRepository.GetTrackerByIdAsync(
-                trackerId,
-                stoppingToken);
-
-            if (tracker == null)
-            {
-                _logger.LogWarning("Tracker with id {TrackerId} was not found.", trackerId);
-                continue;
-            }
-
             var room = await _roomRepository.GetRoomByIdAsync(
-                tracker.RoomDtoId,
+                roomId,
                 stoppingToken);
 
             if (room == null)
             {
-                _logger.LogWarning("Room with id {RoomId} was not found.", tracker.RoomDtoId);
+                _logger.LogWarning("Room with id {RoomId} was not found.", roomId);
                 continue;
             }
             measuredRooms.Add(room);
@@ -89,15 +75,15 @@ public class LocalizationService : IScopedProcessingService
         var wifi = measurements.Where(m => m.Type == Measurement.Protocol.Wifi);
         var now = DateTime.Now;
 
-        var startMeasurementTime = measurementGroups.Count == 0 ? measurementGroups.Min(mg => mg.Timestamp) : now - _sleepTime;
-        var endMeasurementTime = measurementGroups.Count == 0 ? measurementGroups.Max(mg => mg.Timestamp) : now;
+        var startMeasurementTime = measurementGroups.Count != 0 ? measurementGroups.Min(mg => mg.Timestamp) : now - _sleepTime;
+        var endMeasurementTime = measurementGroups.Count != 0 ? measurementGroups.Max(mg => mg.Timestamp) : now;
 
         var filteredMeasurementsGroups = measurementGroups.Select(mg => FilterMeasurements(mg.Measurements)).ToImmutableArray();
         var numBluetoothPerGroup = filteredMeasurementsGroups.Select(m => m.Count(m => m.Type == Measurement.Protocol.Bluetooth)).ToImmutableArray();
         var numWifiPerGroup = filteredMeasurementsGroups.Select(m => m.Count(m => m.Type == Measurement.Protocol.Wifi)).ToImmutableArray();
 
 
-        var measurementGroupCount = measurementGroups.Count == 0 ? measurementGroups.Count : 1;
+        var measurementGroupCount = measurementGroups.Count != 0 ? measurementGroups.Count : 1;
 
         var bluetoothMax = MaxDevices(numBluetoothPerGroup);
 

@@ -70,7 +70,7 @@ public class MeasurementControllerTests
 
         var addMeasurementsRequest = new AddMeasurementsRequest(_trackerId, measurements);
         await _measurementController.AddMeasurements(addMeasurementsRequest, default);
-        var addedMeasurements = (await _aggregatedMeasurementRepository.GetTrackerMeasurementGroupsAsync(default))[_trackerId][0].Measurements;
+        var addedMeasurements = (await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default))[_trackerId][0].Measurements;
 
         Assert.That(addedMeasurements, Has.Count.EqualTo(measurements.Length));
         Assert.That(addedMeasurements, Does.Contain(measurements[0]));
@@ -78,7 +78,7 @@ public class MeasurementControllerTests
     }
 
     [Test]
-    public async Task TestAddTrackerAsMeasurements()
+    public async Task TrackersFilteredFromMeasurements()
     {
         var measurements = new Measurement[] {
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
@@ -87,7 +87,7 @@ public class MeasurementControllerTests
 
         var addMeasurementsRequest = new AddMeasurementsRequest(_trackerId, measurements);
         await _measurementController.AddMeasurements(addMeasurementsRequest, default);
-        var addedMeasurements = (await _aggregatedMeasurementRepository.GetTrackerMeasurementGroupsAsync(default))[_trackerId][0].Measurements;
+        var addedMeasurements = (await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default))[_trackerId][0].Measurements;
 
         Assert.That(addedMeasurements, Has.Count.EqualTo(0));
     }
