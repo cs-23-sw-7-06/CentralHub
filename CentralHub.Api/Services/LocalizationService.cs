@@ -3,6 +3,7 @@ using System.Linq;
 using App.ScopedService;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
+using CentralHub.Api.Model.Responses.Room;
 
 namespace CentralHub.Api.Services;
 
@@ -41,6 +42,7 @@ public class LocalizationService : IScopedProcessingService
     public async Task AggregateMeasurementsAsync(CancellationToken stoppingToken)
     {
         var trackerMeasurementGroups = await _aggregatorRepository.GetTrackerMeasurementGroupsAsync(stoppingToken);
+        var measuredRooms = new List<RoomDto>();
 
         foreach (var (trackerId, measurementGroups) in trackerMeasurementGroups)
         {
@@ -63,9 +65,19 @@ public class LocalizationService : IScopedProcessingService
                 _logger.LogWarning("Room with id {RoomId} was not found.", tracker.RoomDtoId);
                 continue;
             }
+            measuredRooms.Add(room);
 
             await _aggregatorRepository.AddAggregatedMeasurementAsync(
                 CreateAggregatedMeasurement(room, measurementGroups),
+                stoppingToken);
+        }
+
+        var allRooms = await _roomRepository.GetRoomsAsync(stoppingToken);
+
+        foreach (var room in allRooms.Where(r => !measuredRooms.Contains(r)))
+        {
+            await _aggregatorRepository.AddAggregatedMeasurementAsync(
+                CreateAggregatedMeasurement(room, new List<MeasurementGroup>()),
                 stoppingToken);
         }
     }
@@ -75,16 +87,17 @@ public class LocalizationService : IScopedProcessingService
         var measurements = measurementGroups.SelectMany(mg => mg.Measurements);
         var bluetooth = measurements.Where(m => m.Type == Measurement.Protocol.Bluetooth);
         var wifi = measurements.Where(m => m.Type == Measurement.Protocol.Wifi);
+        var now = DateTime.Now;
 
-        var startMeasurementTime = measurementGroups.Min(mg => mg.Timestamp);
-        var endMeasurementTime = measurementGroups.Max(mg => mg.Timestamp);
+        var startMeasurementTime = measurementGroups.Count == 0 ? measurementGroups.Min(mg => mg.Timestamp) : now - _sleepTime;
+        var endMeasurementTime = measurementGroups.Count == 0 ? measurementGroups.Max(mg => mg.Timestamp) : now;
 
         var filteredMeasurementsGroups = measurementGroups.Select(mg => FilterMeasurements(mg.Measurements)).ToImmutableArray();
         var numBluetoothPerGroup = filteredMeasurementsGroups.Select(m => m.Count(m => m.Type == Measurement.Protocol.Bluetooth)).ToImmutableArray();
         var numWifiPerGroup = filteredMeasurementsGroups.Select(m => m.Count(m => m.Type == Measurement.Protocol.Wifi)).ToImmutableArray();
 
 
-        var measurementCount = measurementGroups.Count;
+        var measurementGroupCount = measurementGroups.Count == 0 ? measurementGroups.Count : 1;
 
         var bluetoothMax = MaxDevices(numBluetoothPerGroup);
 
@@ -114,7 +127,7 @@ public class LocalizationService : IScopedProcessingService
         {
             StartTime = startMeasurementTime,
             EndTime = endMeasurementTime,
-            MeasurementGroupCount = measurementCount,
+            MeasurementGroupCount = measurementGroupCount,
             BluetoothMaxDeviceCount = bluetoothMax,
             BluetoothMedianDeviceCount = bluetoothMedian,
             BluetoothMeanDeviceCount = bluetoothMean,

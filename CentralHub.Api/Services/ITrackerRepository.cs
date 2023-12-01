@@ -17,6 +17,8 @@ public interface ITrackerRepository
     Task<TrackerDto?> GetTrackerByMacAddresses(string wifiMacAddress, string bluetoothMacAddress,
         CancellationToken cancellationToken);
 
+    Task<IEnumerable<TrackerDto>> GetRegisteredTrackers(CancellationToken cancellationToken);
+
     Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackers(CancellationToken cancellationToken);
 
     Task AddUnregisteredTracker(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken);

@@ -35,8 +35,8 @@ class ServiceTests
         {
             Name = "Test Tracker",
             Description = "Test Tracker",
-            BluetoothMacAddress = "11:22:33:44:55:66",
-            WifiMacAddress = "aa:bb:cc:dd:ee:ff",
+            BluetoothMacAddress = "ff:22:33:44:55:66",
+            WifiMacAddress = "ff:bb:cc:dd:ee:ff",
             RoomDtoId = roomDto.RoomDtoId,
             RoomDto = roomDto
         };
@@ -154,5 +154,30 @@ class ServiceTests
         Assert.That(aggregatedMeasurement.MeasurementGroupCount, Is.EqualTo(1));
         Assert.That(aggregatedMeasurement.TotalBluetoothDeviceCount, Is.EqualTo(1));
         Assert.That(aggregatedMeasurement.TotalWifiDeviceCount, Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task TestNoMeasurements()
+    {
+        await _localizationService.AggregateMeasurementsAsync(default);
+        Assert.That(await _aggregatedMeasurementRepository.GetTrackerMeasurementGroupsAsync(default), Is.Empty);
+
+        var aggregatedMeasurements = await _aggregatedMeasurementRepository.GetAggregatedMeasurementsAsync(_roomId, default);
+
+        Assert.That(aggregatedMeasurements, Has.Exactly(1).Items);
+
+        var aggregatedMeasurement = aggregatedMeasurements.First();
+
+        Assert.That(aggregatedMeasurement.MeasurementGroupCount, Is.EqualTo(1));
+        Assert.That(aggregatedMeasurement.BluetoothMedianDeviceCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.WifiMedianDeviceCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.BluetoothMeanDeviceCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.WifiMeanDeviceCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.BluetoothMaxDeviceCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.WifiMaxDeviceCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.BluetoothMinDeviceCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.WifiMinDeviceCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.TotalBluetoothDeviceCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.TotalWifiDeviceCount, Is.EqualTo(0));
     }
 }
