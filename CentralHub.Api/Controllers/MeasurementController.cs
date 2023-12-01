@@ -12,11 +12,11 @@ public sealed class MeasurementController : ControllerBase
 {
     private readonly ILogger<MeasurementController> _logger;
 
-    private readonly IAggregatedMeasurementRepository _aggregatorRepository;
+    private readonly IMeasurementRepository _aggregatorRepository;
 
     public MeasurementController(
         ILogger<MeasurementController> logger,
-        IAggregatedMeasurementRepository aggregatorRepository)
+        IMeasurementRepository aggregatorRepository)
     {
         _logger = logger;
         _aggregatorRepository = aggregatorRepository;
@@ -32,9 +32,9 @@ public sealed class MeasurementController : ControllerBase
     }
 
     [HttpGet("get")]
-    public async Task<GetAggregatedMeasurementsResponse> GetMeasurements(int roomId, CancellationToken token)
+    public async Task<GetAggregatedMeasurementsResponse> GetAggregateMeasurements(int roomId, CancellationToken token)
     {
-        var aggregatedMeasurements = await _aggregatorRepository.GetMeasurementsAsync(roomId, token);
+        var aggregatedMeasurements = await _aggregatorRepository.GetAggregatedMeasurementsAsync(roomId, token);
 
         if (aggregatedMeasurements == null)
         {
@@ -47,22 +47,22 @@ public sealed class MeasurementController : ControllerBase
             am.StartTime,
             am.EndTime,
             am.MeasurementGroupCount,
-            am.BluetoothMedian,
-            am.BluetoothMean,
-            am.BluetoothMax,
-            am.BluetoothMin,
+            am.BluetoothMedianDeviceCount,
+            am.BluetoothMeanDeviceCount,
+            am.BluetoothMaxDeviceCount,
+            am.BluetoothMinDeviceCount,
             am.TotalBluetoothDeviceCount,
-            am.WifiMedian,
-            am.WifiMean,
-            am.WifiMax,
-            am.WifiMin,
+            am.WifiMedianDeviceCount,
+            am.WifiMeanDeviceCount,
+            am.WifiMaxDeviceCount,
+            am.WifiMinDeviceCount,
             am.TotalWifiDeviceCount)));
     }
 
-    [HttpGet("getperiod")]
-    public async Task<GetAggregatedMeasurementsResponse> GetMeasurements(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken token)
+    [HttpGet("get")]
+    public async Task<GetAggregatedMeasurementsResponse> GetAggregateMeasurements(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken token)
     {
-        var aggregatedMeasurements = await GetMeasurements(roomId, token);
+        var aggregatedMeasurements = await GetAggregateMeasurements(roomId, token);
 
         if (!aggregatedMeasurements.Success)
         {

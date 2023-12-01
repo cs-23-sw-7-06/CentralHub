@@ -5,9 +5,9 @@ using CentralHub.Api.Services;
 
 namespace CentralHub.Api.Tests;
 
-public class TrackersControllerTests
+public partial class TrackersControllerTests
 {
-    private TrackerRepository _trackerRepository;
+    private MockTrackerRepository _trackerRepository;
     private TrackerController _trackerController;
 
     [SetUp]
@@ -18,10 +18,12 @@ public class TrackersControllerTests
             Name = "Test Room",
             Description = "Test Room",
         };
-        roomDto.RoomDtoId = 1;
 
-        _trackerRepository = new TrackerRepository(roomDto);
-        _trackerController = new TrackerController(new RoomRepository(roomDto), _trackerRepository);
+        var roomRepository = new MockRoomRepository();
+        roomRepository.AddRoomAsync(roomDto, default).GetAwaiter().GetResult();
+
+        _trackerRepository = new MockTrackerRepository(roomDto);
+        _trackerController = new TrackerController(roomRepository, _trackerRepository);
     }
 
     [Test]
@@ -91,131 +93,5 @@ public class TrackersControllerTests
 
         Assert.That(trackerRegistrationInfo.Registered, Is.True);
         Assert.That(trackerRegistrationInfo.TrackerId, Is.EqualTo(addTrackerResponse.TrackerId));
-    }
-
-    private sealed class RoomRepository : IRoomRepository
-    {
-        public RoomDto RoomDto { get; }
-
-        public RoomRepository(RoomDto roomDto)
-        {
-            RoomDto = roomDto;
-        }
-
-        public Task<int> AddRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task RemoveRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<RoomDto>> GetRoomsAsync(CancellationToken cancellationToken)
-        {
-            return Task.FromResult(new[] { RoomDto }.AsEnumerable());
-        }
-
-        public Task<RoomDto> GetRoomByIdAsync(int id, CancellationToken cancellationToken)
-        {
-            if (id != RoomDto.RoomDtoId)
-            {
-                return Task.FromResult<RoomDto>(null);
-            }
-
-            return Task.FromResult(RoomDto);
-        }
-    }
-
-    private sealed class TrackerRepository : ITrackerRepository
-    {
-        private readonly List<UnregisteredTrackerDto> _unregisteredTrackers = new List<UnregisteredTrackerDto>();
-
-        private int _nextId = 0;
-
-
-        public RoomDto RoomDto { get; }
-
-        public TrackerRepository(RoomDto roomDto)
-        {
-            RoomDto = roomDto;
-        }
-
-        public Task<int> AddTrackerAsync(TrackerDto trackerDto, CancellationToken cancellationToken)
-        {
-            if (trackerDto.RoomDtoId != RoomDto.RoomDtoId)
-            {
-                throw new KeyNotFoundException("RoomDto not found");
-            }
-
-            trackerDto.TrackerDtoId = _nextId;
-            trackerDto.RoomDto = RoomDto;
-
-            _nextId++;
-
-            RoomDto.Trackers.Add(trackerDto);
-
-            return new ValueTask<int>(trackerDto.TrackerDtoId).AsTask();
-        }
-
-        public Task UpdateTrackerAsync(TrackerDto trackerDto, CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task RemoveTrackerAsync(TrackerDto trackerDto, CancellationToken cancellationToken)
-        {
-            if (trackerDto.RoomDtoId != RoomDto.RoomDtoId)
-            {
-                throw new KeyNotFoundException("RoomDto not found");
-            }
-
-            RoomDto.Trackers.Remove(trackerDto);
-
-            return Task.CompletedTask;
-        }
-
-        public Task<IEnumerable<TrackerDto>> GetTrackersInRoomAsync(int roomId, CancellationToken cancellationToken)
-        {
-            if (roomId != RoomDto.RoomDtoId)
-            {
-                return Task.FromResult<IEnumerable<TrackerDto>>(null);
-            }
-
-            return Task.FromResult(RoomDto.Trackers.AsEnumerable());
-        }
-
-        public Task<TrackerDto> GetTrackerByIdAsync(int id, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(RoomDto.Trackers.SingleOrDefault(t => t.TrackerDtoId == id));
-        }
-
-        public Task<TrackerDto> GetTrackerByMacAddresses(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(RoomDto.Trackers.SingleOrDefault(t =>
-                t.WifiMacAddress == wifiMacAddress && t.BluetoothMacAddress == bluetoothMacAddress));
-        }
-
-        public Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackers(CancellationToken cancellationToken)
-        {
-            return Task.FromResult<IEnumerable<UnregisteredTrackerDto>>(_unregisteredTrackers.ToArray());
-        }
-
-        public Task AddUnregisteredTracker(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
-        {
-            _unregisteredTrackers.Add(
-                new UnregisteredTrackerDto
-                {
-                    WifiMacAddress = wifiMacAddress,
-                    BluetoothMacAddress = bluetoothMacAddress,
-                });
-            return Task.CompletedTask;
-        }
     }
 }

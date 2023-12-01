@@ -6,20 +6,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CentralHub.Api.Services;
 
-internal sealed class AggregatedMeasurementRepository : IAggregatedMeasurementRepository
+internal sealed class MeasurementRepository : IMeasurementRepository
 {
     private readonly static Dictionary<int, List<MeasurementGroup>> _recentTrackerMeasurementGroups = new Dictionary<int, List<MeasurementGroup>>();
 
     private readonly ApplicationDbContext _applicationDbContext;
 
-    public AggregatedMeasurementRepository(ApplicationDbContext applicationDbContext)
+    public MeasurementRepository(ApplicationDbContext applicationDbContext)
     {
         _applicationDbContext = applicationDbContext;
         _applicationDbContext.Database.OpenConnection();
         _applicationDbContext.Database.EnsureCreated();
     }
 
-    public async Task<int> AddMeasurementAsync(AggregatedMeasurementDto measurementDto, CancellationToken cancellationToken)
+    public async Task<int> AddAggregatedMeasurementAsync(AggregatedMeasurementDto measurementDto, CancellationToken cancellationToken)
     {
         _applicationDbContext.AggregatedMeasurements.Add(measurementDto);
         try
@@ -35,7 +35,7 @@ internal sealed class AggregatedMeasurementRepository : IAggregatedMeasurementRe
         }
     }
 
-    public async Task RemoveMeasurementAsync(AggregatedMeasurementDto measurementDto, CancellationToken cancellationToken)
+    public async Task RemoveAggregatedMeasurementAsync(AggregatedMeasurementDto measurementDto, CancellationToken cancellationToken)
     {
         _applicationDbContext.AggregatedMeasurements.Remove(measurementDto);
         try
@@ -50,12 +50,12 @@ internal sealed class AggregatedMeasurementRepository : IAggregatedMeasurementRe
         }
     }
 
-    public async Task<IEnumerable<AggregatedMeasurementDto>> GetMeasurementsAsync(int roomId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, CancellationToken cancellationToken)
     {
         return await _applicationDbContext.AggregatedMeasurements.Where(am => roomId == am.RoomDtoId).ToArrayAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<AggregatedMeasurementDto>> GetMeasurementsAsync(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken cancellationToken)
+    public async Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken cancellationToken)
     {
         return await _applicationDbContext.AggregatedMeasurements
             .Where(am => roomId == am.RoomDtoId)
