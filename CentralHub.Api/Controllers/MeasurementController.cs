@@ -108,13 +108,13 @@ public sealed class MeasurementController : ControllerBase
             am.MeasurementGroupCount,
             am.BluetoothMedianDeviceCount - bluetoothCalibrationNumber,
             am.BluetoothMeanDeviceCount - bluetoothCalibrationNumber,
-            am.BluetoothMaxDeviceCount - bluetoothCalibrationNumber,
             am.BluetoothMinDeviceCount - bluetoothCalibrationNumber,
+            am.BluetoothMaxDeviceCount - bluetoothCalibrationNumber,
             am.TotalBluetoothDeviceCount - bluetoothCalibrationNumber,
             am.WifiMedianDeviceCount - wifiCalibrationNumber,
             am.WifiMeanDeviceCount - wifiCalibrationNumber,
-            am.WifiMaxDeviceCount - wifiCalibrationNumber,
             am.WifiMinDeviceCount - wifiCalibrationNumber,
+            am.WifiMaxDeviceCount - wifiCalibrationNumber,
             am.TotalWifiDeviceCount - wifiCalibrationNumber)
             ).ToImmutableArray();
     }
