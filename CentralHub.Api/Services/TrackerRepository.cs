@@ -159,6 +159,14 @@ public sealed class TrackerRepository : ITrackerRepository
         return tracker;
     }
 
+    public async Task<IEnumerable<TrackerDto>> GetRegisteredTrackers(CancellationToken cancellationToken)
+    {
+        return await _applicationDbContext.Rooms
+            .Include(r => r.Trackers)
+            .SelectMany(r => r.Trackers)
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackers(CancellationToken cancellationToken)
     {
         return await UnregisteredTrackersMutex.Lock(unregisteredTrackers =>

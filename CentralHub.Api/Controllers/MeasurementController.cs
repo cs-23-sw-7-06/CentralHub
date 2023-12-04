@@ -15,21 +15,39 @@ public sealed class MeasurementController : ControllerBase
 
     private readonly IMeasurementRepository _aggregatorRepository;
 
+    private readonly ITrackerRepository _trackerRepository;
+
     public MeasurementController(
         ILogger<MeasurementController> logger,
-        IMeasurementRepository aggregatorRepository)
+        IMeasurementRepository aggregatorRepository,
+        ITrackerRepository trackerRepository)
     {
         _logger = logger;
         _aggregatorRepository = aggregatorRepository;
+        _trackerRepository = trackerRepository;
     }
 
     [HttpPost("add")]
-    public async Task AddMeasurements(AddMeasurementsRequest addMeasurementsRequest, CancellationToken token)
+    public async Task<AddMeasurementsResponse> AddMeasurements(AddMeasurementsRequest addMeasurementsRequest, CancellationToken token)
     {
+        var registeredTrackers = await _trackerRepository.GetRegisteredTrackers(token);
+        var unregisteredTrackers = await _trackerRepository.GetUnregisteredTrackers(token);
+
+        var tracker = registeredTrackers.SingleOrDefault(t => t.TrackerDtoId == addMeasurementsRequest.TrackerId);
+
+        if (tracker == null)
+        {
+            return AddMeasurementsResponse.CreateUnsuccessful();
+        }
+
         await _aggregatorRepository.AddMeasurementsAsync(
-            addMeasurementsRequest.TrackerId,
-            addMeasurementsRequest.Measurements,
+            tracker.RoomDtoId,
+            addMeasurementsRequest.Measurements
+            .Where(m => !registeredTrackers.Any(t => t.WifiMacAddress == m.MacAddress || t.BluetoothMacAddress == m.MacAddress))
+            .Where(m => !unregisteredTrackers.Any(t => t.WifiMacAddress == m.MacAddress || t.BluetoothMacAddress == m.MacAddress))
+            .ToImmutableArray(),
             token);
+        return AddMeasurementsResponse.CreateSuccessful();
     }
 
     [HttpGet("all")]
