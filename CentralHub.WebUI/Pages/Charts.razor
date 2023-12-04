@@ -12,8 +12,24 @@
 
 <div class="container">
     <div class="row">
+        <div class="col">
+            <InputDate
+                Type="InputDateType.DateTimeLocal"
+                min="@_firstDateTime"
+                max="@MaxDateTime.ToString("yyyy-MM-dd")"
+                @bind-Value="@MinDateTime"
+                />
+        </div>
+        <div class="col">
+            <InputDate
+                Type="InputDateType.DateTimeLocal"
+                min="@MinDateTime.ToString("yyyy-MM-dd")"
+                @bind-Value="@MaxDateTime" />
+        </div>
+    </div>
+    <div class="row">
         <div class="col-xl">
-            <ApexChart TItem="AggregatedMeasurements" Title="Wifi Data" Debug="true" Options="_options1">
+            <ApexChart @ref="_wifiChart" TItem="AggregatedMeasurements" Title="Wifi Data" Debug="true" Options="_options1">
                 <ApexRangeAreaSeries
                     TItem="AggregatedMeasurements"
                     Items="_data1"
@@ -44,7 +60,7 @@
             </ApexChart>
         </div>
         <div class="col-xl">
-            <ApexChart TItem="AggregatedMeasurements" Title="Bluetooth Data" Debug="true" Options="_options2">
+            <ApexChart @ref="_bluetoothChart" TItem="AggregatedMeasurements" Title="Bluetooth Data" Debug="true" Options="_options2">
                 <ApexRangeAreaSeries
                     TItem="AggregatedMeasurements"
                     Items="_data2"
@@ -90,10 +106,60 @@
     private readonly ApexChartOptions<AggregatedMeasurements> _options1 = new();
     private readonly ApexChartOptions<AggregatedMeasurements> _options2 = new();
 
+
+    private DateTime _firstDateTime;
+    private DateTime _minDateTime = DateTime.Today - TimeSpan.FromDays(1);
+    private DateTime _maxDateTime = DateTime.Now;
+
+    public DateTime MinDateTime
+    {
+        get => _minDateTime;
+        set
+        {
+            _minDateTime = value;
+            InvokeAsync(async () =>
+            {
+                await UpdateAggregatedMeasurements();
+                StateHasChanged();
+                await _wifiChart!.RenderAsync();
+                await _bluetoothChart!.RenderAsync();
+            });
+        }
+    }
+
+    public DateTime MaxDateTime
+    {
+        get => _maxDateTime;
+        set { _maxDateTime = value;
+            InvokeAsync(async () =>
+            {
+                await UpdateAggregatedMeasurements();
+                StateHasChanged();
+                await _wifiChart!.RenderAsync();
+                await _bluetoothChart!.RenderAsync();
+            });
+        }
+    }
+
+    private ApexChart<AggregatedMeasurements>? _wifiChart;
+    private ApexChart<AggregatedMeasurements>? _bluetoothChart;
+
+    private async Task UpdateAggregatedMeasurements()
+    {
+        _data1 = await MeasurementService.GetAggregatedMeasurements(RoomId, MinDateTime.ToUniversalTime(), MaxDateTime.ToUniversalTime(), _cancellationTokenSource.Token);
+
+        // HACK!: Add dummy data because the charts crash if there is no data and a page reload is necessary to get it back
+        if (!_data1.Any())
+        {
+            _data1 = new[] {new AggregatedMeasurements(0, MinDateTime.ToUniversalTime(), MaxDateTime.ToUniversalTime(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)};
+        }
+        _data2 = _data1.ToImmutableArray();
+    }
+    
     protected override async Task OnInitializedAsync()
     {
-        _data1 = await MeasurementService.GetAggregatedMeasurements(RoomId, DateTime.MinValue, DateTime.MaxValue, _cancellationTokenSource.Token);
-        _data2 = _data1.ToImmutableArray();
+        _firstDateTime = await MeasurementService.GetFirstAggregatedMeasurementsDateTime(RoomId, _cancellationTokenSource.Token);
+        await UpdateAggregatedMeasurements();
         _options1.Chart = new Chart()
         {
             Type = ChartType.RangeArea

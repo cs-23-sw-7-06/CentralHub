@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using App.ScopedService;
 using CentralHub.Api.DbContexts;
 using CentralHub.Api.Services;
 using Microsoft.EntityFrameworkCore;

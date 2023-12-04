@@ -1,4 +1,4 @@
-namespace App.ScopedService;
+namespace CentralHub.Api.Services;
 
 public interface IScopedProcessingService
 {
