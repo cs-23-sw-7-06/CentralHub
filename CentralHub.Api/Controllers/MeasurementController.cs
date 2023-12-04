@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using CentralHub.Api.Dtos;
-using CentralHub.Api.Model;
 using CentralHub.Api.Model.Requests.Localization;
 using CentralHub.Api.Model.Responses.AggregatedMeasurements;
 using CentralHub.Api.Model.Responses.Measurements;
@@ -11,29 +10,18 @@ namespace CentralHub.Api.Controllers;
 
 [ApiController]
 [Route("/measurements")]
-public sealed class MeasurementController : ControllerBase
+public sealed class MeasurementController(
+        IRoomRepository roomRepository,
+        ITrackerRepository trackerRepository,
+        IMeasurementRepository measurementRepository)
+    : ControllerBase
 {
-    private readonly ILogger<MeasurementController> _logger;
-
-    private readonly IMeasurementRepository _measurementRepository;
-
-    private readonly ITrackerRepository _trackerRepository;
-
-    public MeasurementController(
-        ILogger<MeasurementController> logger,
-        IMeasurementRepository measurementRepository,
-        ITrackerRepository trackerRepository)
-    {
-        _logger = logger;
-        _measurementRepository = measurementRepository;
-        _trackerRepository = trackerRepository;
-    }
-
     [HttpPost("add")]
     public async Task<AddMeasurementsResponse> AddMeasurements(AddMeasurementsRequest addMeasurementsRequest, CancellationToken token)
     {
-        var registeredTrackers = await _trackerRepository.GetRegisteredTrackers(token);
-        var unregisteredTrackers = await _trackerRepository.GetUnregisteredTrackers(token);
+        var registeredTrackers = (await trackerRepository.GetRegisteredTrackers(token))
+            .ToImmutableArray();
+        var unregisteredTrackers = await trackerRepository.GetUnregisteredTrackers(token);
 
         var tracker = registeredTrackers.SingleOrDefault(t => t.TrackerDtoId == addMeasurementsRequest.TrackerId);
 
@@ -42,7 +30,7 @@ public sealed class MeasurementController : ControllerBase
             return AddMeasurementsResponse.CreateUnsuccessful();
         }
 
-        await _measurementRepository.AddMeasurementsAsync(
+        await measurementRepository.AddMeasurementsAsync(
             tracker.RoomDtoId,
             addMeasurementsRequest.Measurements
             .Where(m => !registeredTrackers.Any(t => t.WifiMacAddress == m.MacAddress || t.BluetoothMacAddress == m.MacAddress))
@@ -55,12 +43,14 @@ public sealed class MeasurementController : ControllerBase
     [HttpGet("all")]
     public async Task<GetAggregatedMeasurementsResponse> GetAggregateMeasurements(int roomId, CancellationToken token)
     {
-        var aggregatedMeasurements = await _measurementRepository.GetAggregatedMeasurementsAsync(roomId, token);
-
-        if (aggregatedMeasurements == null)
+        var possibleRoom = await roomRepository.GetRoomByIdAsync(roomId, token);
+        if (possibleRoom == null)
         {
             return GetAggregatedMeasurementsResponse.CreateUnsuccessful();
         }
+
+        var aggregatedMeasurements = (await measurementRepository.GetAggregatedMeasurementsAsync(roomId, token))
+            .ToImmutableArray();
 
         return GetAggregatedMeasurementsResponse
             .CreateSuccessful(CreateMeasurements(aggregatedMeasurements));
@@ -69,12 +59,14 @@ public sealed class MeasurementController : ControllerBase
     [HttpGet("range")]
     public async Task<GetAggregatedMeasurementsResponse> GetAggregateMeasurements(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken token)
     {
-        var aggregatedMeasurements = await _measurementRepository.GetAggregatedMeasurementsAsync(roomId, timeStart, timeEnd, token);
-
-        if (aggregatedMeasurements == null)
+        var possibleRoom = await roomRepository.GetRoomByIdAsync(roomId, token);
+        if (possibleRoom == null)
         {
             return GetAggregatedMeasurementsResponse.CreateUnsuccessful();
         }
+
+        var aggregatedMeasurements = (await measurementRepository.GetAggregatedMeasurementsAsync(roomId, timeStart, timeEnd, token))
+            .ToImmutableArray();
 
         return GetAggregatedMeasurementsResponse
             .CreateSuccessful(CreateMeasurements(aggregatedMeasurements));
@@ -85,7 +77,7 @@ public sealed class MeasurementController : ControllerBase
         CancellationToken cancellationToken)
     {
         var possibleFirstDateTime =
-            await _measurementRepository.GetFirstAggregatedMeasurementsDateTimeAsync(roomId, cancellationToken);
+            await measurementRepository.GetFirstAggregatedMeasurementsDateTimeAsync(roomId, cancellationToken);
 
         if (possibleFirstDateTime == null)
         {
@@ -95,27 +87,21 @@ public sealed class MeasurementController : ControllerBase
         return GetFirstAggregatedMeasurementsDateTimeResponse.CreateSuccessful(possibleFirstDateTime.Value);
     }
 
-    private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IEnumerable<AggregatedMeasurementDto> aggregatedMeasurements)
+    private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IReadOnlyCollection<AggregatedMeasurementDto> aggregatedMeasurements)
     {
-        var recentAggregatedMeasurements = aggregatedMeasurements.Where(am => am.EndTime > (DateTime.UtcNow - TimeSpan.FromDays(1)));
-        var wifiCalibrationNumber = recentAggregatedMeasurements.Min(am => am.WifiMinDeviceCount);
-        var bluetoothCalibrationNumber = recentAggregatedMeasurements.Min(am => am.BluetoothMinDeviceCount);
+        var recentAggregatedMeasurements = aggregatedMeasurements
+            .Where(am => am.EndTime > (DateTime.UtcNow - TimeSpan.FromDays(1)))
+            .ToImmutableArray();
+
+        var bluetoothCalibrationNumber = recentAggregatedMeasurements.Min(am => am.BluetoothCount);
+        var wifiCalibrationNumber = recentAggregatedMeasurements.Min(am => am.WifiCount);
 
         return aggregatedMeasurements.Select(am => new AggregatedMeasurements(
             am.AggregatedMeasurementDtoId,
             am.StartTime,
             am.EndTime,
-            am.MeasurementGroupCount,
-            am.BluetoothMedianDeviceCount - bluetoothCalibrationNumber,
-            am.BluetoothMeanDeviceCount - bluetoothCalibrationNumber,
-            am.BluetoothMinDeviceCount - bluetoothCalibrationNumber,
-            am.BluetoothMaxDeviceCount - bluetoothCalibrationNumber,
-            am.TotalBluetoothDeviceCount - bluetoothCalibrationNumber,
-            am.WifiMedianDeviceCount - wifiCalibrationNumber,
-            am.WifiMeanDeviceCount - wifiCalibrationNumber,
-            am.WifiMinDeviceCount - wifiCalibrationNumber,
-            am.WifiMaxDeviceCount - wifiCalibrationNumber,
-            am.TotalWifiDeviceCount - wifiCalibrationNumber)
+            am.BluetoothCount - bluetoothCalibrationNumber,
+            am.WifiCount - wifiCalibrationNumber)
             ).ToImmutableArray();
     }
 }

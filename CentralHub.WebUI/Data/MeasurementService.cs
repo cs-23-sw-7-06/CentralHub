@@ -47,7 +47,7 @@ public sealed class MeasurementService
         return getAggregatedMeasurementsResponse.AggregatedMeasurements!;
     }
 
-    public async Task<DateTime> GetFirstAggregatedMeasurementsDateTime(int roomId, CancellationToken cancellationToken)
+    public async Task<DateTime?> GetFirstAggregatedMeasurementsDateTime(int roomId, CancellationToken cancellationToken)
     {
         var request = new HttpRequestMessage(
             HttpMethod.Get,
@@ -68,9 +68,9 @@ public sealed class MeasurementService
 
         if (getFirstAggregatedMeasurementsDateTimeResponse == null || !getFirstAggregatedMeasurementsDateTimeResponse.Success)
         {
-            throw new InvalidOperationException("Unsuccessful!");
+            return null;
         }
 
-        return getFirstAggregatedMeasurementsDateTimeResponse.FirstDateTime.Value;
+        return getFirstAggregatedMeasurementsDateTimeResponse.FirstDateTime;
     }
 }
