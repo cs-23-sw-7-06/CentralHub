@@ -18,7 +18,7 @@
                     TItem="AggregatedMeasurements"
                     Items="_data1"
                     Name="Min - Max"
-                    XValue="e => e.EndTime"
+                    XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
                     Top="e => e.WifiMax"
                     Bottom="e => e.WifiMin"
                     Stroke="@(new SeriesStroke{ Width=0 })"
@@ -28,7 +28,7 @@
                     Items="_data1"
                     Name="Median"
                     SeriesType="SeriesType.Line"
-                    XValue="e => e.EndTime"
+                    XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
                     YValue="e => e.WifiMedian"
                     Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#ff3300" })"
                 />
@@ -37,7 +37,7 @@
                     Items="_data1"
                     Name="Mean"
                     SeriesType="SeriesType.Line"
-                    XValue="e => e.EndTime"
+                    XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
                     YValue="e => (decimal)e.WifiMean"
                     Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#0033ff" })"
                 />
@@ -49,7 +49,7 @@
                     TItem="AggregatedMeasurements"
                     Items="_data2"
                     Name="Min - Max"
-                    XValue="e => e.EndTime"
+                    XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
                     Top="e => e.BluetoothMax"
                     Bottom="e => e.BluetoothMin"
                     Stroke="@(new SeriesStroke{ Width=0 })"
@@ -59,7 +59,7 @@
                     Items="_data2"
                     Name="Median"
                     SeriesType="SeriesType.Line"
-                    XValue="e => e.EndTime"
+                    XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
                     YValue="e => e.BluetoothMedian"
                     Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#ff3300" })"
                 />
@@ -68,7 +68,7 @@
                     Items="_data2"
                     Name="Mean"
                     SeriesType="SeriesType.Line"
-                    XValue="e => e.EndTime"
+                    XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
                     YValue="e => (decimal)e.BluetoothMean"
                     Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#0033ff" })"
                 />
@@ -104,6 +104,38 @@
         {
             Opacity = new List<double> { 0.24, 1, 1 }
         };
+
+        _options1.Yaxis = new List<YAxis>()
+        {
+            new YAxis()
+            {
+                Labels = new ()
+                {
+                    Formatter = @"
+                    function (val) {
+                        return val.toFixed(0);
+                    }
+                    ",
+                },
+            },
+        };
+
+        _options1.Tooltip = new Tooltip()
+        {
+            Y = new TooltipY()
+            {
+                Formatter = @"
+                function (val) {
+                    return val.toString();
+                }
+                ",
+            },
+        };
+
+        _options1.Xaxis = new XAxis()
+        {
+            Type = XAxisType.Datetime,
+        };
         
         _options2.Chart = new Chart()
         {
@@ -114,6 +146,38 @@
         _options2.Fill = new Fill
         {
             Opacity = new List<double> { 0.24, 1, 1 }
+        };
+
+        _options2.Yaxis = new List<YAxis>()
+        {
+            new YAxis()
+            {
+                Labels = new ()
+                {
+                    Formatter = @"
+                    function (val) {
+                        return val.toFixed(0);
+                    }
+                    ",
+                },
+            },
+        };
+
+        _options2.Tooltip = new Tooltip()
+        {
+            Y = new TooltipY()
+            {
+                Formatter = @"
+                function (val) {
+                    return val.toString();
+                }
+                ",
+            },
+        };
+
+        _options2.Xaxis = new XAxis()
+        {
+            Type = XAxisType.Datetime,
         };
     }
 
