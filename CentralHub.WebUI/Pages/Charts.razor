@@ -3,6 +3,7 @@
 @using CentralHub.Api.Model.Responses.AggregatedMeasurements
 @using CentralHub.WebUI.Data
 @using System.Collections.Immutable
+@using System.Globalization
 @implements IDisposable
 @inject MeasurementService MeasurementService
 
@@ -15,15 +16,15 @@
         <div class="col">
             <InputDate
                 Type="InputDateType.DateTimeLocal"
-                min="@_firstDateTime"
-                max="@MaxDateTime.ToString("yyyy-MM-dd")"
+                min="@_firstDateTime.ToString("yyyy-MM-ddThh:mm:ss", CultureInfo.InvariantCulture)"
+                max="@MaxDateTime.ToString("yyyy-MM-ddThh:mm:ss", CultureInfo.InvariantCulture)"
                 @bind-Value="@MinDateTime"
                 />
         </div>
         <div class="col">
             <InputDate
                 Type="InputDateType.DateTimeLocal"
-                min="@MinDateTime.ToString("yyyy-MM-dd")"
+                min="@MinDateTime.ToString("yyyy-MM-ddThh:mm:ss", CultureInfo.InvariantCulture)"
                 @bind-Value="@MaxDateTime" />
         </div>
     </div>
