@@ -11,9 +11,11 @@ public interface IMeasurementRepository
 
     Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, CancellationToken cancellationToken);
 
-    Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken cancellationToken);
+    Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken);
 
     Task<IReadOnlyDictionary<int, IReadOnlyList<MeasurementGroup>>> GetRoomMeasurementGroupsAsync(CancellationToken cancellationToken);
 
     Task AddMeasurementsAsync(int roomId, IReadOnlyCollection<Measurement> measurements, CancellationToken cancellationToken);
+
+    Task<DateTime?> GetFirstAggregatedMeasurementsDateTimeAsync(int roomId, CancellationToken cancellationToken);
 }

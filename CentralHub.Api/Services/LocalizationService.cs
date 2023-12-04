@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Linq;
-using App.ScopedService;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
 using CentralHub.Api.Model.Responses.Room;

@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using CentralHub.Api.Model;
 using CentralHub.Api.Model.Requests.Localization;
 using CentralHub.Api.Model.Responses.AggregatedMeasurements;
+using CentralHub.Api.Model.Responses.Measurements;
 using CentralHub.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,17 +14,17 @@ public sealed class MeasurementController : ControllerBase
 {
     private readonly ILogger<MeasurementController> _logger;
 
-    private readonly IMeasurementRepository _aggregatorRepository;
+    private readonly IMeasurementRepository _measurementRepository;
 
     private readonly ITrackerRepository _trackerRepository;
 
     public MeasurementController(
         ILogger<MeasurementController> logger,
-        IMeasurementRepository aggregatorRepository,
+        IMeasurementRepository measurementRepository,
         ITrackerRepository trackerRepository)
     {
         _logger = logger;
-        _aggregatorRepository = aggregatorRepository;
+        _measurementRepository = measurementRepository;
         _trackerRepository = trackerRepository;
     }
 
@@ -40,7 +41,7 @@ public sealed class MeasurementController : ControllerBase
             return AddMeasurementsResponse.CreateUnsuccessful();
         }
 
-        await _aggregatorRepository.AddMeasurementsAsync(
+        await _measurementRepository.AddMeasurementsAsync(
             tracker.RoomDtoId,
             addMeasurementsRequest.Measurements
             .Where(m => !registeredTrackers.Any(t => t.WifiMacAddress == m.MacAddress || t.BluetoothMacAddress == m.MacAddress))
@@ -53,7 +54,7 @@ public sealed class MeasurementController : ControllerBase
     [HttpGet("all")]
     public async Task<GetAggregatedMeasurementsResponse> GetAggregateMeasurements(int roomId, CancellationToken token)
     {
-        var aggregatedMeasurements = await _aggregatorRepository.GetAggregatedMeasurementsAsync(roomId, token);
+        var aggregatedMeasurements = await _measurementRepository.GetAggregatedMeasurementsAsync(roomId, token);
 
         if (aggregatedMeasurements == null)
         {
@@ -92,5 +93,20 @@ public sealed class MeasurementController : ControllerBase
             .CreateSuccessful(aggregatedMeasurements.AggregatedMeasurements!
             .Where(am => am.StartTime >= timeStart && am.EndTime <= timeEnd)
             .ToImmutableArray());
+    }
+
+    [HttpGet("first")]
+    public async Task<GetFirstAggregatedMeasurementsDateTimeResponse> GetFirstAggregatedMeasurementDateTime(int roomId,
+        CancellationToken cancellationToken)
+    {
+        var possibleFirstDateTime =
+            await _measurementRepository.GetFirstAggregatedMeasurementsDateTimeAsync(roomId, cancellationToken);
+
+        if (possibleFirstDateTime == null)
+        {
+            return GetFirstAggregatedMeasurementsDateTimeResponse.CreateUnsuccessful();
+        }
+
+        return GetFirstAggregatedMeasurementsDateTimeResponse.CreateSuccessful(possibleFirstDateTime.Value);
     }
 }

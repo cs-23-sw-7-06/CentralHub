@@ -2,13 +2,15 @@ using System.Collections.Immutable;
 using CentralHub.Api.DbContexts;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
+using CentralHub.Api.Threading;
 using Microsoft.EntityFrameworkCore;
 
 namespace CentralHub.Api.Services;
 
 internal sealed class MeasurementRepository : IMeasurementRepository
 {
-    private readonly static Dictionary<int, List<MeasurementGroup>> _recentRoomMeasurementGroups = new Dictionary<int, List<MeasurementGroup>>();
+    private static readonly CancellableMutex<Dictionary<int, List<MeasurementGroup>>> RecentRoomMeasurementGroupsMutex =
+        new CancellableMutex<Dictionary<int, List<MeasurementGroup>>>(new Dictionary<int, List<MeasurementGroup>>());
 
     private readonly ApplicationDbContext _applicationDbContext;
 
@@ -55,44 +57,48 @@ internal sealed class MeasurementRepository : IMeasurementRepository
         return await _applicationDbContext.AggregatedMeasurements.Where(am => roomId == am.RoomDtoId).ToArrayAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken cancellationToken)
+    public async Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
     {
         return await _applicationDbContext.AggregatedMeasurements
             .Where(am => roomId == am.RoomDtoId)
-            .Where(am => am.StartTime >= timeStart && am.EndTime <= timeEnd)
+            .Where(am => am.StartTime >= startTime && am.EndTime <= endTime)
             .ToArrayAsync(cancellationToken);
     }
 
     public async Task AddMeasurementsAsync(int roomId, IReadOnlyCollection<Measurement> measurements, CancellationToken cancellationToken)
     {
-        await Task.Run(() =>
+        await RecentRoomMeasurementGroupsMutex.Lock(recentRoomMeasurementGroups =>
         {
-            lock (_recentRoomMeasurementGroups)
+            if (recentRoomMeasurementGroups.TryGetValue(roomId, out var value))
             {
-                if (_recentRoomMeasurementGroups.TryGetValue(roomId, out var value))
-                {
-                    value.Add(new MeasurementGroup(measurements.ToImmutableArray()));
-                }
-                else
-                {
-                    _recentRoomMeasurementGroups.Add(roomId, new List<MeasurementGroup>() { new MeasurementGroup(measurements.ToImmutableArray()) });
-                }
+                value.Add(new MeasurementGroup(measurements.ToImmutableArray()));
+            }
+            else
+            {
+                recentRoomMeasurementGroups.Add(roomId, new List<MeasurementGroup>() { new MeasurementGroup(measurements.ToImmutableArray()) });
             }
         }, cancellationToken);
     }
 
+    public async Task<DateTime?> GetFirstAggregatedMeasurementsDateTimeAsync(int roomId, CancellationToken cancellationToken)
+    {
+        var aggregatedMeasurements = _applicationDbContext.AggregatedMeasurements.Where(m => m.RoomDtoId == roomId);
+        if (!aggregatedMeasurements.Any())
+        {
+            return null;
+        }
+
+        return await aggregatedMeasurements.MinAsync(m => m.StartTime, cancellationToken);
+    }
+
     public async Task<IReadOnlyDictionary<int, IReadOnlyList<MeasurementGroup>>> GetRoomMeasurementGroupsAsync(CancellationToken cancellationToken)
     {
-        return await Task.Run(() =>
+        return await RecentRoomMeasurementGroupsMutex.Lock(recentRoomMeasurementGroups =>
         {
-            lock (_recentRoomMeasurementGroups)
-            {
-                var recentRoomMeasurementGroups = _recentRoomMeasurementGroups
-                    .ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<MeasurementGroup>)kvp.Value.ToImmutableArray());
+            var copy = recentRoomMeasurementGroups.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<MeasurementGroup>)kv.Value.ToImmutableArray());
+            recentRoomMeasurementGroups.Clear();
 
-                _recentRoomMeasurementGroups.Clear();
-                return recentRoomMeasurementGroups;
-            }
+            return copy;
         }, cancellationToken);
     }
 }

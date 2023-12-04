@@ -2,87 +2,106 @@ using System.Collections.Immutable;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
 using CentralHub.Api.Services;
+using CentralHub.Api.Threading;
 
 namespace CentralHub.Api.Tests;
 
 internal sealed class MockAggregatedMeasurementRepository : IMeasurementRepository
 {
-    private static readonly Dictionary<int, List<MeasurementGroup>> _recentMeasurementGroups = new Dictionary<int, List<MeasurementGroup>>();
+    private static readonly CancellableMutex<Dictionary<int, List<MeasurementGroup>>> RecentMeasurementGroupsMutex =
+        new CancellableMutex<Dictionary<int, List<MeasurementGroup>>>(new Dictionary<int, List<MeasurementGroup>>());
 
-    private static readonly List<AggregatedMeasurementDto> _AggregatedMeasurements = new List<AggregatedMeasurementDto>();
-    private int _nextId = 0;
 
-    public Task<int> AddAggregatedMeasurementAsync(AggregatedMeasurementDto aggregatedDto, CancellationToken cancellationToken)
+    private static readonly CancellableMutex<AggregatedMeasurementsStuff> AggregatedMeasurementsMutex =
+        new CancellableMutex<AggregatedMeasurementsStuff>(new AggregatedMeasurementsStuff());
+
+    private sealed class AggregatedMeasurementsStuff
     {
-        lock (_AggregatedMeasurements)
-        {
-            _AggregatedMeasurements.Add(aggregatedDto);
-            aggregatedDto.AggregatedMeasurementDtoId = _nextId;
-            _nextId++;
-        }
-        return new ValueTask<int>(aggregatedDto.RoomDtoId).AsTask();
+        public List<AggregatedMeasurementDto> AggregatedMeasurements { get; } = new List<AggregatedMeasurementDto>();
+
+        public int NextId { get; set; } = 0;
     }
 
-    public Task RemoveAggregatedMeasurementAsync(AggregatedMeasurementDto aggregatedDto, CancellationToken cancellationToken)
+    public async Task<int> AddAggregatedMeasurementAsync(AggregatedMeasurementDto aggregatedDto, CancellationToken cancellationToken)
     {
-        lock (_AggregatedMeasurements)
+        return await AggregatedMeasurementsMutex.Lock(stuff =>
         {
-            _AggregatedMeasurements.Remove(aggregatedDto);
-        }
-        return Task.CompletedTask;
+            stuff.AggregatedMeasurements.Add(aggregatedDto);
+            aggregatedDto.AggregatedMeasurementDtoId = stuff.NextId;
+            stuff.NextId++;
+
+            return aggregatedDto.AggregatedMeasurementDtoId;
+        }, cancellationToken);
     }
 
-    public Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, CancellationToken cancellationToken)
+    public async Task RemoveAggregatedMeasurementAsync(AggregatedMeasurementDto aggregatedDto, CancellationToken cancellationToken)
     {
-        lock (_AggregatedMeasurements)
+        await AggregatedMeasurementsMutex.Lock(stuff =>
         {
-            return new ValueTask<IEnumerable<AggregatedMeasurementDto>>(
-                _AggregatedMeasurements
+            stuff.AggregatedMeasurements.Remove(aggregatedDto);
+        }, cancellationToken);
+    }
+
+    public async Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, CancellationToken cancellationToken)
+    {
+        return await AggregatedMeasurementsMutex.Lock(stuff =>
+        {
+            return stuff.AggregatedMeasurements
                 .Where(m => m.RoomDtoId == roomId)
-                .ToImmutableArray()).AsTask();
-        }
+                .ToImmutableArray();
+        }, cancellationToken);
     }
 
-    public Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken cancellationToken)
+    public async Task<IEnumerable<AggregatedMeasurementDto>> GetAggregatedMeasurementsAsync(int roomId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
     {
-        lock (_AggregatedMeasurements)
+        return await AggregatedMeasurementsMutex.Lock(stuff =>
         {
-            return new ValueTask<IEnumerable<AggregatedMeasurementDto>>(
-                _AggregatedMeasurements
-                .Where(m => m.RoomDtoId == roomId && m.StartTime >= timeStart && m.EndTime <= timeEnd)
-                .ToImmutableArray()).AsTask();
-        }
+            return stuff.AggregatedMeasurements
+                .Where(m => m.RoomDtoId == roomId && m.StartTime >= startTime && m.EndTime <= endTime)
+                .ToImmutableArray();
+        }, cancellationToken);
     }
 
     public async Task<IReadOnlyDictionary<int, IReadOnlyList<MeasurementGroup>>> GetRoomMeasurementGroupsAsync(CancellationToken cancellationToken)
     {
-        return await Task.Run(() =>
+        return await RecentMeasurementGroupsMutex.Lock(recentMeasurementGroups =>
         {
-            lock (_recentMeasurementGroups)
-            {
-                var recentTrackerMeasurementGroups = _recentMeasurementGroups
-                    .ToDictionary(k => k.Key, v => (IReadOnlyList<MeasurementGroup>)v.Value.ToImmutableArray());
-                _recentMeasurementGroups.Clear();
-                return recentTrackerMeasurementGroups;
-            }
+            var recentTrackerMeasurementGroups = recentMeasurementGroups
+                .ToDictionary(k => k.Key, v => (IReadOnlyList<MeasurementGroup>)v.Value.ToImmutableArray());
+            recentMeasurementGroups.Clear();
+            return recentTrackerMeasurementGroups;
         }, cancellationToken);
     }
 
-    public Task AddMeasurementsAsync(int id, IReadOnlyCollection<Measurement> measurements, CancellationToken cancellationToken)
+    public async Task AddMeasurementsAsync(int id, IReadOnlyCollection<Measurement> measurements, CancellationToken cancellationToken)
     {
-        return Task.Run(() =>
+        await RecentMeasurementGroupsMutex.Lock(recentMeasurementGroups =>
         {
-            lock (_recentMeasurementGroups)
+            if (recentMeasurementGroups.TryGetValue(id, out var value))
             {
-                if (_recentMeasurementGroups.TryGetValue(id, out var value))
-                {
-                    value.Add(new MeasurementGroup(measurements.ToList()));
-                }
-                else
-                {
-                    _recentMeasurementGroups.Add(id, new List<MeasurementGroup>() { new MeasurementGroup(measurements.ToList()) });
-                }
+                value.Add(new MeasurementGroup(measurements.ToImmutableArray()));
             }
+            else
+            {
+                recentMeasurementGroups.Add(id,
+                    new List<MeasurementGroup>() { new MeasurementGroup(measurements.ToImmutableArray()) });
+            }
+
+        }, cancellationToken);
+    }
+
+    public async Task<DateTime?> GetFirstAggregatedMeasurementsDateTimeAsync(int roomId, CancellationToken cancellationToken)
+    {
+        return await AggregatedMeasurementsMutex.Lock(stuff =>
+        {
+            var aggregatedMeasurements = stuff.AggregatedMeasurements.Where(m => m.RoomDtoId == roomId)
+                .ToImmutableArray();
+            if (!aggregatedMeasurements.Any())
+            {
+                return (DateTime?)null;
+            }
+
+            return aggregatedMeasurements.Min(m => m.StartTime);
         }, cancellationToken);
     }
 }
