@@ -46,7 +46,8 @@ public class MeasurementControllerTests
         _aggregatedMeasurementRepository = new MockAggregatedMeasurementRepository();
         _measurementController = new MeasurementController(
             NullLogger<MeasurementController>.Instance,
-            _aggregatedMeasurementRepository);
+            _aggregatedMeasurementRepository,
+            _trackerRepository);
     }
 
     [TearDown]
@@ -63,16 +64,31 @@ public class MeasurementControllerTests
     public async Task TestAddMeasurements()
     {
         var measurements = new Measurement[] {
+            new Measurement("22:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
+            new Measurement("bb:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 20)
+        };
+
+        var addMeasurementsRequest = new AddMeasurementsRequest(_trackerId, measurements);
+        await _measurementController.AddMeasurements(addMeasurementsRequest, default);
+        var addedMeasurements = (await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default))[_trackerId][0].Measurements;
+
+        Assert.That(addedMeasurements, Has.Count.EqualTo(measurements.Length));
+        Assert.That(addedMeasurements, Does.Contain(measurements[0]));
+        Assert.That(addedMeasurements, Does.Contain(measurements[1]));
+    }
+
+    [Test]
+    public async Task TrackersFilteredFromMeasurements()
+    {
+        var measurements = new Measurement[] {
             new Measurement("11:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
             new Measurement("aa:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 20)
         };
 
         var addMeasurementsRequest = new AddMeasurementsRequest(_trackerId, measurements);
         await _measurementController.AddMeasurements(addMeasurementsRequest, default);
-        var addedMeasurements = (await _aggregatedMeasurementRepository.GetTrackerMeasurementGroupsAsync(default))[_trackerId][0].Measurements;
+        var addedMeasurements = (await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default))[_trackerId][0].Measurements;
 
-        Assert.That(addedMeasurements, Has.Count.EqualTo(measurements.Length));
-        Assert.That(addedMeasurements, Does.Contain(measurements[0]));
-        Assert.That(addedMeasurements, Does.Contain(measurements[1]));
+        Assert.That(addedMeasurements, Has.Count.EqualTo(0));
     }
 }

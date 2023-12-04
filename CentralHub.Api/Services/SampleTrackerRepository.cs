@@ -147,4 +147,12 @@ public sealed class SampleTrackerRepository : ITrackerRepository
                 });
         }, cancellationToken);
     }
+
+    public async Task<IEnumerable<TrackerDto>> GetRegisteredTrackers(CancellationToken cancellationToken)
+    {
+        return await LockedStuffMutex.Lock(stuff =>
+        {
+            return stuff.Trackers.Values.ToImmutableArray();
+        }, cancellationToken);
+    }
 }

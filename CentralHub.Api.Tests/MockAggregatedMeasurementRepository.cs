@@ -54,7 +54,7 @@ internal sealed class MockAggregatedMeasurementRepository : IMeasurementReposito
         }
     }
 
-    public async Task<IReadOnlyDictionary<int, IReadOnlyList<MeasurementGroup>>> GetTrackerMeasurementGroupsAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyDictionary<int, IReadOnlyList<MeasurementGroup>>> GetRoomMeasurementGroupsAsync(CancellationToken cancellationToken)
     {
         return await Task.Run(() =>
         {

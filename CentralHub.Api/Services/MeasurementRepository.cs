@@ -8,7 +8,7 @@ namespace CentralHub.Api.Services;
 
 internal sealed class MeasurementRepository : IMeasurementRepository
 {
-    private readonly static Dictionary<int, List<MeasurementGroup>> _recentTrackerMeasurementGroups = new Dictionary<int, List<MeasurementGroup>>();
+    private readonly static Dictionary<int, List<MeasurementGroup>> _recentRoomMeasurementGroups = new Dictionary<int, List<MeasurementGroup>>();
 
     private readonly ApplicationDbContext _applicationDbContext;
 
@@ -63,35 +63,35 @@ internal sealed class MeasurementRepository : IMeasurementRepository
             .ToArrayAsync(cancellationToken);
     }
 
-    public async Task AddMeasurementsAsync(int trackerId, IReadOnlyCollection<Measurement> measurements, CancellationToken cancellationToken)
+    public async Task AddMeasurementsAsync(int roomId, IReadOnlyCollection<Measurement> measurements, CancellationToken cancellationToken)
     {
         await Task.Run(() =>
         {
-            lock (_recentTrackerMeasurementGroups)
+            lock (_recentRoomMeasurementGroups)
             {
-                if (_recentTrackerMeasurementGroups.TryGetValue(trackerId, out var value))
+                if (_recentRoomMeasurementGroups.TryGetValue(roomId, out var value))
                 {
                     value.Add(new MeasurementGroup(measurements.ToImmutableArray()));
                 }
                 else
                 {
-                    _recentTrackerMeasurementGroups.Add(trackerId, new List<MeasurementGroup>() { new MeasurementGroup(measurements.ToImmutableArray()) });
+                    _recentRoomMeasurementGroups.Add(roomId, new List<MeasurementGroup>() { new MeasurementGroup(measurements.ToImmutableArray()) });
                 }
             }
         }, cancellationToken);
     }
 
-    public async Task<IReadOnlyDictionary<int, IReadOnlyList<MeasurementGroup>>> GetTrackerMeasurementGroupsAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyDictionary<int, IReadOnlyList<MeasurementGroup>>> GetRoomMeasurementGroupsAsync(CancellationToken cancellationToken)
     {
         return await Task.Run(() =>
         {
-            lock (_recentTrackerMeasurementGroups)
+            lock (_recentRoomMeasurementGroups)
             {
-                var recentTrackerMeasurementGroups = _recentTrackerMeasurementGroups
+                var recentRoomMeasurementGroups = _recentRoomMeasurementGroups
                     .ToDictionary(kvp => kvp.Key, kvp => (IReadOnlyList<MeasurementGroup>)kvp.Value.ToImmutableArray());
 
-                _recentTrackerMeasurementGroups.Clear();
-                return recentTrackerMeasurementGroups;
+                _recentRoomMeasurementGroups.Clear();
+                return recentRoomMeasurementGroups;
             }
         }, cancellationToken);
     }
