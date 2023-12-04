@@ -9,7 +9,7 @@ namespace CentralHub.Api.Services;
 
 public class LocalizationService : IScopedProcessingService
 {
-    private static readonly TimeSpan _sleepTime = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan SleepTime = TimeSpan.FromMinutes(2);
     private readonly ILogger<LocalizationService> _logger;
 
     private readonly IMeasurementRepository _aggregatorRepository;
@@ -31,7 +31,7 @@ public class LocalizationService : IScopedProcessingService
         while (!stoppingToken.IsCancellationRequested)
         {
             await AggregateMeasurementsAsync(stoppingToken);
-            await Task.Delay(_sleepTime, stoppingToken);
+            await Task.Delay(SleepTime, stoppingToken);
         }
     }
 
@@ -76,39 +76,13 @@ public class LocalizationService : IScopedProcessingService
     private static AggregatedMeasurementDto CreateAggregatedMeasurement(RoomDto room, IReadOnlyCollection<MeasurementGroup> measurementGroups)
     {
         var measurements = measurementGroups.SelectMany(mg => mg.Measurements);
-        var bluetooth = measurements.Where(m => m.Type == Measurement.Protocol.Bluetooth);
-        var wifi = measurements.Where(m => m.Type == Measurement.Protocol.Wifi);
+        var filteredMeasurements = FilterMeasurements(measurements).ToImmutableArray();
+        var bluetoothCount = filteredMeasurements.Count(m => m.Type == Measurement.Protocol.Bluetooth);
+        var wifiCount = filteredMeasurements.Count(m => m.Type == Measurement.Protocol.Wifi);
         var now = DateTime.UtcNow;
 
-        var startMeasurementTime = measurementGroups.Count != 0 ? measurementGroups.Min(mg => mg.Timestamp) : now - _sleepTime;
+        var startMeasurementTime = measurementGroups.Count != 0 ? measurementGroups.Min(mg => mg.Timestamp) : now - SleepTime;
         var endMeasurementTime = measurementGroups.Count != 0 ? measurementGroups.Max(mg => mg.Timestamp) : now;
-
-        var filteredMeasurementsGroups = measurementGroups.Select(mg => FilterMeasurements(mg.Measurements)).ToImmutableArray();
-        var numBluetoothPerGroup = filteredMeasurementsGroups.Select(m => m.Count(m => m.Type == Measurement.Protocol.Bluetooth)).ToImmutableArray();
-        var numWifiPerGroup = filteredMeasurementsGroups.Select(m => m.Count(m => m.Type == Measurement.Protocol.Wifi)).ToImmutableArray();
-
-
-        var measurementGroupCount = measurementGroups.Count != 0 ? measurementGroups.Count : 1;
-
-        var bluetoothMax = MaxDevices(numBluetoothPerGroup);
-
-        var bluetoothMedian = MedianDevices(numBluetoothPerGroup);
-
-        var bluetoothMean = MeanDevices(numBluetoothPerGroup);
-
-        var bluetoothMin = MinDevices(numBluetoothPerGroup);
-
-        var bluetoothCount = FilterMeasurements(bluetooth).Count();
-
-        var wifiMax = MaxDevices(numWifiPerGroup);
-
-        var wifiMedian = MedianDevices(numWifiPerGroup);
-
-        var wifiMean = MeanDevices(numWifiPerGroup);
-
-        var wifiMin = MinDevices(numWifiPerGroup);
-
-        var wifiCount = FilterMeasurements(wifi).Count();
 
         var roomDtoId = room.RoomDtoId;
 
@@ -118,17 +92,8 @@ public class LocalizationService : IScopedProcessingService
         {
             StartTime = startMeasurementTime,
             EndTime = endMeasurementTime,
-            MeasurementGroupCount = measurementGroupCount,
-            BluetoothMaxDeviceCount = bluetoothMax,
-            BluetoothMedianDeviceCount = bluetoothMedian,
-            BluetoothMeanDeviceCount = bluetoothMean,
-            BluetoothMinDeviceCount = bluetoothMin,
-            TotalBluetoothDeviceCount = bluetoothCount,
-            WifiMaxDeviceCount = wifiMax,
-            WifiMedianDeviceCount = wifiMedian,
-            WifiMeanDeviceCount = wifiMean,
-            WifiMinDeviceCount = wifiMin,
-            TotalWifiDeviceCount = wifiCount,
+            BluetoothCount = bluetoothCount,
+            WifiCount = wifiCount,
             RoomDtoId = roomDtoId,
             RoomDto = roomDto
         };
@@ -153,47 +118,6 @@ public class LocalizationService : IScopedProcessingService
         return filteredMeasurements.Values;
     }
 
-    private static int MaxDevices(IEnumerable<int> numMatchingProtocolPerGroup)
-    {
-        if (!numMatchingProtocolPerGroup.Any())
-        {
-            return 0;
-        }
-
-        return numMatchingProtocolPerGroup.Max();
-    }
-
-    private static int MinDevices(IEnumerable<int> numMatchingProtocolPerGroup)
-    {
-        if (!numMatchingProtocolPerGroup.Any())
-        {
-            return 0;
-        }
-
-        return numMatchingProtocolPerGroup.Min();
-    }
-
-    private static int MedianDevices(IEnumerable<int> numMatchingProtocolPerGroup)
-    {
-        if (!numMatchingProtocolPerGroup.Any())
-        {
-            return 0;
-        }
-
-        return numMatchingProtocolPerGroup
-            .Order()
-            .ElementAt((int)Math.Floor(numMatchingProtocolPerGroup.Count() / 2f));
-    }
-
-    private static double MeanDevices(IEnumerable<int> numMatchingProtocolPerGroup)
-    {
-        if (!numMatchingProtocolPerGroup.Any())
-        {
-            return 0;
-        }
-
-        return numMatchingProtocolPerGroup.Average();
-    }
     private readonly struct FilterCriteria
     {
         public string MacAddress { get; }

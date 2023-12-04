@@ -1,9 +1,8 @@
 @page "/charts/{roomId:int}"
 @using ApexCharts
-@using CentralHub.Api.Model.Responses.AggregatedMeasurements
 @using CentralHub.WebUI.Data
-@using System.Collections.Immutable
 @using System.Globalization
+@using CentralHub.Api.Model.Responses.Measurements
 @implements IDisposable
 @inject MeasurementService MeasurementService
 
@@ -29,64 +28,24 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xl">
-            <ApexChart @ref="_wifiChart" TItem="AggregatedMeasurements" Title="Wifi Data" Debug="true" Options="_options1">
-                <ApexRangeAreaSeries
-                    TItem="AggregatedMeasurements"
-                    Items="_data1"
-                    Name="Min - Max"
-                    XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
-                    Top="e => e.WifiMax"
-                    Bottom="e => e.WifiMin"
-                    Stroke="@(new SeriesStroke{ Width=0 })"
-                />
+        <div class="col">
+            <ApexChart @ref="_chart" TItem="AggregatedMeasurements" Title="Data" Debug="true" Options="_chartOptions">
                 <ApexPointSeries
                     TItem="AggregatedMeasurements"
-                    Items="_data1"
-                    Name="Median"
+                    Items="_aggregatedMeasurements"
+                    Name="Wifi Devices"
                     SeriesType="SeriesType.Line"
                     XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
-                    YValue="e => e.WifiMedian"
+                    YValue="e => (decimal)e.WifiCount"
                     Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#ff3300" })"
                 />
                 <ApexPointSeries
                     TItem="AggregatedMeasurements"
-                    Items="_data1"
-                    Name="Mean"
+                    Items="_aggregatedMeasurements"
+                    Name="Bluetooth Devices"
                     SeriesType="SeriesType.Line"
                     XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
-                    YValue="e => (decimal)e.WifiMean"
-                    Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#0033ff" })"
-                />
-            </ApexChart>
-        </div>
-        <div class="col-xl">
-            <ApexChart @ref="_bluetoothChart" TItem="AggregatedMeasurements" Title="Bluetooth Data" Debug="true" Options="_options2">
-                <ApexRangeAreaSeries
-                    TItem="AggregatedMeasurements"
-                    Items="_data2"
-                    Name="Min - Max"
-                    XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
-                    Top="e => e.BluetoothMax"
-                    Bottom="e => e.BluetoothMin"
-                    Stroke="@(new SeriesStroke{ Width=0 })"
-                />
-                <ApexPointSeries
-                    TItem="AggregatedMeasurements"
-                    Items="_data2"
-                    Name="Median"
-                    SeriesType="SeriesType.Line"
-                    XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
-                    YValue="e => e.BluetoothMedian"
-                    Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#ff3300" })"
-                />
-                <ApexPointSeries
-                    TItem="AggregatedMeasurements"
-                    Items="_data2"
-                    Name="Mean"
-                    SeriesType="SeriesType.Line"
-                    XValue="e => e.EndTime.ToUnixTimeMilliseconds()"
-                    YValue="e => (decimal)e.BluetoothMean"
+                    YValue="e => e.BluetoothCount"
                     Stroke="@(new SeriesStroke{ Width=3, DashSpace=3, Color="#0033ff" })"
                 />
             </ApexChart>
@@ -101,11 +60,9 @@
     
     private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-    private IReadOnlyCollection<AggregatedMeasurements>? _data1;
-    private IReadOnlyCollection<AggregatedMeasurements>? _data2;
+    private IReadOnlyCollection<AggregatedMeasurements>? _aggregatedMeasurements;
 
-    private readonly ApexChartOptions<AggregatedMeasurements> _options1 = new();
-    private readonly ApexChartOptions<AggregatedMeasurements> _options2 = new();
+    private readonly ApexChartOptions<AggregatedMeasurements> _chartOptions = new();
 
 
     private DateTime _firstDateTime;
@@ -122,8 +79,7 @@
             {
                 await UpdateAggregatedMeasurements();
                 StateHasChanged();
-                await _wifiChart!.RenderAsync();
-                await _bluetoothChart!.RenderAsync();
+                await _chart!.RenderAsync();
             });
         }
     }
@@ -136,43 +92,40 @@
             {
                 await UpdateAggregatedMeasurements();
                 StateHasChanged();
-                await _wifiChart!.RenderAsync();
-                await _bluetoothChart!.RenderAsync();
+                await _chart!.RenderAsync();
             });
         }
     }
 
-    private ApexChart<AggregatedMeasurements>? _wifiChart;
-    private ApexChart<AggregatedMeasurements>? _bluetoothChart;
+    private ApexChart<AggregatedMeasurements>? _chart;
 
     private async Task UpdateAggregatedMeasurements()
     {
-        _data1 = await MeasurementService.GetAggregatedMeasurements(RoomId, MinDateTime.ToUniversalTime(), MaxDateTime.ToUniversalTime(), _cancellationTokenSource.Token);
+        _aggregatedMeasurements = await MeasurementService.GetAggregatedMeasurements(RoomId, MinDateTime.ToUniversalTime(), MaxDateTime.ToUniversalTime(), _cancellationTokenSource.Token);
 
         // HACK!: Add dummy data because the charts crash if there is no data and a page reload is necessary to get it back
-        if (!_data1.Any())
+        if (!_aggregatedMeasurements.Any())
         {
-            _data1 = new[] {new AggregatedMeasurements(0, MinDateTime.ToUniversalTime(), MaxDateTime.ToUniversalTime(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)};
+            _aggregatedMeasurements = new[] {new AggregatedMeasurements(0, MinDateTime.ToUniversalTime(), MaxDateTime.ToUniversalTime(), 0, 0)};
         }
-        _data2 = _data1.ToImmutableArray();
     }
     
     protected override async Task OnInitializedAsync()
     {
-        _firstDateTime = await MeasurementService.GetFirstAggregatedMeasurementsDateTime(RoomId, _cancellationTokenSource.Token);
+        _firstDateTime = (await MeasurementService.GetFirstAggregatedMeasurementsDateTime(RoomId, _cancellationTokenSource.Token)).GetValueOrDefault();
         await UpdateAggregatedMeasurements();
-        _options1.Chart = new Chart()
+        _chartOptions.Chart = new Chart()
         {
             Type = ChartType.RangeArea
         };
         
-        _options1.Colors = new List<string> { "#d4526e", "#ff3300", "#0033ff" };
-        _options1.Fill = new Fill
+        _chartOptions.Colors = new List<string> { "#ff3300", "#0033ff" };
+        _chartOptions.Fill = new Fill
         {
-            Opacity = new List<double> { 0.24, 1, 1 }
+            Opacity = new List<double> { 1, 1 }
         };
 
-        _options1.Yaxis = new List<YAxis>()
+        _chartOptions.Yaxis = new List<YAxis>()
         {
             new YAxis()
             {
@@ -187,7 +140,7 @@
             },
         };
 
-        _options1.Tooltip = new Tooltip()
+        _chartOptions.Tooltip = new Tooltip()
         {
             Y = new TooltipY()
             {
@@ -199,50 +152,7 @@
             },
         };
 
-        _options1.Xaxis = new XAxis()
-        {
-            Type = XAxisType.Datetime,
-        };
-        
-        _options2.Chart = new Chart()
-        {
-            Type = ChartType.RangeArea
-        };
-        
-        _options2.Colors = new List<string> { "#d4526e", "#ff3300", "#0033ff" };
-        _options2.Fill = new Fill
-        {
-            Opacity = new List<double> { 0.24, 1, 1 }
-        };
-
-        _options2.Yaxis = new List<YAxis>()
-        {
-            new YAxis()
-            {
-                Labels = new ()
-                {
-                    Formatter = @"
-                    function (val) {
-                        return val.toFixed(0);
-                    }
-                    ",
-                },
-            },
-        };
-
-        _options2.Tooltip = new Tooltip()
-        {
-            Y = new TooltipY()
-            {
-                Formatter = @"
-                function (val) {
-                    return val.toString();
-                }
-                ",
-            },
-        };
-
-        _options2.Xaxis = new XAxis()
+        _chartOptions.Xaxis = new XAxis()
         {
             Type = XAxisType.Datetime,
         };

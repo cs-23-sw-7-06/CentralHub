@@ -75,17 +75,8 @@ class ServiceTests
 
         var aggregatedMeasurement = aggregatedMeasurements.First();
 
-        Assert.That(aggregatedMeasurement.MeasurementGroupCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.BluetoothMedianDeviceCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.WifiMedianDeviceCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.BluetoothMeanDeviceCount, Is.EqualTo(1f));
-        Assert.That(aggregatedMeasurement.WifiMeanDeviceCount, Is.EqualTo(1f));
-        Assert.That(aggregatedMeasurement.BluetoothMaxDeviceCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.WifiMaxDeviceCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.BluetoothMinDeviceCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.WifiMinDeviceCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.TotalBluetoothDeviceCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.TotalWifiDeviceCount, Is.EqualTo(1));
+        Assert.That(aggregatedMeasurement.BluetoothCount, Is.EqualTo(1));
+        Assert.That(aggregatedMeasurement.WifiCount, Is.EqualTo(1));
     }
 
     [Test]
@@ -116,17 +107,8 @@ class ServiceTests
 
         var aggregatedMeasurement = aggregatedMeasurements.First();
 
-        Assert.That(aggregatedMeasurement.MeasurementGroupCount, Is.EqualTo(2));
-        Assert.That(aggregatedMeasurement.BluetoothMedianDeviceCount, Is.EqualTo(3));
-        Assert.That(aggregatedMeasurement.WifiMedianDeviceCount, Is.EqualTo(3));
-        Assert.That(aggregatedMeasurement.BluetoothMeanDeviceCount, Is.EqualTo(2.5f));
-        Assert.That(aggregatedMeasurement.WifiMeanDeviceCount, Is.EqualTo(2.5f));
-        Assert.That(aggregatedMeasurement.BluetoothMaxDeviceCount, Is.EqualTo(3));
-        Assert.That(aggregatedMeasurement.WifiMaxDeviceCount, Is.EqualTo(3));
-        Assert.That(aggregatedMeasurement.BluetoothMinDeviceCount, Is.EqualTo(2));
-        Assert.That(aggregatedMeasurement.WifiMinDeviceCount, Is.EqualTo(2));
-        Assert.That(aggregatedMeasurement.TotalBluetoothDeviceCount, Is.EqualTo(5));
-        Assert.That(aggregatedMeasurement.TotalWifiDeviceCount, Is.EqualTo(5));
+        Assert.That(aggregatedMeasurement.BluetoothCount, Is.EqualTo(5));
+        Assert.That(aggregatedMeasurement.WifiCount, Is.EqualTo(5));
     }
 
     [Test]
@@ -148,9 +130,8 @@ class ServiceTests
 
         var aggregatedMeasurement = aggregatedMeasurements.First();
 
-        Assert.That(aggregatedMeasurement.MeasurementGroupCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.TotalBluetoothDeviceCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.TotalWifiDeviceCount, Is.EqualTo(1));
+        Assert.That(aggregatedMeasurement.BluetoothCount, Is.EqualTo(1));
+        Assert.That(aggregatedMeasurement.WifiCount, Is.EqualTo(1));
     }
 
     [Test]
@@ -165,16 +146,7 @@ class ServiceTests
 
         var aggregatedMeasurement = aggregatedMeasurements.First();
 
-        Assert.That(aggregatedMeasurement.MeasurementGroupCount, Is.EqualTo(1));
-        Assert.That(aggregatedMeasurement.BluetoothMedianDeviceCount, Is.EqualTo(0));
-        Assert.That(aggregatedMeasurement.WifiMedianDeviceCount, Is.EqualTo(0));
-        Assert.That(aggregatedMeasurement.BluetoothMeanDeviceCount, Is.EqualTo(0));
-        Assert.That(aggregatedMeasurement.WifiMeanDeviceCount, Is.EqualTo(0));
-        Assert.That(aggregatedMeasurement.BluetoothMaxDeviceCount, Is.EqualTo(0));
-        Assert.That(aggregatedMeasurement.WifiMaxDeviceCount, Is.EqualTo(0));
-        Assert.That(aggregatedMeasurement.BluetoothMinDeviceCount, Is.EqualTo(0));
-        Assert.That(aggregatedMeasurement.WifiMinDeviceCount, Is.EqualTo(0));
-        Assert.That(aggregatedMeasurement.TotalBluetoothDeviceCount, Is.EqualTo(0));
-        Assert.That(aggregatedMeasurement.TotalWifiDeviceCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.BluetoothCount, Is.EqualTo(0));
+        Assert.That(aggregatedMeasurement.WifiCount, Is.EqualTo(0));
     }
 }
