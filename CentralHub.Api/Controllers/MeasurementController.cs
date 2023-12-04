@@ -69,7 +69,7 @@ public sealed class MeasurementController : ControllerBase
     [HttpGet("range")]
     public async Task<GetAggregatedMeasurementsResponse> GetAggregateMeasurements(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken token)
     {
-        var aggregatedMeasurements = await _aggregatorRepository.GetAggregatedMeasurementsAsync(roomId, timeStart, timeEnd, token);
+        var aggregatedMeasurements = await _measurementRepository.GetAggregatedMeasurementsAsync(roomId, timeStart, timeEnd, token);
 
         if (aggregatedMeasurements == null)
         {
@@ -78,6 +78,21 @@ public sealed class MeasurementController : ControllerBase
 
         return GetAggregatedMeasurementsResponse
             .CreateSuccessful(CreateMeasurements(aggregatedMeasurements));
+    }
+
+    [HttpGet("first")]
+    public async Task<GetFirstAggregatedMeasurementsDateTimeResponse> GetFirstAggregatedMeasurementDateTime(int roomId,
+        CancellationToken cancellationToken)
+    {
+        var possibleFirstDateTime =
+            await _measurementRepository.GetFirstAggregatedMeasurementsDateTimeAsync(roomId, cancellationToken);
+
+        if (possibleFirstDateTime == null)
+        {
+            return GetFirstAggregatedMeasurementsDateTimeResponse.CreateUnsuccessful();
+        }
+
+        return GetFirstAggregatedMeasurementsDateTimeResponse.CreateSuccessful(possibleFirstDateTime.Value);
     }
 
     private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IEnumerable<AggregatedMeasurementDto> aggregatedMeasurements)
@@ -102,20 +117,5 @@ public sealed class MeasurementController : ControllerBase
             am.WifiMinDeviceCount - wifiCalibrationNumber,
             am.TotalWifiDeviceCount - wifiCalibrationNumber)
             ).ToImmutableArray();
-    }
-
-    [HttpGet("first")]
-    public async Task<GetFirstAggregatedMeasurementsDateTimeResponse> GetFirstAggregatedMeasurementDateTime(int roomId,
-        CancellationToken cancellationToken)
-    {
-        var possibleFirstDateTime =
-            await _measurementRepository.GetFirstAggregatedMeasurementsDateTimeAsync(roomId, cancellationToken);
-
-        if (possibleFirstDateTime == null)
-        {
-            return GetFirstAggregatedMeasurementsDateTimeResponse.CreateUnsuccessful();
-        }
-
-        return GetFirstAggregatedMeasurementsDateTimeResponse.CreateSuccessful(possibleFirstDateTime.Value);
     }
 }
