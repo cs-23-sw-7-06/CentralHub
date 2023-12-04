@@ -72,7 +72,7 @@ public class LocalizationService : IScopedProcessingService
         var measurements = measurementGroups.SelectMany(mg => mg.Measurements);
         var bluetooth = measurements.Where(m => m.Type == Measurement.Protocol.Bluetooth);
         var wifi = measurements.Where(m => m.Type == Measurement.Protocol.Wifi);
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
         var startMeasurementTime = measurementGroups.Count != 0 ? measurementGroups.Min(mg => mg.Timestamp) : now - _sleepTime;
         var endMeasurementTime = measurementGroups.Count != 0 ? measurementGroups.Max(mg => mg.Timestamp) : now;
@@ -144,7 +144,7 @@ public class LocalizationService : IScopedProcessingService
             }
         }
 
-        return filteredMeasurements.Values.Where(m => m.Rssi >= -75);
+        return filteredMeasurements.Values;
     }
 
     private static int MaxDevices(IEnumerable<int> numMatchingProtocolPerGroup)

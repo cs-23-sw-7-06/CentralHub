@@ -15,6 +15,8 @@ public class MeasurementControllerTests
     private ITrackerRepository _trackerRepository;
     private IMeasurementRepository _aggregatedMeasurementRepository;
 
+    private LocalizationService _localizationService;
+
     private int _roomId = 0;
 
     private int _trackerId = 0;
@@ -48,6 +50,12 @@ public class MeasurementControllerTests
             NullLogger<MeasurementController>.Instance,
             _aggregatedMeasurementRepository,
             _trackerRepository);
+
+        _localizationService = new LocalizationService(
+            NullLogger<LocalizationService>.Instance,
+            _aggregatedMeasurementRepository,
+            _roomRepository
+        );
     }
 
     [TearDown]
@@ -70,7 +78,7 @@ public class MeasurementControllerTests
 
         var addMeasurementsRequest = new AddMeasurementsRequest(_trackerId, measurements);
         await _measurementController.AddMeasurements(addMeasurementsRequest, default);
-        var addedMeasurements = (await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default))[_trackerId][0].Measurements;
+        var addedMeasurements = (await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default))[_roomId][0].Measurements;
 
         Assert.That(addedMeasurements, Has.Count.EqualTo(measurements.Length));
         Assert.That(addedMeasurements, Does.Contain(measurements[0]));
@@ -87,8 +95,55 @@ public class MeasurementControllerTests
 
         var addMeasurementsRequest = new AddMeasurementsRequest(_trackerId, measurements);
         await _measurementController.AddMeasurements(addMeasurementsRequest, default);
-        var addedMeasurements = (await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default))[_trackerId][0].Measurements;
+        var addedMeasurements = (await _aggregatedMeasurementRepository.GetRoomMeasurementGroupsAsync(default))[_roomId][0].Measurements;
 
         Assert.That(addedMeasurements, Has.Count.EqualTo(0));
+    }
+
+    [Test]
+    public async Task CalibrateMeasurements()
+    {
+        var measurements = new Measurement[] {
+            new Measurement("12:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
+            new Measurement("ab:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 20)
+        };
+
+        var addMeasurementsRequest = new AddMeasurementsRequest(_trackerId, measurements);
+        await _measurementController.AddMeasurements(addMeasurementsRequest, default);
+
+        var measurements2 = new Measurement[] {
+            new Measurement("13:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
+            new Measurement("ac:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 20),
+            new Measurement("14:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
+            new Measurement("ab:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 20)
+        };
+
+        var addMeasurementsRequest2 = new AddMeasurementsRequest(_trackerId, measurements2);
+        await _measurementController.AddMeasurements(addMeasurementsRequest2, default);
+        await _localizationService.AggregateMeasurementsAsync(default);
+
+        var measurements3 = new Measurement[] {
+            new Measurement("13:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
+            new Measurement("ac:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 20),
+            new Measurement("14:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
+            new Measurement("ab:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 20)
+        };
+
+        var addMeasurementsRequest3 = new AddMeasurementsRequest(_trackerId, measurements3);
+        await _measurementController.AddMeasurements(addMeasurementsRequest3, default);
+        await _localizationService.AggregateMeasurementsAsync(default);
+
+        var lastAggregatedMeasurements = (await _measurementController.GetAggregateMeasurements(_roomId, default)).AggregatedMeasurements.Last();
+
+        Assert.That(lastAggregatedMeasurements.BluetoothMedian, Is.EqualTo(1));
+        Assert.That(lastAggregatedMeasurements.WifiMedian, Is.EqualTo(1));
+        Assert.That(lastAggregatedMeasurements.BluetoothMean, Is.EqualTo(1f));
+        Assert.That(lastAggregatedMeasurements.WifiMean, Is.EqualTo(1f));
+        Assert.That(lastAggregatedMeasurements.BluetoothMax, Is.EqualTo(1));
+        Assert.That(lastAggregatedMeasurements.WifiMax, Is.EqualTo(1));
+        Assert.That(lastAggregatedMeasurements.BluetoothMin, Is.EqualTo(1));
+        Assert.That(lastAggregatedMeasurements.WifiMin, Is.EqualTo(1));
+        Assert.That(lastAggregatedMeasurements.TotalBluetoothDeviceCount, Is.EqualTo(1));
+        Assert.That(lastAggregatedMeasurements.TotalWifiDeviceCount, Is.EqualTo(1));
     }
 }

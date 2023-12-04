@@ -61,22 +61,27 @@ public sealed class MeasurementController : ControllerBase
             return GetAggregatedMeasurementsResponse.CreateUnsuccessful();
         }
 
+        var recentAggregatedMeasurements = aggregatedMeasurements.Where(am => am.EndTime > (DateTime.UtcNow - TimeSpan.FromDays(1)));
+        var wifiCalibrationNumber = recentAggregatedMeasurements.Min(am => am.WifiMinDeviceCount);
+        var bluetoothCalibrationNumber = recentAggregatedMeasurements.Min(am => am.BluetoothMinDeviceCount);
+
         return GetAggregatedMeasurementsResponse.CreateSuccessful(
             aggregatedMeasurements.Select(am => new AggregatedMeasurements(
             am.AggregatedMeasurementDtoId,
             am.StartTime,
             am.EndTime,
             am.MeasurementGroupCount,
-            am.BluetoothMedianDeviceCount,
-            am.BluetoothMeanDeviceCount,
-            am.BluetoothMaxDeviceCount,
-            am.BluetoothMinDeviceCount,
-            am.TotalBluetoothDeviceCount,
-            am.WifiMedianDeviceCount,
-            am.WifiMeanDeviceCount,
-            am.WifiMaxDeviceCount,
-            am.WifiMinDeviceCount,
-            am.TotalWifiDeviceCount)).ToImmutableArray());
+            am.BluetoothMedianDeviceCount - bluetoothCalibrationNumber,
+            am.BluetoothMeanDeviceCount - bluetoothCalibrationNumber,
+            am.BluetoothMaxDeviceCount - bluetoothCalibrationNumber,
+            am.BluetoothMinDeviceCount - bluetoothCalibrationNumber,
+            am.TotalBluetoothDeviceCount - bluetoothCalibrationNumber,
+            am.WifiMedianDeviceCount - wifiCalibrationNumber,
+            am.WifiMeanDeviceCount - wifiCalibrationNumber,
+            am.WifiMaxDeviceCount - wifiCalibrationNumber,
+            am.WifiMinDeviceCount - wifiCalibrationNumber,
+            am.TotalWifiDeviceCount - wifiCalibrationNumber)
+            ).ToImmutableArray());
     }
 
     [HttpGet("range")]

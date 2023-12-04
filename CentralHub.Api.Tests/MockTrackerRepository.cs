@@ -89,6 +89,6 @@ internal sealed class MockTrackerRepository : ITrackerRepository
 
     public Task<IEnumerable<TrackerDto>> GetRegisteredTrackers(CancellationToken cancellationToken)
     {
-        return Task.FromResult(RoomDto.Trackers.ToList().AsEnumerable());
+        return Task.FromResult(RoomDto.Trackers.ToArray().AsEnumerable());
     }
 }
