@@ -7,7 +7,7 @@ public class MeasurementGroup
 {
     public MeasurementGroup(IEnumerable<Measurement> measurements)
     {
-        Timestamp = DateTime.Now;
+        Timestamp = DateTime.UtcNow;
         Measurements = measurements.ToImmutableArray();
     }
     public DateTime Timestamp { get; }
