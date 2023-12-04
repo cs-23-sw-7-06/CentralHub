@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
 using CentralHub.Api.Model.Requests.Localization;
 using CentralHub.Api.Model.Responses.AggregatedMeasurements;
@@ -61,12 +62,31 @@ public sealed class MeasurementController : ControllerBase
             return GetAggregatedMeasurementsResponse.CreateUnsuccessful();
         }
 
+        return GetAggregatedMeasurementsResponse
+            .CreateSuccessful(CreateMeasurements(aggregatedMeasurements));
+    }
+
+    [HttpGet("range")]
+    public async Task<GetAggregatedMeasurementsResponse> GetAggregateMeasurements(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken token)
+    {
+        var aggregatedMeasurements = await _aggregatorRepository.GetAggregatedMeasurementsAsync(roomId, timeStart, timeEnd, token);
+
+        if (aggregatedMeasurements == null)
+        {
+            return GetAggregatedMeasurementsResponse.CreateUnsuccessful();
+        }
+
+        return GetAggregatedMeasurementsResponse
+            .CreateSuccessful(CreateMeasurements(aggregatedMeasurements));
+    }
+
+    private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IEnumerable<AggregatedMeasurementDto> aggregatedMeasurements)
+    {
         var recentAggregatedMeasurements = aggregatedMeasurements.Where(am => am.EndTime > (DateTime.UtcNow - TimeSpan.FromDays(1)));
         var wifiCalibrationNumber = recentAggregatedMeasurements.Min(am => am.WifiMinDeviceCount);
         var bluetoothCalibrationNumber = recentAggregatedMeasurements.Min(am => am.BluetoothMinDeviceCount);
 
-        return GetAggregatedMeasurementsResponse.CreateSuccessful(
-            aggregatedMeasurements.Select(am => new AggregatedMeasurements(
+        return aggregatedMeasurements.Select(am => new AggregatedMeasurements(
             am.AggregatedMeasurementDtoId,
             am.StartTime,
             am.EndTime,
@@ -81,23 +101,7 @@ public sealed class MeasurementController : ControllerBase
             am.WifiMaxDeviceCount - wifiCalibrationNumber,
             am.WifiMinDeviceCount - wifiCalibrationNumber,
             am.TotalWifiDeviceCount - wifiCalibrationNumber)
-            ).ToImmutableArray());
-    }
-
-    [HttpGet("range")]
-    public async Task<GetAggregatedMeasurementsResponse> GetAggregateMeasurements(int roomId, DateTime timeStart, DateTime timeEnd, CancellationToken token)
-    {
-        var aggregatedMeasurements = await GetAggregateMeasurements(roomId, token);
-
-        if (!aggregatedMeasurements.Success)
-        {
-            return GetAggregatedMeasurementsResponse.CreateUnsuccessful();
-        }
-
-        return GetAggregatedMeasurementsResponse
-            .CreateSuccessful(aggregatedMeasurements.AggregatedMeasurements!
-            .Where(am => am.StartTime >= timeStart && am.EndTime <= timeEnd)
-            .ToImmutableArray());
+            ).ToImmutableArray();
     }
 
     [HttpGet("first")]
