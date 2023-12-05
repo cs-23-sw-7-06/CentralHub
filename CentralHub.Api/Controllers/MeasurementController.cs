@@ -87,7 +87,29 @@ public sealed class MeasurementController(
         return GetFirstAggregatedMeasurementsDateTimeResponse.CreateSuccessful(possibleFirstDateTime.Value);
     }
 
-    private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IReadOnlyCollection<AggregatedMeasurementDto> aggregatedMeasurements)
+    [HttpGet("occupancy/latest")]
+    public async Task<GetLatestOccupancyResponse> GetLatestEstimatedOccupancy(
+        int roomId,
+        float wifiDevicesPerPerson,
+        float bluetoothDevicesPerPerson,
+        CancellationToken cancellationToken)
+    {
+        var aggregatedMeasurements = (await measurementRepository.GetAggregatedMeasurementsAsync(roomId, cancellationToken)).Last();
+
+        if (aggregatedMeasurements == null)
+        {
+            return GetLatestOccupancyResponse.CreateUnsuccessful();
+        }
+
+        var occupancy =
+            (int)Math.Round(
+            bluetoothDevicesPerPerson == 0 ? 0 : aggregatedMeasurements.BluetoothCount / bluetoothDevicesPerPerson +
+            wifiDevicesPerPerson == 0 ? 0 : aggregatedMeasurements.BluetoothCount / wifiDevicesPerPerson);
+
+        return GetLatestOccupancyResponse.CreateSuccessful(occupancy);
+    }
+
+    private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IEnumerable<AggregatedMeasurementDto> aggregatedMeasurements)
     {
         return aggregatedMeasurements.Select(am => new AggregatedMeasurements(
             am.AggregatedMeasurementDtoId,
