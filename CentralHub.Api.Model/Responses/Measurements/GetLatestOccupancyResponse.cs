@@ -5,10 +5,10 @@ namespace CentralHub.Api.Model.Responses.AggregatedMeasurements;
 public sealed class GetLatestOccupancyResponse
 {
     [JsonConstructor]
-    public GetLatestOccupancyResponse(int? occupancy, bool success)
+    public GetLatestOccupancyResponse(bool success, int? occupancy)
     {
-        EstimatedOccupancy = occupancy;
         Success = success;
+        EstimatedOccupancy = occupancy;
     }
 
     public bool Success { get; }
@@ -17,11 +17,11 @@ public sealed class GetLatestOccupancyResponse
 
     public static GetLatestOccupancyResponse CreateUnsuccessful()
     {
-        return new GetLatestOccupancyResponse(null, false);
+        return new GetLatestOccupancyResponse(false, null);
     }
 
     public static GetLatestOccupancyResponse CreateSuccessful(int occupancy)
     {
-        return new GetLatestOccupancyResponse(occupancy, true);
+        return new GetLatestOccupancyResponse(true, occupancy);
     }
 }
