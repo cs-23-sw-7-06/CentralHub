@@ -142,6 +142,10 @@
 
         _chartOptions.Tooltip = new Tooltip()
         {
+            X = new TooltipX()
+            {
+                Format = "yyyy-MM-dd hh:mm:ss",
+            },
             Y = new TooltipY()
             {
                 Formatter = @"
@@ -155,6 +159,10 @@
         _chartOptions.Xaxis = new XAxis()
         {
             Type = XAxisType.Datetime,
+            Labels = new XAxisLabels()
+            {
+                DatetimeUTC = false
+            }
         };
     }
 
