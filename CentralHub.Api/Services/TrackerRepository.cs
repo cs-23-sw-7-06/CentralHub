@@ -110,6 +110,16 @@ public sealed class TrackerRepository : ITrackerRepository
         }
 
         room.Trackers.Remove(trackerDto);
+        var unregisteredTracker = await UnregisteredTrackersMutex.Lock(unregisteredTrackers =>
+        {
+            var unregisteredTracker = new UnregisteredTrackerDto()
+            {
+                BluetoothMacAddress = trackerDto.BluetoothMacAddress,
+                WifiMacAddress = trackerDto.WifiMacAddress,
+            };
+            unregisteredTrackers.Add(unregisteredTracker);
+            return unregisteredTracker;
+        }, cancellationToken);
         _applicationDbContext.Rooms.Update(room);
         try
         {
@@ -120,6 +130,10 @@ public sealed class TrackerRepository : ITrackerRepository
             // Set the roomDto to unchanged
             _applicationDbContext.Rooms.Attach(room).State = EntityState.Unchanged;
             room.Trackers.Add(trackerDto);
+            await UnregisteredTrackersMutex.Lock(unregisteredTrackers =>
+            {
+                unregisteredTrackers.Remove(unregisteredTracker);
+            }, cancellationToken);
             throw;
         }
     }
