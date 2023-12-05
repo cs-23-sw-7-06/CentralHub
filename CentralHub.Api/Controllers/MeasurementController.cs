@@ -4,9 +4,11 @@ using CentralHub.Api.Model.Requests.Localization;
 using CentralHub.Api.Model.Responses.AggregatedMeasurements;
 using CentralHub.Api.Model.Responses.Measurements;
 using CentralHub.Api.Services;
+using CentralHub.Api.Threading;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentralHub.Api.Controllers;
+
 
 [ApiController]
 [Route("/measurements")]
@@ -16,6 +18,10 @@ public sealed class MeasurementController(
         IMeasurementRepository measurementRepository)
     : ControllerBase
 {
+    private static CancellableMutex<OccupancySettings> _occupancySettings =
+        new CancellableMutex<OccupancySettings>(
+            new OccupancySettings(1.5f, 2.4f));
+
     [HttpPost("add")]
     public async Task<AddMeasurementsResponse> AddMeasurements(AddMeasurementsRequest addMeasurementsRequest, CancellationToken token)
     {
@@ -88,11 +94,7 @@ public sealed class MeasurementController(
     }
 
     [HttpGet("occupancy/latest")]
-    public async Task<GetLatestOccupancyResponse> GetLatestEstimatedOccupancy(
-        int roomId,
-        float wifiDevicesPerPerson,
-        float bluetoothDevicesPerPerson,
-        CancellationToken cancellationToken)
+    public async Task<GetLatestOccupancyResponse> GetLatestEstimatedOccupancy(int roomId, CancellationToken cancellationToken)
     {
         var aggregatedMeasurements = (await measurementRepository.GetAggregatedMeasurementsAsync(roomId, cancellationToken)).Last();
 
@@ -101,12 +103,37 @@ public sealed class MeasurementController(
             return GetLatestOccupancyResponse.CreateUnsuccessful();
         }
 
-        var occupancy =
-            (int)Math.Round(
-            bluetoothDevicesPerPerson == 0 ? 0 : aggregatedMeasurements.BluetoothCount / bluetoothDevicesPerPerson +
-            wifiDevicesPerPerson == 0 ? 0 : aggregatedMeasurements.BluetoothCount / wifiDevicesPerPerson);
+        var occupancy = await _occupancySettings.Lock(os =>
+        {
+            return (int)Math.Round(
+                aggregatedMeasurements.BluetoothCount / os.BluetoothDevicesPerPerson +
+                aggregatedMeasurements.WifiCount / os.WifiDevicesPerPerson);
+        }, cancellationToken);
+
 
         return GetLatestOccupancyResponse.CreateSuccessful(occupancy);
+    }
+
+    [HttpPost("settings/set")]
+    public async Task<SetDevicesPerPersonResponse> SetDevicesPerPerson(
+        float bluetoothDevicesPerPerson,
+        float wifiDevicesPerPerson,
+        CancellationToken cancellationToken)
+    {
+        if (bluetoothDevicesPerPerson < 0 || wifiDevicesPerPerson < 0)
+        {
+            return SetDevicesPerPersonResponse.CreateUnsuccessful();
+        }
+
+        await _occupancySettings.Lock(os =>
+        {
+            os.BluetoothDevicesPerPerson = bluetoothDevicesPerPerson;
+            os.WifiDevicesPerPerson = wifiDevicesPerPerson;
+        }, cancellationToken);
+
+        return SetDevicesPerPersonResponse
+            .CreateSuccessful(
+                bluetoothDevicesPerPerson, wifiDevicesPerPerson);
     }
 
     private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IEnumerable<AggregatedMeasurementDto> aggregatedMeasurements)
@@ -125,5 +152,16 @@ public sealed class MeasurementController(
             am.BluetoothCount - bluetoothCalibrationNumber,
             am.WifiCount - wifiCalibrationNumber)
             ).ToImmutableArray();
+    }
+
+    private struct OccupancySettings
+    {
+        public OccupancySettings(float bluetoothDevicesPerPerson, float wifiDevicesPerPerson)
+        {
+            BluetoothDevicesPerPerson = bluetoothDevicesPerPerson;
+            WifiDevicesPerPerson = wifiDevicesPerPerson;
+        }
+        public float BluetoothDevicesPerPerson { get; set; }
+        public float WifiDevicesPerPerson { get; set; }
     }
 }
