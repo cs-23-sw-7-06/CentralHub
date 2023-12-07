@@ -89,29 +89,12 @@ public sealed class MeasurementController(
 
     private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IReadOnlyCollection<AggregatedMeasurementDto> aggregatedMeasurements)
     {
-        var recentAggregatedMeasurements = aggregatedMeasurements
-            .Where(am => am.EndTime > (DateTime.UtcNow - TimeSpan.FromDays(1)))
-            .ToImmutableArray();
-
-        int bluetoothCalibrationNumber;
-        int wifiCalibrationNumber;
-        if (recentAggregatedMeasurements.Any())
-        {
-            bluetoothCalibrationNumber = recentAggregatedMeasurements.Min(am => am.BluetoothCount);
-            wifiCalibrationNumber = recentAggregatedMeasurements.Min(am => am.WifiCount);
-        }
-        else
-        {
-            bluetoothCalibrationNumber = 0;
-            wifiCalibrationNumber = 0;
-        }
-
         return aggregatedMeasurements.Select(am => new AggregatedMeasurements(
             am.AggregatedMeasurementDtoId,
             am.StartTime,
             am.EndTime,
-            am.BluetoothCount - bluetoothCalibrationNumber,
-            am.WifiCount - wifiCalibrationNumber)
+            am.BluetoothCount,
+            am.WifiCount)
             ).ToImmutableArray();
     }
 }
