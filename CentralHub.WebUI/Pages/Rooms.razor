@@ -497,7 +497,7 @@ else
         {
             Room = room;
             Children = children;
-            TrackerCount = children.Length; 
+            TrackerCount = children.Length;
         }
         public Room Room { get; set; }
         public Tracker[] Children { get; set; }
@@ -558,7 +558,8 @@ else
 
     private void ToggleNode(RoomWrapper wRoom)
     {
-        wRoom.IsExpanded = wRoom.IsExpanded;
+        wRoom.IsExpanded = !wRoom.IsExpanded;
+        StateHasChanged();
     }
 
     private async Task HideModal(string modalId)
