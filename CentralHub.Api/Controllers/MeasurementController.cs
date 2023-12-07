@@ -93,8 +93,18 @@ public sealed class MeasurementController(
             .Where(am => am.EndTime > (DateTime.UtcNow - TimeSpan.FromDays(1)))
             .ToImmutableArray();
 
-        var bluetoothCalibrationNumber = recentAggregatedMeasurements.Min(am => am.BluetoothCount);
-        var wifiCalibrationNumber = recentAggregatedMeasurements.Min(am => am.WifiCount);
+        int bluetoothCalibrationNumber;
+        int wifiCalibrationNumber;
+        if (recentAggregatedMeasurements.Any())
+        {
+            bluetoothCalibrationNumber = recentAggregatedMeasurements.Min(am => am.BluetoothCount);
+            wifiCalibrationNumber = recentAggregatedMeasurements.Min(am => am.WifiCount);
+        }
+        else
+        {
+            bluetoothCalibrationNumber = 0;
+            wifiCalibrationNumber = 0;
+        }
 
         return aggregatedMeasurements.Select(am => new AggregatedMeasurements(
             am.AggregatedMeasurementDtoId,
