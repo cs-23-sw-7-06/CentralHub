@@ -37,7 +37,7 @@ public sealed class RoomService
         }
     }
 
-    public async Task UpdateRoomAsync(Room room, String name, String description, CancellationToken cancellationToken)
+    public async Task UpdateRoomAsync(Room room, string name, string description, CancellationToken cancellationToken)
     {
         var updateRoomRequest = new UpdateRoomRequest(room.RoomId, name, description);
         var request = new HttpRequestMessage(
