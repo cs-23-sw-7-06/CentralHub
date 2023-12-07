@@ -23,34 +23,34 @@ public sealed class SampleTrackerRepository : ITrackerRepository
         var room1 = sampleRoomRepository.GetRoomByIdAsync(0, default).GetAwaiter().GetResult()!;
         var room2 = sampleRoomRepository.GetRoomByIdAsync(1, default).GetAwaiter().GetResult()!;
 
-        List<RoomDto> rooms = new List<RoomDto>();
+        var rooms = new List<RoomDto>();
 
         for (int i = 0; i < 5; i++)
         {
             rooms.Add(sampleRoomRepository.GetRoomByIdAsync(i, default).GetAwaiter().GetResult()!);
         }
 
-        List<TrackerDto> trackers = new List<TrackerDto>();
+        var trackers = new List<TrackerDto>();
 
         for (int i = 0; i < 5; i++)
         {
-            String WifiName;
-            String BluetoothName;
+            string wifiName;
+            string bluetoothName;
             if (i < 10)
             {
-                WifiName = $"00:00:00:00:FE:0{i}";
-                BluetoothName = $"00:00:00:00:0{i}:BL";
+                wifiName = $"00:00:00:00:FE:0{i}";
+                bluetoothName = $"00:00:00:00:0{i}:BL";
             }
             else
             {
-                WifiName = $"00:00:00:00:FE:{i}";
-                BluetoothName = $"00:00:00:00:{i}:BL";
+                wifiName = $"00:00:00:00:FE:{i}";
+                bluetoothName = $"00:00:00:00:{i}:BL";
             }
 
             trackers.Add(new TrackerDto()
             {
-                WifiMacAddress = WifiName,
-                BluetoothMacAddress = BluetoothName,
+                WifiMacAddress = wifiName,
+                BluetoothMacAddress = bluetoothName,
                 Name = $"Sample Tracker {i}",
                 Description = "Sample Tracker",
                 RoomDtoId = rooms[i % 1].RoomDtoId,
@@ -67,20 +67,20 @@ public sealed class SampleTrackerRepository : ITrackerRepository
 
         for (int i = 0; i < 5; i++)
         {
-            String WifiName;
-            String BluetoothName;
+            string wifiName;
+            string bluetoothName;
             if (i < 10)
             {
-                WifiName = $"0{i}:FE:00:00:00:00";
-                BluetoothName = $"BL:0{i}:00:00:00:00";
+                wifiName = $"0{i}:FE:00:00:00:00";
+                bluetoothName = $"BL:0{i}:00:00:00:00";
             }
             else
             {
-                WifiName = $"{i}:FE:00:00:00:00";
-                BluetoothName = $"BL:{i}:00:00:00:00";
+                wifiName = $"{i}:FE:00:00:00:00";
+                bluetoothName = $"BL:{i}:00:00:00:00";
             }
 
-            sampleTrackerRepository.AddUnregisteredTracker(WifiName, BluetoothName, default).GetAwaiter().GetResult();
+            sampleTrackerRepository.AddUnregisteredTracker(wifiName, bluetoothName, default).GetAwaiter().GetResult();
         }
     }
 
