@@ -40,7 +40,7 @@ public sealed class TrackerService
         }
     }
 
-    public async Task AddTrackerAsync(Room room, UnregisteredTracker tracker, String name, String description, CancellationToken cancellationToken)
+    public async Task AddTrackerAsync(Room room, UnregisteredTracker tracker, string name, string description, CancellationToken cancellationToken)
     {
         var addTrackerRequest = new AddTrackerRequest(room.RoomId, name, description, tracker.WifiMacAddress, tracker.BluetoothMacAddress);
         var request = new HttpRequestMessage(
@@ -62,7 +62,7 @@ public sealed class TrackerService
         }
     }
 
-    public async Task UpdateTrackerAsync(Room room, Tracker tracker, String name, String description, CancellationToken cancellationToken)
+    public async Task UpdateTrackerAsync(Room room, Tracker tracker, string name, string description, CancellationToken cancellationToken)
     {
         if (room.RoomId == tracker.RoomId)
         {
