@@ -17,7 +17,7 @@ public sealed class SampleRoomRepository : IRoomRepository
     static SampleRoomRepository()
     {
         var sampleRoomRepository = new SampleRoomRepository();
-        List<RoomDto> rooms = new List<RoomDto>();
+        var rooms = new List<RoomDto>();
 
         for (int i = 0; i < 5; i++)
         {
