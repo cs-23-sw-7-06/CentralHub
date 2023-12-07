@@ -212,7 +212,7 @@ else
                             </select>
                         </td>
                         <td>
-                            <select class="form-control" @bind="@_selectedTrackerMacAdress">  
+                            <select class="form-control" @bind="@_selectedTrackerMacAddress">  
                                 @foreach (var uTracker in _unregisteredTrackers!)
                                 {
                                     <option value="@uTracker.WifiMacAddress">@uTracker.WifiMacAddress</option>
@@ -236,7 +236,7 @@ else
             <!-- Modal footer -->
             <div class="modal-footer">
                 <button type="button" class="btn" @onclick= '()=> HideModal("addTrackerModal")'>Cancel</button>
-                <button type="button" class="btn btn-main" @onclick='() => ConfirmAddTracker(_selectedRoomId, _selectedTrackerMacAdress, _trackerName!, _trackerDescription!)'>Confirm</button>
+                <button type="button" class="btn btn-main" @onclick='() => ConfirmAddTracker(_selectedRoomId, _selectedTrackerMacAddress, _trackerName!, _trackerDescription!)'>Confirm</button>
             </div>
         </div>
     </div>
@@ -316,15 +316,15 @@ else
     private string _roomDescription = "Your room description";
     private string _trackerName = "Your tracker name";
     private string _trackerDescription = "Your tracker description"; 
-    private string? _selectedTrackerMacAddress = "-1";
+    private string? _selectedTrackerMacAddress = null;
     
-    async Task AddRoomModal()
+    private async Task AddRoomModal()
     {
         await ShowModal("addRoomModal");
         StateHasChanged();
     }
 
-    async Task ConfirmAddRoom(String name, String description)
+    private async Task ConfirmAddRoom(String name, String description)
     {
         if(name != "" && name != null)
         {
@@ -338,7 +338,7 @@ else
         }
     }
 
-    async Task EditRoomModal(RoomWrapper wRoom)
+    private async Task EditRoomModal(RoomWrapper wRoom)
     {
         if(wRoom != null)
         {
@@ -355,7 +355,7 @@ else
         }
     }
 
-    async Task DeleteRoomModal(RoomWrapper wRoom)
+    private async Task DeleteRoomModal(RoomWrapper wRoom)
     {
         if(wRoom != null)
         {
@@ -369,7 +369,7 @@ else
         }
     }
 
-    async Task ConfirmEditRoom(RoomWrapper wRoom, String name, String description)
+    private async Task ConfirmEditRoom(RoomWrapper wRoom, String name, String description)
     {
         if(wRoom != null && name != "" && name != null)
         {
@@ -387,14 +387,14 @@ else
         }
     }
 
-    async Task AddTrackerModal(RoomWrapper wRoom)
+    private async Task AddTrackerModal(RoomWrapper wRoom)
     {
         if(wRoom != null)
         {
             _selectedWRoom = wRoom;
             _selectedRoomId = wRoom!.Room.RoomId;
             _unregisteredTrackers = await TrackerService.GetUnregisteredTrackersAsync(_cancellationTokenSource.Token);
-            _selectedTrackerMacAdress = _unregisteredTrackers[0].WifiMacAddress;
+            _selectedTrackerMacAddress = _unregisteredTrackers[0].WifiMacAddress;
             await ShowModal("addTrackerModal");
             StateHasChanged();
         }
@@ -404,7 +404,7 @@ else
         }
     }
 
-    async Task ConfirmAddTracker(int? roomId, String trackerMacAdress, String name, String description)
+    private async Task ConfirmAddTracker(int? roomId, String trackerMacAdress, String name, String description)
     {
         if(roomId != -1 && name != "" && name != null && trackerMacAdress != "-1")
         { 
@@ -428,7 +428,7 @@ else
         }
     }
 
-    async Task EditTrackerModal(RoomWrapper wRoom, Tracker tracker)
+    private async Task EditTrackerModal(RoomWrapper wRoom, Tracker tracker)
     {
         if(wRoom != null && tracker != null)
         {
@@ -450,7 +450,7 @@ else
         }
     }
 
-    async Task ConfirmEditTracker(Tracker tracker, int roomId, String name, String description)
+    private async Task ConfirmEditTracker(Tracker tracker, int roomId, String name, String description)
     {
         if(tracker != null && roomId != -1 && name != "" && name != null)
         {
@@ -473,7 +473,7 @@ else
         }
     }
 
-    async Task DeleteTrackerModal(RoomWrapper wRoom, Tracker tracker)
+    private async Task DeleteTrackerModal(RoomWrapper wRoom, Tracker tracker)
     {
         if(wRoom != null && tracker != null) 
         {
@@ -491,7 +491,7 @@ else
         }
     }
 
-    protected class RoomWrapper
+    private sealed class RoomWrapper
     {
         public RoomWrapper(Room room, Tracker[] children, bool isExpanded = false)
         {
@@ -510,7 +510,7 @@ else
         _rooms = (await RoomService.GetRoomsAsync(_cancellationTokenSource.Token)).ToList();
         _unregisteredTrackers = await TrackerService.GetUnregisteredTrackersAsync(_cancellationTokenSource.Token);
 
-        List<RoomWrapper> RoomWrappers = new List<RoomWrapper>();
+        var RoomWrappers = new List<RoomWrapper>();
         foreach (var room in _rooms)
         {
             RoomWrappers.Add(new RoomWrapper(
@@ -528,7 +528,7 @@ else
         return trackers.Length;
     }
 
-    protected async Task DeleteRoom(RoomWrapper wRoom)
+    private async Task DeleteRoom(RoomWrapper wRoom)
     {
         // Remove the room on the server
         await RoomService.RemoveRoomAsync(wRoom.Room, _cancellationTokenSource.Token);
@@ -539,7 +539,7 @@ else
         StateHasChanged();
     }
 
-    protected async Task DeleteTracker(RoomWrapper wRoom, Tracker tracker)
+    private async Task DeleteTracker(RoomWrapper wRoom, Tracker tracker)
     {
         // Remove the tracker on the server
         await TrackerService.RemoveTrackerAsync(tracker, _cancellationTokenSource.Token);
@@ -556,24 +556,24 @@ else
         _cancellationTokenSource.Dispose();
     }
 
-void ToggleNode(RoomWrapper wRoom)
+    private void ToggleNode(RoomWrapper wRoom)
     {
         wRoom.IsExpanded = !wRoom.IsExpanded;
     }
 
-async Task HideModal(String modalId)
+    private async Task HideModal(String modalId)
     {
         await JSRuntime.InvokeVoidAsync("hideModal", modalId);
         AssignStandardValues();
         StateHasChanged();
     }
 
-    async Task ShowModal(String modalId)
+    private async Task ShowModal(String modalId)
     {
         await JSRuntime.InvokeVoidAsync("showModal", modalId);
     }
 
-    void AssignStandardValues()
+    private void AssignStandardValues()
     {
         _selectedWRoom = null;
         _selectedTracker = null;
@@ -583,7 +583,7 @@ async Task HideModal(String modalId)
         _roomDescription = "Your room description";
         _trackerName = "Your tracker name";
         _trackerDescription = "Your tracker description"; 
-        _selectedTrackerMacAdress = "-1";
+        _selectedTrackerMacAddress = null;
     }
 
 }
