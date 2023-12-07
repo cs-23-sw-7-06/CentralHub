@@ -326,169 +326,167 @@ else
 
     private async Task ConfirmAddRoom(String name, String description)
     {
-        if(name != "" && name != null)
-        {
-            await RoomService.AddRoomAsync(name!, description, _cancellationTokenSource.Token);
-            await HideModal("addRoomModal");
-            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
-        }
-        else
+        if(string.IsNullOrWhiteSpace(name))
         {
             await JSRuntime.InvokeVoidAsync("alert", "Please enter a name for the room");
+            return;
         }
+        
+        await RoomService.AddRoomAsync(name!, description, _cancellationTokenSource.Token);
+        await HideModal("addRoomModal");
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
     private async Task EditRoomModal(RoomWrapper wRoom)
     {
-        if(wRoom != null)
-        {
-            _selectedWRoom = wRoom;
-            _roomName = _selectedWRoom!.Room.Name;
-            _roomDescription = _selectedWRoom.Room.Description;
-            wRoom!.TrackerCount = await GetTrackerCountAsync(wRoom.Room);
-            await ShowModal("editRoomModal");
-            StateHasChanged();
-        }
-        else
+        if(wRoom == null)
         {
             await JSRuntime.InvokeVoidAsync("alert", "Room is null");
+            return;
         }
+
+        _selectedWRoom = wRoom;
+        _roomName = _selectedWRoom!.Room.Name;
+        _roomDescription = _selectedWRoom.Room.Description;
+        wRoom!.TrackerCount = await GetTrackerCountAsync(wRoom.Room);
+        await ShowModal("editRoomModal");
+        StateHasChanged();
     }
 
     private async Task DeleteRoomModal(RoomWrapper wRoom)
     {
-        if(wRoom != null)
-        {
-            await DeleteRoom(wRoom!);
-            await HideModal("editRoomModal");
-            StateHasChanged();
-        }
-        else
+        if(wRoom == null)
         {
             await JSRuntime.InvokeVoidAsync("alert", "Room is null");
+            return;
         }
+
+        await DeleteRoom(wRoom!);
+        await HideModal("editRoomModal");
+        StateHasChanged();
     }
 
     private async Task ConfirmEditRoom(RoomWrapper wRoom, String name, String description)
     {
-        if(wRoom != null && name != "" && name != null)
-        {
-            await RoomService.UpdateRoomAsync(wRoom!.Room, name!, description, _cancellationTokenSource.Token);
-            await HideModal("editRoomModal");
-            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
-        } 
-        else if(wRoom == null)
-        {
-            await JSRuntime.InvokeVoidAsync("alert", "Room is null");
-        }
-        else if(name == "" || name == null)
+        if(string.IsNullOrWhiteSpace(name))
         {
             await JSRuntime.InvokeVoidAsync("alert", "Please enter a name for the room");
+            return;
+        } 
+        if(wRoom == null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Room is null");
+            return;
         }
+
+        await RoomService.UpdateRoomAsync(wRoom!.Room, name!, description, _cancellationTokenSource.Token);
+        await HideModal("editRoomModal");
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
     private async Task AddTrackerModal(RoomWrapper wRoom)
     {
-        if(wRoom != null)
-        {
-            _selectedWRoom = wRoom;
-            _selectedRoomId = wRoom!.Room.RoomId;
-            _unregisteredTrackers = await TrackerService.GetUnregisteredTrackersAsync(_cancellationTokenSource.Token);
-            _selectedTrackerMacAddress = _unregisteredTrackers[0].WifiMacAddress;
-            await ShowModal("addTrackerModal");
-            StateHasChanged();
-        }
-        else
+        if(wRoom == null)
         {
             await JSRuntime.InvokeVoidAsync("alert", "Room is null");
+            return;
         }
+
+        _selectedWRoom = wRoom;
+        _selectedRoomId = wRoom!.Room.RoomId;
+        _unregisteredTrackers = await TrackerService.GetUnregisteredTrackersAsync(_cancellationTokenSource.Token);
+        _selectedTrackerMacAddress = _unregisteredTrackers[0].WifiMacAddress;
+        await ShowModal("addTrackerModal");
+        StateHasChanged();
     }
 
     private async Task ConfirmAddTracker(int? roomId, String trackerMacAdress, String name, String description)
     {
-        if(roomId != -1 && name != "" && name != null && trackerMacAdress != "-1")
-        { 
-            Room selectedRoom = _rooms!.Find(r => r.RoomId == roomId)!;
-            UnregisteredTracker selectedTracker = _unregisteredTrackers!.Single(t => t.WifiMacAddress == trackerMacAdress);
-            await TrackerService.AddTrackerAsync(selectedRoom, selectedTracker, name!, description, _cancellationTokenSource.Token);
-            await HideModal("addTrackerModal");
-            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
-        } 
-        else if(roomId == -1)
-        {
-            await JSRuntime.InvokeVoidAsync("alert", "Room's ID is invalid");
-        } 
-        else if(name == "" || name == null)
+        if(string.IsNullOrWhiteSpace(name))
         {
             await JSRuntime.InvokeVoidAsync("alert", "Please enter a name for the tracker");
+            return;
         } 
-        else if(trackerMacAdress == "-1")
+        if(roomId == -1)
         {
-            await JSRuntime.InvokeVoidAsync("alert", "Tracker's MAC-Address is invalid");
+            await JSRuntime.InvokeVoidAsync("alert", "Room's ID is invalid");
+            return;
+        } 
+        if(trackerMacAdress == null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Tracker's MAC-Address is null");
+            return;
         }
+
+        Room selectedRoom = _rooms!.Find(r => r.RoomId == roomId)!;
+        UnregisteredTracker selectedTracker = _unregisteredTrackers!.Single(t => t.WifiMacAddress == trackerMacAdress);
+        await TrackerService.AddTrackerAsync(selectedRoom, selectedTracker, name!, description, _cancellationTokenSource.Token);
+        await HideModal("addTrackerModal");
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
     private async Task EditTrackerModal(RoomWrapper wRoom, Tracker tracker)
     {
-        if(wRoom != null && tracker != null)
-        {
-            _selectedWRoom = wRoom;
-            _selectedRoomId = wRoom!.Room.RoomId;
-            _selectedTracker = tracker;
-            _trackerName = tracker!.Name;
-            _trackerDescription = tracker.Description;
-            await ShowModal("editTrackerModal");
-            StateHasChanged();
-        } 
-        else if(wRoom == null)
+        if(wRoom == null)
         {
             await JSRuntime.InvokeVoidAsync("alert", "Room is null");
+            return;
         } 
-        else if(tracker == null)
+        if(tracker == null)
         {
             await JSRuntime.InvokeVoidAsync("alert", "Tracker is null");
-        }
+            return;
+        } 
+
+        _selectedWRoom = wRoom;
+        _selectedRoomId = wRoom!.Room.RoomId;
+        _selectedTracker = tracker;
+        _trackerName = tracker!.Name;
+        _trackerDescription = tracker.Description;
+        await ShowModal("editTrackerModal");
+        StateHasChanged();
     }
 
     private async Task ConfirmEditTracker(Tracker tracker, int roomId, String name, String description)
     {
-        if(tracker != null && roomId != -1 && name != "" && name != null)
-        {
-            Room selectedRoom = _rooms!.Find(r => r.RoomId == roomId)!;
-            await TrackerService.UpdateTrackerAsync(selectedRoom, tracker, name!, description, _cancellationTokenSource.Token);
-            await HideModal("editTrackerModal");
-            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
-        } 
-        else if(tracker == null)
-        {
-            await JSRuntime.InvokeVoidAsync("alert", "Tracker is null");
-        } 
-        else if(roomId == -1)
-        {
-            await JSRuntime.InvokeVoidAsync("alert", "Room's ID is invalid");
-        } 
-        else if(name == "" || name == null)
+        if(string.IsNullOrWhiteSpace(name))
         {
             await JSRuntime.InvokeVoidAsync("alert", "Please enter a name for the tracker");
+            return;
         }
+        if(tracker == null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Tracker is null");
+            return;
+        } 
+        if(roomId == -1)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Room's ID is invalid");
+            return;
+        }
+
+        Room selectedRoom = _rooms!.Find(r => r.RoomId == roomId)!;
+        await TrackerService.UpdateTrackerAsync(selectedRoom, tracker, name!, description, _cancellationTokenSource.Token);
+        await HideModal("editTrackerModal");
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
     private async Task DeleteTrackerModal(RoomWrapper wRoom, Tracker tracker)
     {
-        if(wRoom != null && tracker != null) 
-        {
-            await DeleteTracker(wRoom!, tracker!);
-            await HideModal("editTrackerModal");
-            StateHasChanged();
-        } 
-        else if(wRoom == null)
+        if(wRoom == null)
         {
             await JSRuntime.InvokeVoidAsync("alert", "Room is null");
+            return;
         } 
-        else if(tracker == null)
+        if(tracker == null)
         {
             await JSRuntime.InvokeVoidAsync("alert", "Tracker is null");
+            return;
         }
+
+        await DeleteTracker(wRoom!, tracker!);
+        await HideModal("editTrackerModal");
+        StateHasChanged();
     }
 
     private sealed class RoomWrapper
