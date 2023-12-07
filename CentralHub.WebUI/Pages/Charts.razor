@@ -125,34 +125,11 @@
             Opacity = new List<double> { 1, 1 }
         };
 
-        _chartOptions.Yaxis = new List<YAxis>()
-        {
-            new YAxis()
-            {
-                Labels = new ()
-                {
-                    Formatter = @"
-                    function (val) {
-                        return val.toFixed(0);
-                    }
-                    ",
-                },
-            },
-        };
-
         _chartOptions.Tooltip = new Tooltip()
         {
             X = new TooltipX()
             {
                 Format = "yyyy-MM-dd hh:mm:ss",
-            },
-            Y = new TooltipY()
-            {
-                Formatter = @"
-                function (val) {
-                    return val.toString();
-                }
-                ",
             },
         };
 
