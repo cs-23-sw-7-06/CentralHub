@@ -138,19 +138,12 @@ public sealed class MeasurementController(
 
     private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IEnumerable<AggregatedMeasurementDto> aggregatedMeasurements)
     {
-        var recentAggregatedMeasurements = aggregatedMeasurements
-            .Where(am => am.EndTime > (DateTime.UtcNow - TimeSpan.FromDays(1)))
-            .ToImmutableArray();
-
-        var bluetoothCalibrationNumber = recentAggregatedMeasurements.Min(am => am.BluetoothCount);
-        var wifiCalibrationNumber = recentAggregatedMeasurements.Min(am => am.WifiCount);
-
         return aggregatedMeasurements.Select(am => new AggregatedMeasurements(
             am.AggregatedMeasurementDtoId,
             am.StartTime,
             am.EndTime,
-            am.BluetoothCount - bluetoothCalibrationNumber,
-            am.WifiCount - wifiCalibrationNumber)
+            am.BluetoothCount,
+            am.WifiCount)
             ).ToImmutableArray();
     }
 

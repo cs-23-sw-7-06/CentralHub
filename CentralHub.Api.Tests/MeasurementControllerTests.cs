@@ -100,34 +100,4 @@ public class MeasurementControllerTests
 
         Assert.That(addedMeasurements, Has.Count.EqualTo(0));
     }
-
-    [Test]
-    public async Task CalibrateMeasurements()
-    {
-        var measurements = new Measurement[] {
-            new Measurement("12:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
-            new Measurement("ab:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 20)
-        };
-
-        var addMeasurementsRequest = new AddMeasurementsRequest(_trackerId, measurements);
-        await _measurementController.AddMeasurements(addMeasurementsRequest, default);
-
-        await _localizationService.AggregateMeasurementsAsync(default);
-
-        var measurements3 = new Measurement[] {
-            new Measurement("13:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
-            new Measurement("ac:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 20),
-            new Measurement("14:22:33:44:55:66", Measurement.Protocol.Bluetooth, 10),
-            new Measurement("ab:bb:cc:dd:ee:ff", Measurement.Protocol.Wifi, 20)
-        };
-
-        var addMeasurementsRequest3 = new AddMeasurementsRequest(_trackerId, measurements3);
-        await _measurementController.AddMeasurements(addMeasurementsRequest3, default);
-        await _localizationService.AggregateMeasurementsAsync(default);
-
-        var lastAggregatedMeasurements = (await _measurementController.GetAggregateMeasurements(_roomId, default)).AggregatedMeasurements.Last();
-
-        Assert.That(lastAggregatedMeasurements.BluetoothCount, Is.EqualTo(1));
-        Assert.That(lastAggregatedMeasurements.WifiCount, Is.EqualTo(1));
-    }
 }
