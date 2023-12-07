@@ -262,7 +262,7 @@ else
                     <!-- Modal footer -->
                     <div class="modal-footer">
                         <button type="button" class="btn" @onclick= '()=> HideModal("addTrackerModal")'>Cancel</button>
-                        <button type="button" class="btn btn-main" @onclick='() => ConfirmAddTracker(_selectedRoomId, _selectedTrackerMacAddress, _trackerName!, _trackerDescription!)'>Confirm</button>
+                        <button type="button" class="btn btn-main" @onclick='() => ConfirmAddTracker(_selectedRoomId, _selectedTrackerMacAddress, _trackerName, _trackerDescription)'>Confirm</button>
                     </div>
                 </div>
             </div>
@@ -296,7 +296,7 @@ else
                             </td>
                             <td>
                                 <select class="form-control"  @bind="@_selectedRoomId"> 
-                                    @foreach (var wRoom in _wRooms!)
+                                    @foreach (var wRoom in _wRooms)
                                     {
                                         <option value="@wRoom.Room.RoomId">@wRoom.Room.Name</option>
                                     }
@@ -324,7 +324,7 @@ else
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" @onclick="() => DeleteTrackerModal(_selectedWRoom!, _selectedTracker!)">Delete</button>
                     <button type="button" class="btn" @onclick= '()=> HideModal("editTrackerModal")'>Cancel</button>
-                    <button type="button" class="btn btn-main" @onclick='() => ConfirmEditTracker(_selectedTracker!, _selectedRoomId!, _trackerName!, _trackerDescription!)'>Confirm</button>
+                    <button type="button" class="btn btn-main" @onclick='() => ConfirmEditTracker(_selectedTracker!, _selectedRoomId, _trackerName, _trackerDescription)'>Confirm</button>
                 </div>
             </div>
         </div>
@@ -359,7 +359,7 @@ else
             return;
         }
         
-        await RoomService.AddRoomAsync(name!, description, _cancellationTokenSource.Token);
+        await RoomService.AddRoomAsync(name, description, _cancellationTokenSource.Token);
         await HideModal("addRoomModal");
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
@@ -373,9 +373,9 @@ else
         }
 
         _selectedWRoom = wRoom;
-        _roomName = _selectedWRoom!.Room.Name;
+        _roomName = _selectedWRoom.Room.Name;
         _roomDescription = _selectedWRoom.Room.Description;
-        wRoom!.TrackerCount = await GetTrackerCountAsync(wRoom.Room);
+        wRoom.TrackerCount = await GetTrackerCountAsync(wRoom.Room);
         await ShowModal("editRoomModal");
         StateHasChanged();
     }
@@ -388,7 +388,7 @@ else
             return;
         }
 
-        await DeleteRoom(wRoom!);
+        await DeleteRoom(wRoom);
         await HideModal("editRoomModal");
         StateHasChanged();
     }
@@ -406,7 +406,7 @@ else
             return;
         }
 
-        await RoomService.UpdateRoomAsync(wRoom!.Room, name!, description, _cancellationTokenSource.Token);
+        await RoomService.UpdateRoomAsync(wRoom.Room, name, description, _cancellationTokenSource.Token);
         await HideModal("editRoomModal");
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
@@ -424,7 +424,7 @@ else
         }
 
         _selectedWRoom = wRoom;
-        _selectedRoomId = wRoom!.Room.RoomId;
+        _selectedRoomId = wRoom.Room.RoomId;
         _unregisteredTrackers = await TrackerService.GetUnregisteredTrackersAsync(_cancellationTokenSource.Token);
         await ShowModal("addTrackerModal");
         StateHasChanged();
@@ -448,9 +448,21 @@ else
             return;
         }
 
-        Room selectedRoom = _rooms!.Find(r => r.RoomId == roomId)!;
-        UnregisteredTracker selectedTracker = _unregisteredTrackers!.Single(t => t.WifiMacAddress == trackerMacAdress);
-        await TrackerService.AddTrackerAsync(selectedRoom, selectedTracker, name!, description, _cancellationTokenSource.Token);
+        Room? selectedRoom = _rooms.Find(r => r.RoomId == roomId);
+        if (selectedRoom == null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Room not found");
+            return;
+        }
+
+        UnregisteredTracker? selectedTracker = _unregisteredTrackers.Single(t => t.WifiMacAddress == trackerMacAdress);
+        if (selectedTracker == null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Tracker not found");
+            return;
+        }
+        
+        await TrackerService.AddTrackerAsync(selectedRoom, selectedTracker, name, description, _cancellationTokenSource.Token);
         await HideModal("addTrackerModal");
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
@@ -469,9 +481,9 @@ else
         } 
 
         _selectedWRoom = wRoom;
-        _selectedRoomId = wRoom!.Room.RoomId;
+        _selectedRoomId = wRoom.Room.RoomId;
         _selectedTracker = tracker;
-        _trackerName = tracker!.Name;
+        _trackerName = tracker.Name;
         _trackerDescription = tracker.Description;
         await ShowModal("editTrackerModal");
         StateHasChanged();
@@ -494,9 +506,14 @@ else
             await JSRuntime.InvokeVoidAsync("alert", "Room's ID is invalid");
             return;
         }
+        Room? selectedRoom = _rooms.Find(r => r.RoomId == roomId);
+        if (selectedRoom == null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Room not found");
+            return;
+        }
 
-        Room selectedRoom = _rooms!.Find(r => r.RoomId == roomId)!;
-        await TrackerService.UpdateTrackerAsync(selectedRoom, tracker, name!, description, _cancellationTokenSource.Token);
+        await TrackerService.UpdateTrackerAsync(selectedRoom, tracker, name, description, _cancellationTokenSource.Token);
         await HideModal("editTrackerModal");
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
@@ -514,7 +531,7 @@ else
             return;
         }
 
-        await DeleteTracker(wRoom!, tracker!);
+        await DeleteTracker(wRoom, tracker);
         await HideModal("editTrackerModal");
         StateHasChanged();
     }
@@ -561,8 +578,8 @@ else
         // Remove the room on the server
         await RoomService.RemoveRoomAsync(wRoom.Room, _cancellationTokenSource.Token);
         // Remove the room in memory
-        _rooms!.Remove(wRoom.Room);
-        _wRooms!.Remove(wRoom);
+        _rooms.Remove(wRoom.Room);
+        _wRooms.Remove(wRoom);
         
         StateHasChanged();
     }
@@ -586,7 +603,7 @@ else
 
     private void ToggleNode(RoomWrapper wRoom)
     {
-        wRoom.IsExpanded = !wRoom.IsExpanded;
+        wRoom.IsExpanded = wRoom.IsExpanded;
     }
 
     private async Task HideModal(String modalId)
@@ -613,5 +630,4 @@ else
         _trackerDescription = "Your tracker description"; 
         _selectedTrackerMacAddress = null;
     }
-
 }
