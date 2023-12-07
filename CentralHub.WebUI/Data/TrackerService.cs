@@ -32,8 +32,9 @@ public sealed class TrackerService
         var client = _clientFactory.CreateClient();
 
         var response = await client.SendAsync(request, cancellationToken);
+        var removeTrackerResponse = await response.Content.ReadFromJsonAsync<RemoveTrackerResponse>(cancellationToken);
 
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (response.StatusCode != HttpStatusCode.OK || !removeTrackerResponse!.Success)
         {
             throw new InvalidOperationException("Somethings fucky");
         }
@@ -53,8 +54,9 @@ public sealed class TrackerService
         var client = _clientFactory.CreateClient();
 
         var response = await client.SendAsync(request, cancellationToken);
+        var addTrackerResponse = await response.Content.ReadFromJsonAsync<AddTrackerResponse>(cancellationToken);
 
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (response.StatusCode != HttpStatusCode.OK || !addTrackerResponse!.Success)
         {
             throw new InvalidOperationException("Somethings fucky");
         }
@@ -85,8 +87,8 @@ public sealed class TrackerService
         else
         {
             await RemoveTrackerAsync(tracker, cancellationToken);
-            UnregisteredTracker[] uTrackers = await GetUnregisteredTrackersAsync(cancellationToken);
-            UnregisteredTracker uTracker = uTrackers.Single(t => t.WifiMacAddress == tracker.WifiMacAddress);
+            var uTrackers = await GetUnregisteredTrackersAsync(cancellationToken);
+            var uTracker = uTrackers.Single(t => t.WifiMacAddress == tracker.WifiMacAddress);
             await AddTrackerAsync(room, uTracker, name, description, cancellationToken);
         }
     }
