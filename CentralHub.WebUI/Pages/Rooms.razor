@@ -243,7 +243,7 @@ else
                         </tr>
                         <tr>
                             <td>
-                                <textarea class="form-control" rows="3" @bind="_trackerDescription"/>
+                                <textarea class="form-control" rows="3" @bind="_trackerDescription"></textarea>
                             </td>
                         </tr>
                     </table>
@@ -286,7 +286,7 @@ else
                         </td>
                         <td>
                             <select class="form-control"  @bind="@_selectedRoomId"> 
-                                @foreach (var wRoom in _wRooms!)
+                                @foreach (var wRoom in _wRooms)
                                 {
                                     <option value="@wRoom.Room.RoomId">@wRoom.Room.Name</option>
                                 }
@@ -428,9 +428,9 @@ else
             return;
         }
 
-        var selectedRoom = _rooms!.Single(r => r.RoomId == roomId);
+        var selectedRoom = _rooms.Single(r => r.RoomId == roomId);
 
-        var selectedTracker = _unregisteredTrackers!.Single(t => t.WifiMacAddress == trackerMacAddress);
+        var selectedTracker = _unregisteredTrackers.Single(t => t.WifiMacAddress == trackerMacAddress);
         
         await TrackerService.AddTrackerAsync(selectedRoom, selectedTracker, name, description, _cancellationTokenSource.Token);
         await HideModal("addTrackerModal");
