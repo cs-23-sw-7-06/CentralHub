@@ -79,7 +79,7 @@ public sealed class RoomService
         {
             throw new InvalidOperationException("Somethings fucky");
         }
-        
+
         var addRoomResponse = await response.Content.ReadFromJsonAsync<AddRoomResponse>(cancellationToken);
         return addRoomResponse!.RoomId;
     }
