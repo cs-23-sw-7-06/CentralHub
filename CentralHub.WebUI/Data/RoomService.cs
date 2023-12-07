@@ -60,7 +60,7 @@ public sealed class RoomService
         }
     }
 
-    public async Task<int> AddRoomAsync(String name, String description, CancellationToken cancellationToken)
+    public async Task<int> AddRoomAsync(string name, string description, CancellationToken cancellationToken)
     {
         var addRoomRequest = new AddRoomRequest(name, description);
         var request = new HttpRequestMessage(
