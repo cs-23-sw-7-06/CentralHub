@@ -30,8 +30,9 @@ public sealed class RoomService
         var client = _clientFactory.CreateClient();
 
         var response = await client.SendAsync(request, cancellationToken);
+        var removeRoomResponse = await response.Content.ReadFromJsonAsync<RemoveRoomResponse>(cancellationToken);
 
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (response.StatusCode != HttpStatusCode.OK || !removeRoomResponse!.Success)
         {
             throw new InvalidOperationException("Somethings fucky");
         }
@@ -51,14 +52,15 @@ public sealed class RoomService
         var client = _clientFactory.CreateClient();
 
         var response = await client.SendAsync(request, cancellationToken);
+        var updateRoomResponse = await response.Content.ReadFromJsonAsync<UpdateRoomResponse>(cancellationToken);
 
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (response.StatusCode != HttpStatusCode.OK || !updateRoomResponse!.Success)
         {
             throw new InvalidOperationException("Somethings fucky");
         }
     }
 
-    public async Task AddRoomAsync(String name, String description, CancellationToken cancellationToken)
+    public async Task<int> AddRoomAsync(String name, String description, CancellationToken cancellationToken)
     {
         var addRoomRequest = new AddRoomRequest(name, description);
         var request = new HttpRequestMessage(
@@ -77,6 +79,9 @@ public sealed class RoomService
         {
             throw new InvalidOperationException("Somethings fucky");
         }
+        
+        var addRoomResponse = await response.Content.ReadFromJsonAsync<AddRoomResponse>(cancellationToken);
+        return addRoomResponse!.RoomId;
     }
 
 
