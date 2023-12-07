@@ -488,7 +488,8 @@ else
 
         await DeleteTracker(wRoom, tracker);
         await HideModal("editTrackerModal");
-        StateHasChanged();
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+    
     }
 
     private sealed class RoomWrapper
