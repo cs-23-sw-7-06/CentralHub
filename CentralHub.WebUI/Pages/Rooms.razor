@@ -72,139 +72,14 @@ else
             }
         </tbody>
     </table>
-}
 
-<div class="modal fade" id="addRoomModal" aria-modal="true" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h4>Add room</h4>
-            </div>
-
-            <!-- Modal body -->
-            <div class="modal-body">
-                <table>
-                    <tr>
-                        <td>
-                            Room name:
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="text" class="form-control" @bind="_roomName"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Room description:
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <textarea class="form-control" rows="3" @bind="_roomDescription"/>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- Modal footer -->
-            <div class="modal-footer">
-                <button type="button" class="btn" @onclick= '()=> HideModal("addRoomModal")'>Cancel</button>
-                <button type="button" class="btn btn-main" @onclick='() => ConfirmAddRoom(_roomName, _roomDescription)'>Confirm</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="editRoomModal" aria-modal="true" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h4>Edit room</h4>
-            </div>
-
-            <!-- Modal body -->
-            <div class="modal-body">
-                <table>
-                    <tr>
-                        <td>
-                            Edit room name:
-                        </td>
-                        <td>
-                            Number of trackers:
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="text" class="form-control"  @bind="_roomName"/>
-                        </td>
-                        <td>
-                            @_selectedWRoom?.TrackerCount
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Edit room description:
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <textarea class="form-control" rows="3"  @bind="_roomDescription"></textarea>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- Modal footer -->
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" @onclick="() => DeleteRoomModal(_selectedWRoom!)">Delete</button>
-                <button type="button" class="btn" @onclick= '()=> HideModal("editRoomModal")'>Cancel</button>
-                <button type="button" class="btn btn-main" @onclick='() => ConfirmEditRoom(_selectedWRoom!, _roomName, _roomDescription)'>Confirm</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@if(_unregisteredTrackers.Length == 0)
-{
-    <div class="modal fade" id="editTrackerModal" aria-modal="true" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <!-- Modal Header -->
-                <div class="modal-header">
-                    <h4>Add tracker</h4>
-                </div>
-
-            <!-- Modal body -->
-            <div class="modal-body">
-                <p>
-                    <em>No unregistered trackers to add!</em>
-                </p>
-            </div>
-            
-            <!-- Modal footer -->
-            <div class="modal-footer">
-                    <button type="button" class="btn" @onclick= '()=> HideModal("addTrackerModal")'>Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-{
-
-}
-else
-}
-    <div class="modal fade" id="addTrackerModal" aria-modal="true" role="dialog">
+    <div class="modal fade" id="addRoomModal" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
 
                 <!-- Modal Header -->
                 <div class="modal-header">
-                    <h4>Add tracker</h4>
+                    <h4>Add room</h4>
                 </div>
 
                 <!-- Modal body -->
@@ -212,51 +87,22 @@ else
                     <table>
                         <tr>
                             <td>
-                                Tracker name:
-                            </td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <input type="text" class="form-control" @bind="@_trackerName"/>
-                            </td>
-                            <td>
-                            </td>
-                        </tr> 
-                        <tr>
-                            <td>
-                                Assigned room:
-                            </td>
-                            <td>
-                                Unregistered trackers:
+                                Room name:
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <select class="form-control" @bind="@_selectedRoomId">  
-                                    @foreach (var wRoom in _wRooms!)
-                                    {
-                                        <option value="@wRoom.Room.RoomId">@wRoom.Room.Name</option>
-                                    }
-                                </select>
-                            </td>
-                            <td>
-                                <select class="form-control" @bind="@_selectedTrackerMacAddress">  
-                                    @foreach (var uTracker in _unregisteredTrackers!)
-                                    {
-                                        <option value="@uTracker.WifiMacAddress">@uTracker.WifiMacAddress</option>
-                                    }
-                                </select>
+                                <input type="text" class="form-control" @bind="_roomName"/>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Tracker description:
+                                Room description:
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <textarea class="form-control" rows="3" @bind="_trackerDescription"/>
+                                <textarea class="form-control" rows="3" @bind="_roomDescription"/>
                             </td>
                         </tr>
                     </table>
@@ -264,32 +110,166 @@ else
 
                 <!-- Modal footer -->
                 <div class="modal-footer">
-                    <button type="button" class="btn" @onclick= '()=> HideModal("addTrackerModal")'>Cancel</button>
-                    <button type="button" class="btn btn-main" @onclick='() => ConfirmAddTracker(_selectedRoomId, _selectedTrackerMacAddress, _trackerName!, _trackerDescription!)'>Confirm</button>
+                    <button type="button" class="btn" @onclick= '()=> HideModal("addRoomModal")'>Cancel</button>
+                    <button type="button" class="btn btn-main" @onclick='() => ConfirmAddRoom(_roomName, _roomDescription)'>Confirm</button>
                 </div>
             </div>
         </div>
     </div>
-}
 
+    <div class="modal fade" id="editRoomModal" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
 
-@if(_wRooms == null)
-{
-<div class="modal fade" id="editTrackerModal" aria-modal="true" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <!-- Modal body -->
-            <div class="modal-body">
-                <p>
-                    <em>Loading...</em>
-                </p>
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4>Edit room</h4>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <table>
+                        <tr>
+                            <td>
+                                Edit room name:
+                            </td>
+                            <td>
+                                Number of trackers:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="text" class="form-control"  @bind="_roomName"/>
+                            </td>
+                            <td>
+                                @_selectedWRoom?.TrackerCount
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Edit room description:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea class="form-control" rows="3"  @bind="_roomDescription"></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="() => DeleteRoomModal(_selectedWRoom!)">Delete</button>
+                    <button type="button" class="btn" @onclick= '()=> HideModal("editRoomModal")'>Cancel</button>
+                    <button type="button" class="btn btn-main" @onclick='() => ConfirmEditRoom(_selectedWRoom!, _roomName, _roomDescription)'>Confirm</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-} 
-else
-{
+
+    @if(_unregisteredTrackers.Length == 0)
+    {
+        <div class="modal fade" id="addTrackerModal" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4>Add tracker</h4>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <p>
+                            <em>No unregistered trackers to add!</em>
+                        </p>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                            <button type="button" class="btn" @onclick= '()=> HideModal("addTrackerModal")'>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="modal fade" id="addTrackerModal" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4>Add tracker</h4>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <table>
+                            <tr>
+                                <td>
+                                    Tracker name:
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" @bind="@_trackerName"/>
+                                </td>
+                                <td>
+                                </td>
+                            </tr> 
+                            <tr>
+                                <td>
+                                    Assigned room:
+                                </td>
+                                <td>
+                                    Unregistered trackers:
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select class="form-control" @bind="@_selectedRoomId">  
+                                        @foreach (var wRoom in _wRooms!)
+                                        {
+                                            <option value="@wRoom.Room.RoomId">@wRoom.Room.Name</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-control" @bind="@_selectedTrackerMacAddress">  
+                                        @foreach (var uTracker in _unregisteredTrackers!)
+                                        {
+                                            <option value="@uTracker.WifiMacAddress">@uTracker.WifiMacAddress</option>
+                                        }
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Tracker description:
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <textarea class="form-control" rows="3" @bind="_trackerDescription"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn" @onclick= '()=> HideModal("addTrackerModal")'>Cancel</button>
+                        <button type="button" class="btn btn-main" @onclick='() => ConfirmAddTracker(_selectedRoomId, _selectedTrackerMacAddress, _trackerName!, _trackerDescription!)'>Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
     <div class="modal fade" id="editTrackerModal" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -316,7 +296,7 @@ else
                             </td>
                             <td>
                                 <select class="form-control"  @bind="@_selectedRoomId"> 
-                                    @foreach (var wRoom in _wRooms)
+                                    @foreach (var wRoom in _wRooms!)
                                     {
                                         <option value="@wRoom.Room.RoomId">@wRoom.Room.Name</option>
                                     }
@@ -438,11 +418,14 @@ else
             await JSRuntime.InvokeVoidAsync("alert", "Room is null");
             return;
         }
+        if(_unregisteredTrackers.Length != 0)
+        {
+            _selectedTrackerMacAddress = _unregisteredTrackers[0].WifiMacAddress;
+        }
 
         _selectedWRoom = wRoom;
         _selectedRoomId = wRoom!.Room.RoomId;
         _unregisteredTrackers = await TrackerService.GetUnregisteredTrackersAsync(_cancellationTokenSource.Token);
-        _selectedTrackerMacAddress = _unregisteredTrackers[0].WifiMacAddress;
         await ShowModal("addTrackerModal");
         StateHasChanged();
     }
