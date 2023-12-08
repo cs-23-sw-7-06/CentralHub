@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace CentralHub.Api.Model.Responses.Measurements;
+namespace CentralHub.Api.Model.Responses.Measurement;
 
 [method: JsonConstructor]
 public sealed class AggregatedMeasurements(int aggregatedMeasurementsId,

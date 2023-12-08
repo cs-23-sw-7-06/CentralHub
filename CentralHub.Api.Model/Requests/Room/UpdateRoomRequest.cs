@@ -2,19 +2,12 @@ using System.Text.Json.Serialization;
 
 namespace CentralHub.Api.Model.Requests.Room;
 
-public sealed class UpdateRoomRequest
+[method: JsonConstructor]
+public sealed class UpdateRoomRequest(int roomId, string name, string description)
 {
-    [JsonConstructor]
-    public UpdateRoomRequest(int roomId, string name, string description)
-    {
-        RoomId = roomId;
-        Name = name;
-        Description = description;
-    }
+    public int RoomId { get; } = roomId;
 
-    public int RoomId { get; }
+    public string Name { get; } = name;
 
-    public string Name { get; }
-
-    public string Description { get; }
+    public string Description { get; } = description;
 }

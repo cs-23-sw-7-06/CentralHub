@@ -1,7 +1,8 @@
 using CentralHub.Api.Controllers;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
-using CentralHub.Api.Model.Requests.Localization;
+using CentralHub.Api.Model.Requests.Measurement;
+using CentralHub.Api.Model.Responses.Measurement;
 using CentralHub.Api.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;

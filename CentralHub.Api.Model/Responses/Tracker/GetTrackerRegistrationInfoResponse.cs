@@ -2,18 +2,12 @@ using System.Text.Json.Serialization;
 
 namespace CentralHub.Api.Model.Responses.Tracker;
 
-public sealed class GetTrackerRegistrationInfoResponse
+[method: JsonConstructor]
+public sealed class GetTrackerRegistrationInfoResponse(bool registered, int? trackerId)
 {
-    public bool Registered { get; }
+    public bool Registered { get; } = registered;
 
-    public int? TrackerId { get; }
-
-    [JsonConstructor]
-    public GetTrackerRegistrationInfoResponse(bool registered, int? trackerId)
-    {
-        Registered = registered;
-        TrackerId = trackerId;
-    }
+    public int? TrackerId { get; } = trackerId;
 
     public static GetTrackerRegistrationInfoResponse CreateRegistered(int trackerId)
     {

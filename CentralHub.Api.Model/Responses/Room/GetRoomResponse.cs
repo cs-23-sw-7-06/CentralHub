@@ -2,19 +2,13 @@ using System.Text.Json.Serialization;
 
 namespace CentralHub.Api.Model.Responses.Room;
 
-public sealed class GetRoomResponse
+[method: JsonConstructor]
+public sealed class GetRoomResponse(bool success, Room? room)
 {
-    [JsonConstructor]
-    public GetRoomResponse(bool success, Room? room)
-    {
-        Success = success;
-        Room = room;
-    }
-
-    public bool Success { get; }
+    public bool Success { get; } = success;
 
     // Null when unsuccessful
-    public Room? Room { get; }
+    public Room? Room { get; } = room;
 
     public static GetRoomResponse CreateUnsuccessful()
     {

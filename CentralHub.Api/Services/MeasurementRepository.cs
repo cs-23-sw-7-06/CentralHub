@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using CentralHub.Api.DbContexts;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
+using CentralHub.Api.Model.Responses.Measurement;
 using CentralHub.Api.Threading;
 using Microsoft.EntityFrameworkCore;
 

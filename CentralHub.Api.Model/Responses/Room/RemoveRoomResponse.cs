@@ -2,15 +2,10 @@ using System.Text.Json.Serialization;
 
 namespace CentralHub.Api.Model.Responses.Room;
 
-public sealed class RemoveRoomResponse
+[method: JsonConstructor]
+public sealed class RemoveRoomResponse(bool success)
 {
-    public bool Success { get; }
-
-    [JsonConstructor]
-    public RemoveRoomResponse(bool success)
-    {
-        Success = success;
-    }
+    public bool Success { get; } = success;
 
     public static RemoveRoomResponse CreateUnsuccessful()
     {

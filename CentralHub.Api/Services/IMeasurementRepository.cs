@@ -1,5 +1,6 @@
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
+using CentralHub.Api.Model.Responses.Measurement;
 
 namespace CentralHub.Api.Services;
 
