@@ -43,6 +43,18 @@
 		},
 		{
 			"name": "Add Measurements",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d804bb6e-1e0a-495f-becf-958cfcef20b1",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"id": "b6bc2627-eba2-409d-b32e-c7d573581300",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
