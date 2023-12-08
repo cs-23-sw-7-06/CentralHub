@@ -4,9 +4,11 @@ using CentralHub.Api.Model.Requests.Localization;
 using CentralHub.Api.Model.Responses.AggregatedMeasurements;
 using CentralHub.Api.Model.Responses.Measurements;
 using CentralHub.Api.Services;
+using CentralHub.Api.Threading;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentralHub.Api.Controllers;
+
 
 [ApiController]
 [Route("/measurements")]
@@ -16,6 +18,10 @@ public sealed class MeasurementController(
         IMeasurementRepository measurementRepository)
     : ControllerBase
 {
+    private static CancellableMutex<OccupancySettings> _occupancySettings =
+        new CancellableMutex<OccupancySettings>(
+            new OccupancySettings(1.5f, 2.4f));
+
     [HttpPost("add")]
     public async Task<AddMeasurementsResponse> AddMeasurements(AddMeasurementsRequest addMeasurementsRequest, CancellationToken token)
     {
@@ -87,31 +93,68 @@ public sealed class MeasurementController(
         return GetFirstAggregatedMeasurementsDateTimeResponse.CreateSuccessful(possibleFirstDateTime.Value);
     }
 
-    private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IReadOnlyCollection<AggregatedMeasurementDto> aggregatedMeasurements)
+    [HttpGet("occupancy/latest")]
+    public async Task<GetLatestOccupancyResponse> GetLatestEstimatedOccupancy(int roomId, CancellationToken cancellationToken)
     {
-        var recentAggregatedMeasurements = aggregatedMeasurements
-            .Where(am => am.EndTime > (DateTime.UtcNow - TimeSpan.FromDays(1)))
-            .ToImmutableArray();
+        var aggregatedMeasurements = (await measurementRepository.GetAggregatedMeasurementsAsync(roomId, cancellationToken)).Last();
 
-        int bluetoothCalibrationNumber;
-        int wifiCalibrationNumber;
-        if (recentAggregatedMeasurements.Any())
+        if (aggregatedMeasurements == null)
         {
-            bluetoothCalibrationNumber = recentAggregatedMeasurements.Min(am => am.BluetoothCount);
-            wifiCalibrationNumber = recentAggregatedMeasurements.Min(am => am.WifiCount);
-        }
-        else
-        {
-            bluetoothCalibrationNumber = 0;
-            wifiCalibrationNumber = 0;
+            return GetLatestOccupancyResponse.CreateUnsuccessful();
         }
 
+        var occupancy = await _occupancySettings.Lock(os =>
+        {
+            return (int)Math.Round(
+                aggregatedMeasurements.BluetoothCount / os.BluetoothDevicesPerPerson +
+                aggregatedMeasurements.WifiCount / os.WifiDevicesPerPerson);
+        }, cancellationToken);
+
+
+        return GetLatestOccupancyResponse.CreateSuccessful(occupancy);
+    }
+
+    [HttpPost("settings/set")]
+    public async Task<SetDevicesPerPersonResponse> SetDevicesPerPerson(
+        float bluetoothDevicesPerPerson,
+        float wifiDevicesPerPerson,
+        CancellationToken cancellationToken)
+    {
+        if (bluetoothDevicesPerPerson < 0 || wifiDevicesPerPerson < 0)
+        {
+            return SetDevicesPerPersonResponse.CreateUnsuccessful();
+        }
+
+        await _occupancySettings.Lock(os =>
+        {
+            os.BluetoothDevicesPerPerson = bluetoothDevicesPerPerson;
+            os.WifiDevicesPerPerson = wifiDevicesPerPerson;
+        }, cancellationToken);
+
+        return SetDevicesPerPersonResponse
+            .CreateSuccessful(
+                bluetoothDevicesPerPerson, wifiDevicesPerPerson);
+    }
+
+    private static IReadOnlyList<AggregatedMeasurements> CreateMeasurements(IEnumerable<AggregatedMeasurementDto> aggregatedMeasurements)
+    {
         return aggregatedMeasurements.Select(am => new AggregatedMeasurements(
             am.AggregatedMeasurementDtoId,
             am.StartTime,
             am.EndTime,
-            am.BluetoothCount - bluetoothCalibrationNumber,
-            am.WifiCount - wifiCalibrationNumber)
+            am.BluetoothCount,
+            am.WifiCount)
             ).ToImmutableArray();
+    }
+
+    private struct OccupancySettings
+    {
+        public OccupancySettings(float bluetoothDevicesPerPerson, float wifiDevicesPerPerson)
+        {
+            BluetoothDevicesPerPerson = bluetoothDevicesPerPerson;
+            WifiDevicesPerPerson = wifiDevicesPerPerson;
+        }
+        public float BluetoothDevicesPerPerson { get; set; }
+        public float WifiDevicesPerPerson { get; set; }
     }
 }
