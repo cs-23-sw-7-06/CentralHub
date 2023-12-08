@@ -1,30 +1,17 @@
 using System.Collections.Immutable;
-using System.Linq;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
-using CentralHub.Api.Model.Responses.Room;
 using CentralHub.Api.Threading;
 
 namespace CentralHub.Api.Services;
 
-public class LocalizationService : IScopedProcessingService
+public class LocalizationService(
+    ILogger<LocalizationService> logger,
+    IMeasurementRepository aggregatorRepository,
+    IRoomRepository roomRepository)
+    : IScopedProcessingService
 {
-    private static readonly TimeSpan SleepTime = TimeSpan.FromMinutes(2);
-    private readonly ILogger<LocalizationService> _logger;
-
-    private readonly IMeasurementRepository _aggregatorRepository;
-
-    private readonly IRoomRepository _roomRepository;
-
-    public LocalizationService(
-        ILogger<LocalizationService> logger,
-        IMeasurementRepository aggregatorRepository,
-        IRoomRepository roomRepository)
-    {
-        _logger = logger;
-        _aggregatorRepository = aggregatorRepository;
-        _roomRepository = roomRepository;
-    }
+    private static readonly TimeSpan SleepTime = TimeSpan.FromMinutes(5);
 
     public async Task DoWorkAsync(CancellationToken stoppingToken)
     {
@@ -37,35 +24,35 @@ public class LocalizationService : IScopedProcessingService
 
     public async Task AggregateMeasurementsAsync(CancellationToken stoppingToken)
     {
-        var roomMeasurementGroups = await _aggregatorRepository.GetRoomMeasurementGroupsAsync(stoppingToken);
-        var allRooms = await _roomRepository.GetRoomsAsync(stoppingToken);
+        var roomMeasurementGroups = await aggregatorRepository.GetRoomMeasurementGroupsAsync(stoppingToken);
+        var allRooms = await roomRepository.GetRoomsAsync(stoppingToken);
         using var measuredRoomsMutex = new CancellableMutex<List<RoomDto>>(new List<RoomDto>());
 
         await Parallel.ForEachAsync(
             roomMeasurementGroups,
             stoppingToken,
-            async (roomMeasurementGroup, stoppingToken) =>
+            async (roomMeasurementGroup, cancellationToken) =>
         {
             var room = allRooms.SingleOrDefault(r => r.RoomDtoId == roomMeasurementGroup.Key);
 
             if (room == null)
             {
-                _logger.LogWarning("Room with id {RoomId} was not found.", roomMeasurementGroup.Key);
+                logger.LogWarning("Room with id {RoomId} was not found.", roomMeasurementGroup.Key);
                 return;
             }
 
-            await measuredRoomsMutex.Lock(m => m.Add(room), stoppingToken);
+            await measuredRoomsMutex.Lock(m => m.Add(room), cancellationToken);
 
-            await _aggregatorRepository.AddAggregatedMeasurementAsync(
+            await aggregatorRepository.AddAggregatedMeasurementAsync(
                 CreateAggregatedMeasurement(room, roomMeasurementGroup.Value),
-                stoppingToken);
+                cancellationToken);
         });
 
         await measuredRoomsMutex.Lock(async m =>
         {
             foreach (var room in allRooms.Where(r => !m.Contains(r)))
             {
-                await _aggregatorRepository.AddAggregatedMeasurementAsync(
+                await aggregatorRepository.AddAggregatedMeasurementAsync(
                     CreateAggregatedMeasurement(room, new List<MeasurementGroup>()),
                     stoppingToken);
             }
@@ -115,19 +102,13 @@ public class LocalizationService : IScopedProcessingService
             }
         }
 
-        return filteredMeasurements.Values;
+        return filteredMeasurements.Values.ToImmutableArray();
     }
 
-    private readonly struct FilterCriteria
+    private readonly struct FilterCriteria(string macAddress, Measurement.Protocol protocol)
     {
-        public string MacAddress { get; }
-        public Measurement.Protocol Protocol { get; }
-
-        public FilterCriteria(string macAddress, Measurement.Protocol protocol)
-        {
-            MacAddress = macAddress;
-            Protocol = protocol;
-        }
+        public string MacAddress { get; } = macAddress;
+        public Measurement.Protocol Protocol { get; } = protocol;
 
         public override int GetHashCode()
         {
