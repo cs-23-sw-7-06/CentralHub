@@ -1,22 +1,15 @@
 using System.Text.Json.Serialization;
 
-namespace CentralHub.Api.Model.Requests;
+namespace CentralHub.Api.Model.Requests.Tracker;
 
-public sealed class UpdateTrackerRequest
+[method: JsonConstructor]
+public sealed class UpdateTrackerRequest(int trackerId, string name, string description)
 {
-    [JsonConstructor]
-    public UpdateTrackerRequest(int trackerId, string name, string description)
-    {
-        TrackerId = trackerId;
-        Name = name;
-        Description = description;
-    }
+    public int TrackerId { get; } = trackerId;
 
-    public int TrackerId { get; }
+    public string Name { get; } = name;
 
-    public string Name { get; }
-
-    public string Description { get; }
+    public string Description { get; } = description;
 
     // TODO: Should you be able to change the mac-address?
 }

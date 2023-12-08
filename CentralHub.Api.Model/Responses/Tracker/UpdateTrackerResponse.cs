@@ -3,15 +3,10 @@ using CentralHub.Api.Model.Requests.Room;
 
 namespace CentralHub.Api.Model.Responses.Tracker;
 
-public sealed class UpdateTrackerResponse
+[method: JsonConstructor]
+public sealed class UpdateTrackerResponse(bool success)
 {
-    public bool Success { get; }
-
-    [JsonConstructor]
-    public UpdateTrackerResponse(bool success)
-    {
-        Success = success;
-    }
+    public bool Success { get; } = success;
 
     public static UpdateTrackerResponse CreateUnsuccessful()
     {

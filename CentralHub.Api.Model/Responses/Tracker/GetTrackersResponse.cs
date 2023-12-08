@@ -3,19 +3,13 @@ using CentralHub.Api.Model.Responses.Room;
 
 namespace CentralHub.Api.Model.Responses.Tracker;
 
-public sealed class GetTrackersResponse
+[method: JsonConstructor]
+public sealed class GetTrackersResponse(bool success, IEnumerable<Tracker>? trackers)
 {
-    [JsonConstructor]
-    public GetTrackersResponse(bool success, IEnumerable<Tracker>? trackers)
-    {
-        Success = success;
-        Trackers = trackers;
-    }
-
-    public bool Success { get; }
+    public bool Success { get; } = success;
 
     // Null when unsuccessful
-    public IEnumerable<Tracker>? Trackers { get; }
+    public IEnumerable<Tracker>? Trackers { get; } = trackers;
 
     public static GetTrackersResponse CreateUnsuccessful()
     {

@@ -2,16 +2,10 @@ using System.Text.Json.Serialization;
 
 namespace CentralHub.Api.Model.Requests.Room;
 
-public sealed class AddRoomRequest
+[method: JsonConstructor]
+public sealed class AddRoomRequest(string name, string description)
 {
-    [JsonConstructor]
-    public AddRoomRequest(string name, string description)
-    {
-        Name = name;
-        Description = description;
-    }
+    public string Name { get; } = name;
 
-    public string Name { get; }
-
-    public string Description { get; }
+    public string Description { get; } = description;
 }

@@ -2,8 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using CentralHub.Api.Model.Responses.AggregatedMeasurements;
-using CentralHub.Api.Model.Responses.Measurements;
+using CentralHub.Api.Model.Responses.Measurement;
 
 namespace CentralHub.WebUI.Data;
 

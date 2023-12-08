@@ -2,15 +2,10 @@ using System.Text.Json.Serialization;
 
 namespace CentralHub.Api.Model.Responses.Tracker;
 
-public sealed class RemoveTrackerResponse
+[method: JsonConstructor]
+public sealed class RemoveTrackerResponse(bool success)
 {
-    public bool Success { get; }
-
-    [JsonConstructor]
-    public RemoveTrackerResponse(bool success)
-    {
-        Success = success;
-    }
+    public bool Success { get; } = success;
 
     public static RemoveTrackerResponse CreateUnsuccessful()
     {

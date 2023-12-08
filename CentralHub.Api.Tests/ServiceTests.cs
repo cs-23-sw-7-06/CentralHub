@@ -2,6 +2,7 @@
 using CentralHub.Api.Controllers;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
+using CentralHub.Api.Model.Responses.Measurement;
 using CentralHub.Api.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 

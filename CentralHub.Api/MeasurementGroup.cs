@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using CentralHub.Api.Model;
+using CentralHub.Api.Model.Responses.Measurement;
 
 namespace CentralHub.Api;
 

@@ -1,16 +1,11 @@
 using System.Text.Json.Serialization;
 
-namespace CentralHub.Api.Model.Responses.AggregatedMeasurements;
+namespace CentralHub.Api.Model.Responses.Measurement;
 
-public sealed class AddMeasurementsResponse
+[method: JsonConstructor]
+public sealed class AddMeasurementsResponse(bool success)
 {
-    [JsonConstructor]
-    public AddMeasurementsResponse(bool success)
-    {
-        Success = success;
-    }
-
-    public bool Success { get; }
+    public bool Success { get; } = success;
 
     public static AddMeasurementsResponse CreateUnsuccessful()
     {

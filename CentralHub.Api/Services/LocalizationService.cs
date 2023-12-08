@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
+using CentralHub.Api.Model.Responses.Measurement;
 using CentralHub.Api.Threading;
 
 namespace CentralHub.Api.Services;
