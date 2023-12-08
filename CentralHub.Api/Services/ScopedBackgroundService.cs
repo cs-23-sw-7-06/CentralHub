@@ -17,13 +17,11 @@ public sealed class ScopedBackgroundService(IServiceProvider serviceProvider,
         logger.LogInformation(
             $"{nameof(ScopedBackgroundService)} is working.");
 
-        using (IServiceScope scope = serviceProvider.CreateScope())
-        {
-            IScopedProcessingService scopedProcessingService =
-                scope.ServiceProvider.GetRequiredService<IScopedProcessingService>();
+        using var scope = serviceProvider.CreateScope();
+        var scopedProcessingService =
+            scope.ServiceProvider.GetRequiredService<IScopedProcessingService>();
 
-            await scopedProcessingService.DoWorkAsync(cancellationToken);
-        }
+        await scopedProcessingService.DoWorkAsync(cancellationToken);
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)

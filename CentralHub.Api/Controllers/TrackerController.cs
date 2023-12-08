@@ -98,11 +98,11 @@ public class TrackerController : ControllerBase
         string bluetoothMacAddress, CancellationToken cancellationToken)
     {
         var possibleTracker =
-            await _trackerRepository.GetTrackerByMacAddresses(wifiMacAddress, bluetoothMacAddress, cancellationToken);
+            await _trackerRepository.GetTrackerByMacAddressesAsync(wifiMacAddress, bluetoothMacAddress, cancellationToken);
 
         if (possibleTracker == null)
         {
-            await _trackerRepository.AddUnregisteredTracker(wifiMacAddress, bluetoothMacAddress, cancellationToken);
+            await _trackerRepository.AddUnregisteredTrackerAsync(wifiMacAddress, bluetoothMacAddress, cancellationToken);
             return GetTrackerRegistrationInfoResponse.CreateUnregistered();
         }
 
@@ -112,7 +112,7 @@ public class TrackerController : ControllerBase
     [HttpGet("registration/unregistered")]
     public async Task<GetUnregisteredTrackersResponse> GetUnregisteredTrackers(CancellationToken cancellationToken)
     {
-        var unregisteredTrackers = await _trackerRepository.GetUnregisteredTrackers(cancellationToken);
+        var unregisteredTrackers = await _trackerRepository.GetUnregisteredTrackersAsync(cancellationToken);
 
         return new GetUnregisteredTrackersResponse(
             unregisteredTrackers.Select(t => new UnregisteredTracker(t.WifiMacAddress, t.BluetoothMacAddress)));

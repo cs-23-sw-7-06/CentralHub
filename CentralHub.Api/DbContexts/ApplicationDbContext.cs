@@ -4,15 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CentralHub.Api.DbContexts;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public DbSet<RoomDto> Rooms { get; set; }
-    public DbSet<AggregatedMeasurementDto> AggregatedMeasurements { get; set; }
-
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
+    public DbSet<RoomDto> Rooms { get; set; } = null!;
+    public DbSet<AggregatedMeasurementDto> AggregatedMeasurements { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
