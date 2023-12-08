@@ -17,24 +17,23 @@ public sealed class SampleRoomRepository : IRoomRepository
     static SampleRoomRepository()
     {
         var sampleRoomRepository = new SampleRoomRepository();
-        var room1 = new RoomDto()
-        {
-            Name = "Sample Room 1",
-            Description = "Sample Room",
-            RoomDtoId = -1,
-            Trackers = new List<TrackerDto>()
-        };
+        var rooms = new List<RoomDto>();
 
-        var room2 = new RoomDto()
+        for (int i = 0; i < 5; i++)
         {
-            Name = "Sample Room 2",
-            Description = "Sample Room",
-            RoomDtoId = -1,
-            Trackers = new List<TrackerDto>()
-        };
+            rooms.Add(new RoomDto()
+            {
+                Name = $"Sample Room {i}",
+                Description = "Sample Room",
+                RoomDtoId = -1,
+                Trackers = new List<TrackerDto>()
+            });
+        }
 
-        sampleRoomRepository.AddRoomAsync(room1, default).GetAwaiter().GetResult();
-        sampleRoomRepository.AddRoomAsync(room2, default).GetAwaiter().GetResult();
+        foreach (var room in rooms)
+        {
+            sampleRoomRepository.AddRoomAsync(room, default).GetAwaiter().GetResult();
+        }
     }
 
     public async Task<int> AddRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)

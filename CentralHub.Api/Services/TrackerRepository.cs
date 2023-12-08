@@ -157,6 +157,7 @@ public sealed class TrackerRepository : ITrackerRepository
         var tracker = await _applicationDbContext.Rooms
             .Include(r => r.Trackers)
             .SelectMany(r => r.Trackers)
+            .Include(t => t.RoomDto)
             .SingleOrDefaultAsync(t => t.TrackerDtoId == id, cancellationToken);
 
         return tracker;

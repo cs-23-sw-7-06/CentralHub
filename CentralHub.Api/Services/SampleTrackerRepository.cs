@@ -23,47 +23,65 @@ public sealed class SampleTrackerRepository : ITrackerRepository
         var room1 = sampleRoomRepository.GetRoomByIdAsync(0, default).GetAwaiter().GetResult()!;
         var room2 = sampleRoomRepository.GetRoomByIdAsync(1, default).GetAwaiter().GetResult()!;
 
-        var tracker1 = new TrackerDto()
+        var rooms = new List<RoomDto>();
+
+        for (int i = 0; i < 5; i++)
         {
-            WifiMacAddress = "AA:BB:CC:DD:EE:FF",
-            BluetoothMacAddress = "FF:EE:DD:CC:BB:AA",
-            Name = "Sample Tracker 1",
-            Description = "Belongs to Sample Room 1",
-            RoomDtoId = room1.RoomDtoId,
-            RoomDto = room1,
-            TrackerDtoId = -1,
-        };
+            rooms.Add(sampleRoomRepository.GetRoomByIdAsync(i, default).GetAwaiter().GetResult()!);
+        }
 
-        var tracker2 = new TrackerDto()
+        var trackers = new List<TrackerDto>();
+
+        for (int i = 0; i < 5; i++)
         {
-            WifiMacAddress = "00:11:22:33:44:55",
-            BluetoothMacAddress = "55:44:33:22:11:00",
-            Name = "Sample Tracker 2",
-            Description = "Belongs to Sample Room 1",
-            RoomDtoId = room1.RoomDtoId,
-            RoomDto = room1,
-            TrackerDtoId = -1,
-        };
+            string wifiName;
+            string bluetoothName;
+            if (i < 10)
+            {
+                wifiName = $"00:00:00:00:FE:0{i}";
+                bluetoothName = $"00:00:00:00:0{i}:BL";
+            }
+            else
+            {
+                wifiName = $"00:00:00:00:FE:{i}";
+                bluetoothName = $"00:00:00:00:{i}:BL";
+            }
+
+            trackers.Add(new TrackerDto()
+            {
+                WifiMacAddress = wifiName,
+                BluetoothMacAddress = bluetoothName,
+                Name = $"Sample Tracker {i}",
+                Description = "Sample Tracker",
+                RoomDtoId = rooms[i % 1].RoomDtoId,
+                RoomDto = rooms[i % 1],
+                TrackerDtoId = -1,
+            });
+        }
 
 
-        var tracker3 = new TrackerDto()
+        foreach (var tracker in trackers)
         {
-            WifiMacAddress = "00:22:44:66:88:00",
-            BluetoothMacAddress = "00:88:66:44:22:00",
-            Name = "Sample Tracker 3",
-            Description = "Belongs to Sample Room 2",
-            RoomDtoId = room2.RoomDtoId,
-            RoomDto = room2,
-            TrackerDtoId = -1,
-        };
+            sampleTrackerRepository.AddTrackerAsync(tracker, default).GetAwaiter().GetResult();
+        }
 
+        for (int i = 0; i < 5; i++)
+        {
+            string wifiName;
+            string bluetoothName;
+            if (i < 10)
+            {
+                wifiName = $"0{i}:FE:00:00:00:00";
+                bluetoothName = $"BL:0{i}:00:00:00:00";
+            }
+            else
+            {
+                wifiName = $"{i}:FE:00:00:00:00";
+                bluetoothName = $"BL:{i}:00:00:00:00";
+            }
 
-        sampleTrackerRepository.AddTrackerAsync(tracker1, default).GetAwaiter().GetResult();
-        sampleTrackerRepository.AddTrackerAsync(tracker2, default).GetAwaiter().GetResult();
-        sampleTrackerRepository.AddTrackerAsync(tracker3, default).GetAwaiter().GetResult();
-
-
-        sampleTrackerRepository.AddUnregisteredTracker("BB:AA:DD:CC:FF:EE", "EE:FF:CC:DD:AA:BB", default).GetAwaiter().GetResult();
+            sampleTrackerRepository.AddUnregisteredTracker(wifiName, bluetoothName, default).GetAwaiter().GetResult();
+        }
     }
 
     public async Task<int> AddTrackerAsync(TrackerDto trackerDto, CancellationToken cancellationToken)
@@ -98,7 +116,13 @@ public sealed class SampleTrackerRepository : ITrackerRepository
         await LockedStuffMutex.Lock(stuff =>
         {
             stuff.Trackers.Remove(trackerDto.TrackerDtoId);
+            stuff.UnregisteredTrackers.Add(new UnregisteredTrackerDto()
+            {
+                WifiMacAddress = trackerDto.WifiMacAddress,
+                BluetoothMacAddress = trackerDto.BluetoothMacAddress
+            });
         }, cancellationToken);
+
     }
 
     public async Task<IEnumerable<TrackerDto>?> GetTrackersInRoomAsync(int roomId, CancellationToken cancellationToken)

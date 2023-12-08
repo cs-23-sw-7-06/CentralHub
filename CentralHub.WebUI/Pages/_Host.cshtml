@@ -15,6 +15,26 @@
     <link href="CentralHub.WebUI.styles.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="favicon.png"/>
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered"/>
+    <script src="js/bootstrap.min.js">
+        
+    </script>
+    <script>
+
+        window.showModal = function(id)
+        {
+            const myModal = document.getElementById(id);
+            const modal = bootstrap.Modal.getOrCreateInstance(myModal);
+            modal.show();
+        
+        }
+        window.hideModal = function(id)
+        {
+            const myModal = document.getElementById(id);
+            const modal = bootstrap.Modal.getOrCreateInstance(myModal);
+            modal.hide();
+        
+        }
+    </script>
 </head>
 <body>
 <component type="typeof(App)" render-mode="ServerPrerendered"/>
