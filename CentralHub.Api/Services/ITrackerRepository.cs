@@ -14,12 +14,12 @@ public interface ITrackerRepository
 
     Task<TrackerDto?> GetTrackerByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<TrackerDto?> GetTrackerByMacAddresses(string wifiMacAddress, string bluetoothMacAddress,
+    Task<TrackerDto?> GetTrackerByMacAddressesAsync(string wifiMacAddress, string bluetoothMacAddress,
         CancellationToken cancellationToken);
 
-    Task<IEnumerable<TrackerDto>> GetRegisteredTrackers(CancellationToken cancellationToken);
+    Task<IEnumerable<TrackerDto>> GetRegisteredTrackersAsync(CancellationToken cancellationToken);
 
-    Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackers(CancellationToken cancellationToken);
+    Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackersAsync(CancellationToken cancellationToken);
 
-    Task AddUnregisteredTracker(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken);
+    Task AddUnregisteredTrackerAsync(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken);
 }

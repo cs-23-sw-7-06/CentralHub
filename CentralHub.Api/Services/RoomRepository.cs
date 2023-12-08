@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using CentralHub.Api.DbContexts;
 using CentralHub.Api.Dtos;
 using Microsoft.EntityFrameworkCore;
@@ -8,11 +9,15 @@ internal sealed class RoomRepository : IRoomRepository
 {
     private readonly ApplicationDbContext _applicationDbContext;
 
-    public RoomRepository(ApplicationDbContext applicationDbContext)
+    private readonly ITrackerRepository _trackerRepository;
+
+    public RoomRepository(ApplicationDbContext applicationDbContext, ITrackerRepository trackerRepository)
     {
         _applicationDbContext = applicationDbContext;
         _applicationDbContext.Database.OpenConnection();
         _applicationDbContext.Database.EnsureCreated();
+
+        _trackerRepository = trackerRepository;
     }
 
     public async Task<int> AddRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
@@ -40,6 +45,11 @@ internal sealed class RoomRepository : IRoomRepository
 
     public async Task RemoveRoomAsync(RoomDto roomDto, CancellationToken cancellationToken)
     {
+        var trackers = (await _applicationDbContext.Rooms
+            .Include(r => r.Trackers)
+            .SingleAsync(r => r == roomDto, cancellationToken))
+            .Trackers.ToImmutableArray();
+
         _applicationDbContext.Rooms.Remove(roomDto);
         try
         {
@@ -51,6 +61,8 @@ internal sealed class RoomRepository : IRoomRepository
             _applicationDbContext.Rooms.Add(roomDto);
             throw;
         }
+
+        Task.WaitAll(trackers.Select(tracker => _trackerRepository.AddUnregisteredTrackerAsync(tracker.WifiMacAddress, tracker.BluetoothMacAddress, cancellationToken)).ToArray(), cancellationToken);
     }
 
     public async Task<IEnumerable<RoomDto>> GetRoomsAsync(CancellationToken cancellationToken)

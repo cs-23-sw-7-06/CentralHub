@@ -25,9 +25,9 @@ public sealed class MeasurementController(
     [HttpPost("add")]
     public async Task<AddMeasurementsResponse> AddMeasurements(AddMeasurementsRequest addMeasurementsRequest, CancellationToken token)
     {
-        var registeredTrackers = (await trackerRepository.GetRegisteredTrackers(token))
+        var registeredTrackers = (await trackerRepository.GetRegisteredTrackersAsync(token))
             .ToImmutableArray();
-        var unregisteredTrackers = await trackerRepository.GetUnregisteredTrackers(token);
+        var unregisteredTrackers = await trackerRepository.GetUnregisteredTrackersAsync(token);
 
         var tracker = registeredTrackers.SingleOrDefault(t => t.TrackerDtoId == addMeasurementsRequest.TrackerId);
 
@@ -96,19 +96,21 @@ public sealed class MeasurementController(
     [HttpGet("occupancy/latest")]
     public async Task<GetLatestOccupancyResponse> GetLatestEstimatedOccupancy(int roomId, CancellationToken cancellationToken)
     {
-        var aggregatedMeasurements = (await measurementRepository.GetAggregatedMeasurementsAsync(roomId, cancellationToken)).Last();
+        var aggregatedMeasurements = (await measurementRepository.GetAggregatedMeasurementsAsync(roomId, cancellationToken))
+            .ToImmutableArray();
 
-        if (aggregatedMeasurements == null)
+        if (!aggregatedMeasurements.Any())
         {
             return GetLatestOccupancyResponse.CreateUnsuccessful();
         }
 
-        var occupancy = await _occupancySettings.Lock(os =>
-        {
-            return (int)Math.Round(
-                aggregatedMeasurements.BluetoothCount / os.BluetoothDevicesPerPerson +
-                aggregatedMeasurements.WifiCount / os.WifiDevicesPerPerson);
-        }, cancellationToken);
+        var aggregatedMeasurement = aggregatedMeasurements.Last();
+
+        var occupancy = await _occupancySettings.Lock(
+            os => (int)Math.Round(
+                aggregatedMeasurement.BluetoothCount / os.BluetoothDevicesPerPerson +
+                aggregatedMeasurement.WifiCount / os.WifiDevicesPerPerson),
+            cancellationToken);
 
 
         return GetLatestOccupancyResponse.CreateSuccessful(occupancy);

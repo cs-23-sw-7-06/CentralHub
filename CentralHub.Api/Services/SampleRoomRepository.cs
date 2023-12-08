@@ -64,17 +64,15 @@ public sealed class SampleRoomRepository : IRoomRepository
 
     public async Task<IEnumerable<RoomDto>> GetRoomsAsync(CancellationToken cancellationToken)
     {
-        return await LockedStuffMutex.Lock(stuff =>
-        {
-            return stuff.Rooms.Values.ToImmutableArray();
-        }, cancellationToken);
+        return await LockedStuffMutex.Lock(
+            stuff => stuff.Rooms.Values.ToImmutableArray(),
+            cancellationToken);
     }
 
     public async Task<RoomDto?> GetRoomByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return await LockedStuffMutex.Lock(stuff =>
-        {
-            return stuff.Rooms.TryGetValue(id, out var roomDto) ? roomDto : null;
-        }, cancellationToken);
+        return await LockedStuffMutex.Lock(
+            stuff => stuff.Rooms.TryGetValue(id, out var roomDto) ? roomDto : null,
+            cancellationToken);
     }
 }

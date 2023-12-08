@@ -75,7 +75,7 @@ internal sealed class MeasurementRepository : IMeasurementRepository
             }
             else
             {
-                recentRoomMeasurementGroups.Add(roomId, new List<MeasurementGroup>() { new MeasurementGroup(measurements.ToImmutableArray()) });
+                recentRoomMeasurementGroups.Add(roomId, [new MeasurementGroup(measurements.ToImmutableArray())]);
             }
         }, cancellationToken);
     }

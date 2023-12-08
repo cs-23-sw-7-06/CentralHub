@@ -1,4 +1,3 @@
-using System.Diagnostics.Metrics;
 using CentralHub.Api.Dtos;
 using CentralHub.Api.Model.Requests.Room;
 using CentralHub.Api.Model.Responses.Room;
@@ -9,15 +8,8 @@ namespace CentralHub.Api.Controllers;
 
 [ApiController]
 [Route("/room")]
-public class RoomController : ControllerBase
+public class RoomController(IRoomRepository roomRepository) : ControllerBase
 {
-    private readonly IRoomRepository _roomRepository;
-
-    public RoomController(IRoomRepository roomRepository)
-    {
-        _roomRepository = roomRepository;
-    }
-
     [HttpPost("add")]
     public async Task<AddRoomResponse> AddRoom(AddRoomRequest addRoomRequest, CancellationToken cancellationToken)
     {
@@ -27,7 +19,7 @@ public class RoomController : ControllerBase
             Description = addRoomRequest.Description
         };
 
-        var roomId = await _roomRepository.AddRoomAsync(roomDto, cancellationToken);
+        var roomId = await roomRepository.AddRoomAsync(roomDto, cancellationToken);
 
         return new AddRoomResponse(roomId);
     }
@@ -35,7 +27,7 @@ public class RoomController : ControllerBase
     [HttpPut("update")]
     public async Task<UpdateRoomResponse> UpdateRoom(UpdateRoomRequest updateRoomRequest, CancellationToken cancellationToken)
     {
-        var roomDto = await _roomRepository.GetRoomByIdAsync(updateRoomRequest.RoomId, cancellationToken);
+        var roomDto = await roomRepository.GetRoomByIdAsync(updateRoomRequest.RoomId, cancellationToken);
         if (roomDto == null)
         {
             return UpdateRoomResponse.CreateUnsuccessful();
@@ -44,7 +36,7 @@ public class RoomController : ControllerBase
         roomDto.Name = updateRoomRequest.Name;
         roomDto.Description = updateRoomRequest.Description;
 
-        await _roomRepository.UpdateRoomAsync(roomDto, cancellationToken);
+        await roomRepository.UpdateRoomAsync(roomDto, cancellationToken);
 
         return UpdateRoomResponse.CreateSuccessful();
     }
@@ -52,13 +44,13 @@ public class RoomController : ControllerBase
     [HttpDelete("remove")]
     public async Task<RemoveRoomResponse> RemoveRoom(int roomId, CancellationToken cancellationToken)
     {
-        var room = await _roomRepository.GetRoomByIdAsync(roomId, cancellationToken);
+        var room = await roomRepository.GetRoomByIdAsync(roomId, cancellationToken);
         if (room == null)
         {
             return RemoveRoomResponse.CreateUnsuccessful();
         }
 
-        await _roomRepository.RemoveRoomAsync(room, cancellationToken);
+        await roomRepository.RemoveRoomAsync(room, cancellationToken);
 
         return RemoveRoomResponse.CreateSuccessful();
     }
@@ -66,14 +58,14 @@ public class RoomController : ControllerBase
     [HttpGet("all")]
     public async Task<IEnumerable<Room>> GetRooms(CancellationToken cancellationToken)
     {
-        var roomDtos = await _roomRepository.GetRoomsAsync(cancellationToken);
+        var roomDtos = await roomRepository.GetRoomsAsync(cancellationToken);
         return roomDtos.Select(r => new Room(r.RoomDtoId, r.Name, r.Description));
     }
 
     [HttpGet("get")]
     public async Task<GetRoomResponse> GetRoom(int id, CancellationToken cancellationToken)
     {
-        var roomDto = await _roomRepository.GetRoomByIdAsync(id, cancellationToken);
+        var roomDto = await roomRepository.GetRoomByIdAsync(id, cancellationToken);
 
         if (roomDto == null)
         {

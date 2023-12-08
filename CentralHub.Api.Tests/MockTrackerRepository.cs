@@ -65,18 +65,18 @@ internal sealed class MockTrackerRepository : ITrackerRepository
         return Task.FromResult(RoomDto.Trackers.SingleOrDefault(t => t.TrackerDtoId == id));
     }
 
-    public Task<TrackerDto> GetTrackerByMacAddresses(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
+    public Task<TrackerDto> GetTrackerByMacAddressesAsync(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
     {
         return Task.FromResult(RoomDto.Trackers.SingleOrDefault(t =>
             t.WifiMacAddress == wifiMacAddress && t.BluetoothMacAddress == bluetoothMacAddress));
     }
 
-    public Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackers(CancellationToken cancellationToken)
+    public Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackersAsync(CancellationToken cancellationToken)
     {
         return Task.FromResult<IEnumerable<UnregisteredTrackerDto>>(_unregisteredTrackers.ToArray());
     }
 
-    public Task AddUnregisteredTracker(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
+    public Task AddUnregisteredTrackerAsync(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
     {
         _unregisteredTrackers.Add(
             new UnregisteredTrackerDto
@@ -87,7 +87,7 @@ internal sealed class MockTrackerRepository : ITrackerRepository
         return Task.CompletedTask;
     }
 
-    public Task<IEnumerable<TrackerDto>> GetRegisteredTrackers(CancellationToken cancellationToken)
+    public Task<IEnumerable<TrackerDto>> GetRegisteredTrackersAsync(CancellationToken cancellationToken)
     {
         return Task.FromResult(RoomDto.Trackers.ToArray().AsEnumerable());
     }

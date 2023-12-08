@@ -80,7 +80,7 @@ public sealed class SampleTrackerRepository : ITrackerRepository
                 bluetoothName = $"BL:{i}:00:00:00:00";
             }
 
-            sampleTrackerRepository.AddUnregisteredTracker(wifiName, bluetoothName, default).GetAwaiter().GetResult();
+            sampleTrackerRepository.AddUnregisteredTrackerAsync(wifiName, bluetoothName, default).GetAwaiter().GetResult();
         }
     }
 
@@ -142,7 +142,7 @@ public sealed class SampleTrackerRepository : ITrackerRepository
         }, cancellationToken);
     }
 
-    public async Task<TrackerDto?> GetTrackerByMacAddresses(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
+    public async Task<TrackerDto?> GetTrackerByMacAddressesAsync(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
     {
         return await LockedStuffMutex.Lock(stuff =>
         {
@@ -151,7 +151,7 @@ public sealed class SampleTrackerRepository : ITrackerRepository
         }, cancellationToken);
     }
 
-    public async Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackers(CancellationToken cancellationToken)
+    public async Task<IEnumerable<UnregisteredTrackerDto>> GetUnregisteredTrackersAsync(CancellationToken cancellationToken)
     {
         return await LockedStuffMutex.Lock(stuff =>
         {
@@ -159,7 +159,7 @@ public sealed class SampleTrackerRepository : ITrackerRepository
         }, cancellationToken);
     }
 
-    public async Task AddUnregisteredTracker(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
+    public async Task AddUnregisteredTrackerAsync(string wifiMacAddress, string bluetoothMacAddress, CancellationToken cancellationToken)
     {
         await LockedStuffMutex.Lock(stuff =>
         {
@@ -172,7 +172,7 @@ public sealed class SampleTrackerRepository : ITrackerRepository
         }, cancellationToken);
     }
 
-    public async Task<IEnumerable<TrackerDto>> GetRegisteredTrackers(CancellationToken cancellationToken)
+    public async Task<IEnumerable<TrackerDto>> GetRegisteredTrackersAsync(CancellationToken cancellationToken)
     {
         return await LockedStuffMutex.Lock(stuff =>
         {
