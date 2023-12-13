@@ -203,24 +203,14 @@ else
                             <td>
                                 Tracker name:
                             </td>
-                            <td></td>
+                            <td>
+                                Assigned room:
+                            </td>
                         </tr>
                         <tr>
                             <td>
                                 <input type="text" class="form-control" @bind="@_trackerName"/>
                             </td>
-                            <td>
-                            </td>
-                        </tr> 
-                        <tr>
-                            <td>
-                                Assigned room:
-                            </td>
-                            <td>
-                                Unregistered trackers:
-                            </td>
-                        </tr>
-                        <tr>
                             <td>
                                 <select class="form-control" @bind="@_selectedRoomId">  
                                     @foreach (var wRoom in _wRooms)
@@ -229,6 +219,19 @@ else
                                     }
                                 </select>
                             </td>
+                        </tr> 
+                        <tr>
+                            <td>
+                                Tracker description:
+                            </td>
+                            <td>
+                                Unregistered trackers:
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea class="form-control" rows="3" @bind="_trackerDescription"></textarea>
+                            </td>
                             <td>
                                 <select class="form-control" @bind="@_selectedTrackerMacAddress">  
                                     @foreach (var uTracker in _unregisteredTrackers)
@@ -236,16 +239,6 @@ else
                                         <option value="@uTracker.WifiMacAddress">@uTracker.WifiMacAddress</option>
                                     }
                                 </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Tracker description:
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <textarea class="form-control" rows="3" @bind="_trackerDescription"></textarea>
                             </td>
                         </tr>
                     </table>
@@ -296,8 +289,12 @@ else
                         </td>
                     </tr> 
                     <tr>
-                        <td>Tracker description:</td>
-                        <td>MAC-Address:</td>
+                        <td>
+                            Tracker description:
+                        </td>
+                        <td>
+                            MAC-Address:
+                        </td>
                     </tr>
                     <tr>
                         <td>
