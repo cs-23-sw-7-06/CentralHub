@@ -403,7 +403,6 @@ else
             _selectedTrackerMacAddress = _unregisteredTrackers[0].WifiMacAddress;
         }
 
-        _selectedWRoom = wRoom;
         _selectedRoomId = wRoom.Room.RoomId;
         await ShowModal("addTrackerModal");
         StateHasChanged();
