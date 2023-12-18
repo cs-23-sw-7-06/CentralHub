@@ -40,58 +40,6 @@
 				"url": "http://localhost:8081/room/add"
 			},
 			"response": []
-		},
-		{
-			"name": "Add Measurements",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "d804bb6e-1e0a-495f-becf-958cfcef20b1",
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"id": "b6bc2627-eba2-409d-b32e-c7d573581300",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"trackerId\": 1,\n  \"measurements\":[\n    {\n        \"macAddress\": \"41:51:69\",\n        \"type\": 0,\n        \"rssi\": -9\n    },\n    {\n        \"macAddress\": \"58:84:81\",\n        \"type\": 1,\n        \"rssi\": -28\n    },\n    {\n        \"macAddress\": \"28:64:26\",\n        \"type\": 1,\n        \"rssi\": -95\n    },\n    {\n        \"macAddress\": \"45:53:84\",\n        \"type\": 1,\n        \"rssi\": -58\n    },\n    {\n        \"macAddress\": \"95:8:3\",\n        \"type\": 1,\n        \"rssi\": 4\n    },\n    {\n        \"macAddress\": \"64:51:18\",\n        \"type\": 0,\n        \"rssi\": -81\n    },\n    {\n        \"macAddress\": \"59:36:73\",\n        \"type\": 0,\n        \"rssi\": -93\n    },\n    {\n        \"macAddress\": \"22:17:41\",\n        \"type\": 1,\n        \"rssi\": -39\n    },\n    {\n        \"macAddress\": \"18:5:64\",\n        \"type\": 0,\n        \"rssi\": -74\n    },\n    {\n        \"macAddress\": \"71:61:28\",\n        \"type\": 0,\n        \"rssi\": -32\n    },\n    {\n        \"macAddress\": \"92:56:19\",\n        \"type\": 1,\n        \"rssi\": -67\n    },\n    {\n        \"macAddress\": \"35:73:4\",\n        \"type\": 1,\n        \"rssi\": -65\n    },\n    {\n        \"macAddress\": \"8:70:97\",\n        \"type\": 0,\n        \"rssi\": -21\n    },\n    {\n        \"macAddress\": \"76:11:36\",\n        \"type\": 0,\n        \"rssi\": -78\n    },\n    {\n        \"macAddress\": \"2:49:72\",\n        \"type\": 1,\n        \"rssi\": -3\n    },\n    {\n        \"macAddress\": \"29:66:73\",\n        \"type\": 0,\n        \"rssi\": -22\n    },\n    {\n        \"macAddress\": \"17:87:86\",\n        \"type\": 1,\n        \"rssi\": -10\n    },\n    {\n        \"macAddress\": \"59:81:90\",\n        \"type\": 0,\n        \"rssi\": -66\n    },\n    {\n        \"macAddress\": \"60:33:20\",\n        \"type\": 1,\n        \"rssi\": -52\n    },\n    {\n        \"macAddress\": \"78:12:53\",\n        \"type\": 0,\n        \"rssi\": -77\n    },\n    {\n        \"macAddress\": \"23:14:50\",\n        \"type\": 0,\n        \"rssi\": -1\n    },\n    {\n        \"macAddress\": \"36:45:70\",\n        \"type\": 1,\n        \"rssi\": -96\n    },\n    {\n        \"macAddress\": \"42:15:65\",\n        \"type\": 1,\n        \"rssi\": -70\n    },\n    {\n        \"macAddress\": \"87:49:14\",\n        \"type\": 1,\n        \"rssi\": -91\n    },\n    {\n        \"macAddress\": \"23:4:11\",\n        \"type\": 1,\n        \"rssi\": -12\n    },\n    {\n        \"macAddress\": \"41:40:82\",\n        \"type\": 1,\n        \"rssi\": -75\n    },\n    {\n        \"macAddress\": \"50:36:85\",\n        \"type\": 0,\n        \"rssi\": -23\n    },\n    {\n        \"macAddress\": \"13:95:97\",\n        \"type\": 1,\n        \"rssi\": -30\n    },\n    {\n        \"macAddress\": \"13:53:69\",\n        \"type\": 0,\n        \"rssi\": -82\n    },\n    {\n        \"macAddress\": \"94:38:38\",\n        \"type\": 1,\n        \"rssi\": -99\n    },\n    {\n        \"macAddress\": \"0:53:78\",\n        \"type\": 0,\n        \"rssi\": -90\n    },\n    {\n        \"macAddress\": \"99:4:27\",\n        \"type\": 1,\n        \"rssi\": -66\n    },\n    {\n        \"macAddress\": \"25:11:55\",\n        \"type\": 0,\n        \"rssi\": -82\n    },\n    {\n        \"macAddress\": \"95:46:84\",\n        \"type\": 1,\n        \"rssi\": -9\n    },\n    {\n        \"macAddress\": \"93:13:16\",\n        \"type\": 1,\n        \"rssi\": -27\n    },\n    {\n        \"macAddress\": \"73:97:54\",\n        \"type\": 1,\n        \"rssi\": -54\n    },\n    {\n        \"macAddress\": \"82:86:10\",\n        \"type\": 1,\n        \"rssi\": -22\n    },\n    {\n        \"macAddress\": \"21:26:67\",\n        \"type\": 0,\n        \"rssi\": -56\n    },\n    {\n        \"macAddress\": \"14:85:10\",\n        \"type\": 1,\n        \"rssi\": -14\n    },\n    {\n        \"macAddress\": \"40:33:90\",\n        \"type\": 0,\n        \"rssi\": -86\n    },\n    {\n        \"macAddress\": \"50:82:63\",\n        \"type\": 1,\n        \"rssi\": -5\n    },\n    {\n        \"macAddress\": \"72:89:8\",\n        \"type\": 0,\n        \"rssi\": -66\n    },\n    {\n        \"macAddress\": \"3:31:10\",\n        \"type\": 1,\n        \"rssi\": -10\n    },\n    {\n        \"macAddress\": \"48:90:60\",\n        \"type\": 0,\n        \"rssi\": 0\n    },\n    {\n        \"macAddress\": \"60:25:93\",\n        \"type\": 0,\n        \"rssi\": -61\n    },\n    {\n        \"macAddress\": \"19:27:90\",\n        \"type\": 0,\n        \"rssi\": 9\n    },\n    {\n        \"macAddress\": \"85:75:76\",\n        \"type\": 1,\n        \"rssi\": 0\n    },\n    {\n        \"macAddress\": \"37:32:87\",\n        \"type\": 1,\n        \"rssi\": -63\n    },\n    {\n        \"macAddress\": \"54:0:35\",\n        \"type\": 1,\n        \"rssi\": -50\n    },\n    {\n        \"macAddress\": \"72:94:19\",\n        \"type\": 1,\n        \"rssi\": -60\n    },\n    {\n        \"macAddress\": \"58:40:54\",\n        \"type\": 0,\n        \"rssi\": -27\n    },\n    {\n        \"macAddress\": \"93:63:8\",\n        \"type\": 0,\n        \"rssi\": -64\n    },\n    {\n        \"macAddress\": \"39:49:44\",\n        \"type\": 0,\n        \"rssi\": -85\n    },\n    {\n        \"macAddress\": \"79:95:76\",\n        \"type\": 0,\n        \"rssi\": -13\n    },\n    {\n        \"macAddress\": \"41:93:78\",\n        \"type\": 0,\n        \"rssi\": -75\n    },\n    {\n        \"macAddress\": \"16:50:70\",\n        \"type\": 1,\n        \"rssi\": -95\n    },\n    {\n        \"macAddress\": \"20:99:50\",\n        \"type\": 1,\n        \"rssi\": -77\n    },\n    {\n        \"macAddress\": \"20:88:6\",\n        \"type\": 0,\n        \"rssi\": -48\n    },\n    {\n        \"macAddress\": \"80:74:81\",\n        \"type\": 1,\n        \"rssi\": -91\n    },\n    {\n        \"macAddress\": \"5:91:80\",\n        \"type\": 1,\n        \"rssi\": -70\n    },\n    {\n        \"macAddress\": \"52:17:21\",\n        \"type\": 0,\n        \"rssi\": -33\n    },\n    {\n        \"macAddress\": \"0:5:49\",\n        \"type\": 1,\n        \"rssi\": -65\n    },\n    {\n        \"macAddress\": \"87:59:44\",\n        \"type\": 1,\n        \"rssi\": -91\n    },\n    {\n        \"macAddress\": \"27:43:21\",\n        \"type\": 0,\n        \"rssi\": -15\n    },\n    {\n        \"macAddress\": \"10:47:51\",\n        \"type\": 0,\n        \"rssi\": -96\n    },\n    {\n        \"macAddress\": \"93:74:35\",\n        \"type\": 1,\n        \"rssi\": -78\n    },\n    {\n        \"macAddress\": \"27:66:45\",\n        \"type\": 1,\n        \"rssi\": -42\n    },\n    {\n        \"macAddress\": \"96:74:16\",\n        \"type\": 0,\n        \"rssi\": 9\n    },\n    {\n        \"macAddress\": \"17:85:19\",\n        \"type\": 0,\n        \"rssi\": -13\n    },\n    {\n        \"macAddress\": \"29:16:51\",\n        \"type\": 1,\n        \"rssi\": -36\n    },\n    {\n        \"macAddress\": \"31:29:3\",\n        \"type\": 0,\n        \"rssi\": -79\n    },\n    {\n        \"macAddress\": \"18:75:99\",\n        \"type\": 0,\n        \"rssi\": -7\n    },\n    {\n        \"macAddress\": \"11:34:91\",\n        \"type\": 1,\n        \"rssi\": -65\n    },\n    {\n        \"macAddress\": \"80:89:65\",\n        \"type\": 1,\n        \"rssi\": -86\n    },\n    {\n        \"macAddress\": \"23:29:20\",\n        \"type\": 0,\n        \"rssi\": -90\n    },\n    {\n        \"macAddress\": \"44:60:0\",\n        \"type\": 1,\n        \"rssi\": -59\n    },\n    {\n        \"macAddress\": \"63:15:95\",\n        \"type\": 0,\n        \"rssi\": -63\n    },\n    {\n        \"macAddress\": \"90:85:53\",\n        \"type\": 0,\n        \"rssi\": -60\n    },\n    {\n        \"macAddress\": \"14:91:50\",\n        \"type\": 0,\n        \"rssi\": 5\n    },\n    {\n        \"macAddress\": \"50:3:46\",\n        \"type\": 0,\n        \"rssi\": -70\n    },\n    {\n        \"macAddress\": \"59:46:45\",\n        \"type\": 0,\n        \"rssi\": -14\n    },\n    {\n        \"macAddress\": \"10:10:52\",\n        \"type\": 1,\n        \"rssi\": -37\n    },\n    {\n        \"macAddress\": \"94:95:26\",\n        \"type\": 1,\n        \"rssi\": -39\n    },\n    {\n        \"macAddress\": \"60:84:98\",\n        \"type\": 1,\n        \"rssi\": -17\n    },\n    {\n        \"macAddress\": \"84:60:83\",\n        \"type\": 1,\n        \"rssi\": -34\n    },\n    {\n        \"macAddress\": \"69:39:14\",\n        \"type\": 0,\n        \"rssi\": -66\n    },\n    {\n        \"macAddress\": \"90:63:71\",\n        \"type\": 1,\n        \"rssi\": -38\n    },\n    {\n        \"macAddress\": \"63:85:37\",\n        \"type\": 1,\n        \"rssi\": -96\n    },\n    {\n        \"macAddress\": \"15:38:11\",\n        \"type\": 1,\n        \"rssi\": -87\n    },\n    {\n        \"macAddress\": \"17:77:56\",\n        \"type\": 0,\n        \"rssi\": -91\n    },\n    {\n        \"macAddress\": \"94:47:44\",\n        \"type\": 0,\n        \"rssi\": -80\n    },\n    {\n        \"macAddress\": \"38:33:67\",\n        \"type\": 1,\n        \"rssi\": 8\n    },\n    {\n        \"macAddress\": \"50:4:58\",\n        \"type\": 1,\n        \"rssi\": -84\n    },\n    {\n        \"macAddress\": \"62:12:66\",\n        \"type\": 1,\n        \"rssi\": -5\n    },\n    {\n        \"macAddress\": \"89:22:81\",\n        \"type\": 1,\n        \"rssi\": -41\n    },\n    {\n        \"macAddress\": \"2:26:50\",\n        \"type\": 0,\n        \"rssi\": -4\n    },\n    {\n        \"macAddress\": \"80:52:33\",\n        \"type\": 1,\n        \"rssi\": -34\n    },\n    {\n        \"macAddress\": \"51:33:17\",\n        \"type\": 1,\n        \"rssi\": -14\n    },\n    {\n        \"macAddress\": \"0:69:75\",\n        \"type\": 1,\n        \"rssi\": -40\n    },\n    {\n        \"macAddress\": \"3:77:87\",\n        \"type\": 1,\n        \"rssi\": -55\n    }\n    ]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8081/measurements/add",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8081",
-					"path": [
-						"measurements",
-						"add"
-					],
-					"query": [
-						{
-							"key": "roomId",
-							"value": "1",
-							"disabled": true
-						}
-					]
-				}
-			},
-			"response": []
 		}
 	]
 }
