@@ -18,8 +18,24 @@ public class LocalizationService(
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            var now = DateTime.UtcNow;
+            logger.LogInformation("Starting measurement aggregation {Time}", now);
             await AggregateMeasurementsAsync(stoppingToken);
-            await Task.Delay(SleepTime, stoppingToken);
+            var after = DateTime.UtcNow;
+            logger.LogInformation("Ending aggregation {Time}", after);
+
+            var aggregationTime = after - now;
+            logger.LogInformation("Aggregation took: {Time} s", aggregationTime.TotalSeconds);
+
+            if (aggregationTime <= SleepTime)
+            {
+                logger.LogInformation("Aggregation finished sleeping {Time} until next aggregation", SleepTime - aggregationTime);
+                await Task.Delay(SleepTime - aggregationTime, stoppingToken);
+            }
+            else
+            {
+                logger.LogWarning("Aggregation of measurements took {Time}, which is longer than what has been allocated.", aggregationTime);
+            }
         }
     }
 
