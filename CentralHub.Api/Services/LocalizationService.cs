@@ -3,6 +3,7 @@ using CentralHub.Api.Dtos;
 using CentralHub.Api.Model;
 using CentralHub.Api.Model.Responses.Measurement;
 using CentralHub.Api.Threading;
+using Microsoft.Data.Sqlite;
 
 namespace CentralHub.Api.Services;
 
@@ -44,6 +45,8 @@ public class LocalizationService(
         var roomMeasurementGroups = await aggregatorRepository.GetRoomMeasurementGroupsAsync(stoppingToken);
         var allRooms = await roomRepository.GetRoomsAsync(stoppingToken);
         using var measuredRoomsMutex = new CancellableMutex<List<RoomDto>>(new List<RoomDto>());
+        using var aggregatedMeasurementsMutex = new CancellableMutex<List<AggregatedMeasurementDto>>(new List<AggregatedMeasurementDto>());
+
 
         await Parallel.ForEachAsync(
             roomMeasurementGroups,
@@ -60,21 +63,25 @@ public class LocalizationService(
 
             await measuredRoomsMutex.Lock(m => m.Add(room), cancellationToken);
 
-            await aggregatorRepository.AddAggregatedMeasurementAsync(
-                CreateAggregatedMeasurement(room, roomMeasurementGroup.Value),
-                cancellationToken);
+            var aggregatedMeasurement = CreateAggregatedMeasurement(room, roomMeasurementGroup.Value);
+            await aggregatedMeasurementsMutex.Lock(am => am.Add(aggregatedMeasurement), cancellationToken);
         });
 
         await measuredRoomsMutex.Lock(async m =>
         {
             foreach (var room in allRooms.Where(r => !m.Contains(r)))
             {
-                await aggregatorRepository.AddAggregatedMeasurementAsync(
-                    CreateAggregatedMeasurement(room, new List<MeasurementGroup>()),
+                await aggregatedMeasurementsMutex.Lock(am =>
+                    am.Add(CreateAggregatedMeasurement(room, new List<MeasurementGroup>())),
                     stoppingToken);
+
             }
         },
         stoppingToken);
+
+        await aggregatedMeasurementsMutex.Lock(async am =>
+            await aggregatorRepository.AddAggregatedMeasurementAsync(am, stoppingToken),
+            stoppingToken);
     }
 
     private static AggregatedMeasurementDto CreateAggregatedMeasurement(RoomDto room, IReadOnlyCollection<MeasurementGroup> measurementGroups)

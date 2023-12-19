@@ -38,7 +38,7 @@ internal static class Program
             // Ignore
         }
 #endif
-        var connectionString = $"Data Source={dbPath}";
+        var connectionString = $"Data Source={dbPath}; Pooling=False";
 
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();

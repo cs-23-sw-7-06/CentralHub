@@ -105,4 +105,17 @@ internal sealed class MockAggregatedMeasurementRepository : IMeasurementReposito
             return aggregatedMeasurements.Min(m => m.StartTime);
         }, cancellationToken);
     }
+
+    public async Task AddAggregatedMeasurementAsync(List<AggregatedMeasurementDto> measurementDtos, CancellationToken cancellationToken)
+    {
+        await AggregatedMeasurementsMutex.Lock(stuff =>
+        {
+            stuff.AggregatedMeasurements.AddRange(measurementDtos);
+            measurementDtos.ForEach(am =>
+            {
+                am.AggregatedMeasurementDtoId = stuff.NextId;
+                stuff.NextId++;
+            });
+        }, cancellationToken);
+    }
 }
