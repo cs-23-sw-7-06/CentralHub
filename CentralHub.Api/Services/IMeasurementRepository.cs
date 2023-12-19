@@ -6,6 +6,8 @@ namespace CentralHub.Api.Services;
 
 public interface IMeasurementRepository
 {
+    Task AddAggregatedMeasurementAsync(List<AggregatedMeasurementDto> measurementDtos, CancellationToken cancellationToken);
+
     Task<int> AddAggregatedMeasurementAsync(AggregatedMeasurementDto measurementDto, CancellationToken cancellationToken);
 
     Task RemoveAggregatedMeasurementAsync(AggregatedMeasurementDto measurementDto, CancellationToken cancellationToken);

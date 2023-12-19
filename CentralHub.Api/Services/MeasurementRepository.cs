@@ -22,6 +22,22 @@ internal sealed class MeasurementRepository : IMeasurementRepository
         _applicationDbContext.Database.EnsureCreated();
     }
 
+    public async Task AddAggregatedMeasurementAsync(List<AggregatedMeasurementDto> measurementDtos, CancellationToken cancellationToken)
+    {
+        _applicationDbContext.AggregatedMeasurements.AddRange(measurementDtos);
+        try
+        {
+            await _applicationDbContext.SaveChangesAsync(cancellationToken);
+            return;
+        }
+        catch (OperationCanceledException)
+        {
+            // Remove the roomDto from the collection as the operation was cancelled.
+            _applicationDbContext.AggregatedMeasurements.RemoveRange(measurementDtos);
+            throw;
+        }
+    }
+
     public async Task<int> AddAggregatedMeasurementAsync(AggregatedMeasurementDto measurementDto, CancellationToken cancellationToken)
     {
         _applicationDbContext.AggregatedMeasurements.Add(measurementDto);
