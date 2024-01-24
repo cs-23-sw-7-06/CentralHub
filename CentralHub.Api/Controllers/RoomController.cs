@@ -18,11 +18,11 @@ public class RoomController(IRoomRepository roomRepository) : ControllerBase
             Name = addRoomRequest.Name,
             Description = addRoomRequest.Description,
             Capacity = addRoomRequest.Capacity,
-            NeighbouringRooms = (ICollection<RoomDto>)addRoomRequest.NeighbourIds
-                .Select(async rId => 
-                    await roomRepository
-                        .GetRoomByIdAsync(rId, cancellationToken)),
         };
+        //NeighbouringRooms = (ICollection<RoomDto>)addRoomRequest.NeighbourIds
+        //    .Select(async rId => 
+         //       await roomRepository
+          //          .GetRoomByIdAsync(rId, cancellationToken)),
 
         var roomId = await roomRepository.AddRoomAsync(roomDto, cancellationToken);
 

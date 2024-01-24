@@ -29,6 +29,8 @@ public class MeasurementControllerTests
         {
             Name = "Test Room",
             Description = "Test Room",
+            Capacity = 10,
+            NeighbouringRooms = [],
         };
 
         _roomRepository = new MockRoomRepository();

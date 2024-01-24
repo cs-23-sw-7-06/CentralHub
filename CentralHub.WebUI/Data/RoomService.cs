@@ -38,9 +38,9 @@ public sealed class RoomService
         }
     }
 
-    public async Task UpdateRoomAsync(Room room, string name, string description, CancellationToken cancellationToken)
+    public async Task UpdateRoomAsync(Room room, string name, string description, int capacity, List<int> neighbourIds,  CancellationToken cancellationToken)
     {
-        var updateRoomRequest = new UpdateRoomRequest(room.RoomId, name, description);
+        var updateRoomRequest = new UpdateRoomRequest(room.RoomId, name, description, capacity, neighbourIds);
         var request = new HttpRequestMessage(
             HttpMethod.Put,
             $"http://localhost:8081/room/update"
@@ -60,9 +60,9 @@ public sealed class RoomService
         }
     }
 
-    public async Task<int> AddRoomAsync(string name, string description, CancellationToken cancellationToken)
+    public async Task<int> AddRoomAsync(string name, string description, int capacity, List<int> neighbourIds, CancellationToken cancellationToken)
     {
-        var addRoomRequest = new AddRoomRequest(name, description);
+        var addRoomRequest = new AddRoomRequest(name, description, capacity, neighbourIds);
         var request = new HttpRequestMessage(
             HttpMethod.Post,
             $"http://localhost:8081/room/add"

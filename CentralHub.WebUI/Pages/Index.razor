@@ -97,13 +97,23 @@
                             <textarea class="form-control" rows="3" @bind="_roomDescription"></textarea>
                         </td>
                     </tr>
+                                        <tr>
+                        <td>
+                            Room Capacity:
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="number" class="form-control" @bind="_roomCapacity"/>
+                        </td>
+                    </tr>
                 </table>
             </div>
 
             <!-- Modal footer -->
             <div class="modal-footer">
                 <button type="button" class="btn" @onclick='()=> HideModal("addRoomModal")'>Cancel</button>
-                <button type="button" class="btn btn-primary" @onclick="() => ConfirmAddRoom(_roomName, _roomDescription)">Confirm</button>
+                <button type="button" class="btn btn-primary" @onclick="() => ConfirmAddRoom(_roomName, _roomDescription, _roomCapacity, [])">Confirm</button>
             </div>
         </div>
     </div>
@@ -147,6 +157,16 @@
                             <textarea class="form-control" rows="3"  @bind="_roomDescription"></textarea>
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            Room Capacity:
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="number" class="form-control" @bind="_roomCapacity"/>
+                        </td>
+                    </tr>
                 </table>
             </div>
 
@@ -154,7 +174,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" @onclick="() => DeleteRoomModal(_selectedWRoom)">Delete</button>
                 <button type="button" class="btn" @onclick='()=> HideModal("editRoomModal")'>Cancel</button>
-                <button type="button" class="btn btn-primary" @onclick="() => ConfirmEditRoom(_selectedWRoom, _roomName, _roomDescription)">Confirm</button>
+                <button type="button" class="btn btn-primary" @onclick="() => ConfirmEditRoom(_selectedWRoom, _roomName, _roomDescription, _roomCapacity, [])">Confirm</button>
             </div>
         </div>
     </div>
@@ -327,8 +347,10 @@ else
     private RoomWrapper? _selectedWRoom;
     private Tracker? _selectedTracker;
     private int _selectedRoomId = -1;
-    private string _roomName = "Your room name"; 
+    private string _roomName = "Your room name";
     private string _roomDescription = "Your room description";
+    private int _roomCapacity = 10;
+
     private string _trackerName = "Your tracker name";
     private string _trackerDescription = "Your tracker description"; 
     private string? _selectedTrackerMacAddress = null;
@@ -339,7 +361,7 @@ else
         StateHasChanged();
     }
 
-    private async Task ConfirmAddRoom(string name, string description)
+    private async Task ConfirmAddRoom(string name, string description, int capacity, List<int> neighbourIds)
     {
         if(string.IsNullOrWhiteSpace(name))
         {
@@ -347,7 +369,7 @@ else
             return;
         }
         
-        await RoomService.AddRoomAsync(name, description, _cancellationTokenSource.Token);
+        await RoomService.AddRoomAsync(name, description, capacity, neighbourIds, _cancellationTokenSource.Token);
         await HideModal("addRoomModal");
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
@@ -375,7 +397,7 @@ else
         StateHasChanged();
     }
 
-    private async Task ConfirmEditRoom(RoomWrapper? wRoom, string name, string description)
+    private async Task ConfirmEditRoom(RoomWrapper? wRoom, string name, string description, int capacity, List<int> neighbourIds)
     {
         if(string.IsNullOrWhiteSpace(name))
         {
@@ -389,7 +411,7 @@ else
         }
     
 
-        await RoomService.UpdateRoomAsync(wRoom.Room, name, description, _cancellationTokenSource.Token);
+        await RoomService.UpdateRoomAsync(wRoom.Room, name, description, capacity, neighbourIds, _cancellationTokenSource.Token);
         await HideModal("editRoomModal");
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }

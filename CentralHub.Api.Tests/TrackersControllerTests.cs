@@ -17,6 +17,8 @@ public partial class TrackersControllerTests
         {
             Name = "Test Room",
             Description = "Test Room",
+            Capacity = 10,
+            NeighbouringRooms = [],
         };
 
         var roomRepository = new MockRoomRepository();

@@ -28,7 +28,9 @@ public sealed class TrackerRepository : ITrackerRepository
         var room = new RoomDto()
         {
             Name = "Test RoomDto 1",
-            Description = "Test RoomDto"
+            Description = "Test RoomDto",
+            Capacity = 10,
+            NeighbouringRooms = [],
         };
 
         _applicationDbContext.Rooms.Add(room);

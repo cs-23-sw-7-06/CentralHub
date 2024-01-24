@@ -25,6 +25,8 @@ class ServiceTests
         {
             Name = "Test Room",
             Description = "Test Room",
+            Capacity = 10,
+            NeighbouringRooms = [],
         };
 
         _roomRepository = new MockRoomRepository();

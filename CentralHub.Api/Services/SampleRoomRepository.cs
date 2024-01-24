@@ -25,6 +25,8 @@ public sealed class SampleRoomRepository : IRoomRepository
             {
                 Name = $"Sample Room {i}",
                 Description = "Sample Room",
+                Capacity = 10,
+                NeighbouringRooms = [],
                 RoomDtoId = -1,
                 Trackers = new List<TrackerDto>()
             });
