@@ -16,7 +16,12 @@ public class RoomController(IRoomRepository roomRepository) : ControllerBase
         var roomDto = new RoomDto()
         {
             Name = addRoomRequest.Name,
-            Description = addRoomRequest.Description
+            Description = addRoomRequest.Description,
+            Capacity = addRoomRequest.Capacity,
+            NeighbouringRooms = (ICollection<RoomDto>)addRoomRequest.NeighbourIds
+                .Select(async rId => 
+                    await roomRepository
+                        .GetRoomByIdAsync(rId, cancellationToken)),
         };
 
         var roomId = await roomRepository.AddRoomAsync(roomDto, cancellationToken);
@@ -35,6 +40,11 @@ public class RoomController(IRoomRepository roomRepository) : ControllerBase
 
         roomDto.Name = updateRoomRequest.Name;
         roomDto.Description = updateRoomRequest.Description;
+        roomDto.Capacity = updateRoomRequest.Capacity;
+        roomDto.NeighbouringRooms = (ICollection<RoomDto>)updateRoomRequest.NeighbourIds
+                .Select(async rId => 
+                    await roomRepository
+                        .GetRoomByIdAsync(rId, cancellationToken));
 
         await roomRepository.UpdateRoomAsync(roomDto, cancellationToken);
 

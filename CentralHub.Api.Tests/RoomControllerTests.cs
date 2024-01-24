@@ -27,7 +27,7 @@ public class RoomControllerTests
     [Test]
     public async Task TestAddRoom()
     {
-        var room = new AddRoomRequest("Test Room 1", "0.1.95");
+        var room = new AddRoomRequest("Test Room 1", "0.1.95", 50, []);
         var addRoomResponse = await _roomController.AddRoom(room, default);
 
         // Should be 0
@@ -36,7 +36,7 @@ public class RoomControllerTests
         Assert.That(rooms.Count(), Is.EqualTo(1));
 
         // Add another and check the id
-        var room2 = new AddRoomRequest("Test Room 2", "123");
+        var room2 = new AddRoomRequest("Test Room 2", "123", 30, []);
         var addRoomResponse2 = await _roomController.AddRoom(room2, default);
         Assert.That(addRoomResponse2.RoomId, Is.EqualTo(1));
         var rooms2 = await _roomController.GetRooms(default);
@@ -46,7 +46,7 @@ public class RoomControllerTests
     [Test]
     public async Task TestRemoveRoom()
     {
-        var room = new AddRoomRequest("Test Room", "0.1.95");
+        var room = new AddRoomRequest("Test Room", "0.1.95", 20, []);
         var addRoomResponse = await _roomController.AddRoom(room, default);
 
         var removeRoomResponse = await _roomController.RemoveRoom(addRoomResponse.RoomId, default);

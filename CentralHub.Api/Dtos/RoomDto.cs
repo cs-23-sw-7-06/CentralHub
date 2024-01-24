@@ -11,6 +11,10 @@ public sealed class RoomDto
 
     public required string Description { get; set; }
 
+    public required int Capacity { get; set; }
+
+    public ICollection<RoomDto> NeighbouringRooms { get; set; } = new List<RoomDto>();
+
     /// <summary>
     /// Gets a collection of all trackers in the room.
     /// </summary>
