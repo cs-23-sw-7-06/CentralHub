@@ -115,6 +115,39 @@ public sealed class MeasurementController(
         return GetLatestOccupancyResponse.CreateSuccessful(occupancy);
     }
 
+    [HttpGet("occupancy/percentage")]
+    public async Task<float> GetEstimatedOccupancy(int roomId, CancellationToken cancellationToken)
+    {
+        var room = await roomRepository.GetRoomByIdAsync(roomId, cancellationToken);
+        var aggregatedMeasurements = (await measurementRepository.GetAggregatedMeasurementsAsync(roomId, cancellationToken))
+            .ToImmutableArray();
+
+        if (room == null)
+        {
+            return 0f;
+        }
+
+        if (!aggregatedMeasurements.Any())
+        {
+            return 0f;
+        }
+
+        var aggregatedMeasurement = aggregatedMeasurements.Last();
+
+        var occupancy = await _occupancySettings.Lock(
+            os => (int)Math.Round(
+                aggregatedMeasurement.BluetoothCount / os.BluetoothDevicesPerPerson +
+                aggregatedMeasurement.WifiCount / os.WifiDevicesPerPerson),
+            cancellationToken);
+
+        if (occupancy == 0) 
+        {
+            return 0f;
+        }
+
+        return occupancy/room.Capacity;
+    }
+
     [HttpPut("settings/set")]
     public async Task<SetSettingsResponse> SetSettings(
         SetSettingsRequest setSettingsRequest,
